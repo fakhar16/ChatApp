@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/navigation_chats">
+
+    <fragment
+        android:id="@+id/navigation_stories"
+        android:name="com.samsung.whatsapp.view.fragments.StoriesFragment"
+        android:label="@string/STORIES"
+        tools:layout="@layout/fragment_stories" />
+
+    <fragment
+        android:id="@+id/navigation_requests"
+        android:name="com.samsung.whatsapp.view.fragments.RequestsFragment"
+        android:label="@string/REQUESTS"
+        tools:layout="@layout/fragment_requests" />
+
+    <fragment
+        android:id="@+id/navigation_contacts"
+        android:name="com.samsung.whatsapp.view.fragments.ContactsFragment"
+        android:label="@string/CONTACTS"
+        tools:layout="@layout/fragment_contacts" />
+
+    <fragment
+        android:id="@+id/navigation_chats"
+        android:name="com.samsung.whatsapp.view.fragments.ChatFragment"
+        android:label="@string/CHATS"
+        tools:layout="@layout/fragment_chat" />
+</navigation>

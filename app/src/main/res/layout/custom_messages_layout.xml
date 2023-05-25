@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    >
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/receiverProfileImage"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:src="@drawable/profile_image"
+        android:layout_marginTop="10dp"
+        />
+
+    <TextView
+        android:id="@+id/receiverMessageText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="10dp"
+        android:layout_toEndOf="@id/receiverProfileImage"
+        android:background="@drawable/receiver_messages_layout"
+        android:text="Receiver message here"
+        android:padding="10dp"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:textColor="@android:color/black"
+        tools:ignore="HardcodedText" />
+
+    <ImageView
+        android:id="@+id/receiver_feeling"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:src="@drawable/ic_fb_love"
+        android:layout_toEndOf="@id/receiverMessageText"
+        android:layout_alignTop="@id/receiverMessageText"
+        android:layout_alignBottom="@id/receiverMessageText"
+        android:visibility="gone"
+        />
+
+    <ImageView
+        android:id="@+id/messageReceiverPic"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:scaleType="centerCrop"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="50dp"
+        android:layout_marginTop="13dp"
+        />
+
+    <ImageView
+        android:id="@+id/messageSenderPic"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_alignParentEnd="true"
+        android:layout_margin="5dp"
+        android:scaleType="centerCrop"
+        />
+
+    <TextView
+        android:id="@+id/sendMessageText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="10dp"
+        android:layout_alignParentTop="@+id/receiverMessageText"
+        android:background="@drawable/sender_messages_layout"
+        android:text="Sender message here"
+        android:textSize="14sp"
+        android:padding="10dp"
+        android:textStyle="bold"
+        android:textColor="@android:color/black"
+        tools:ignore="HardcodedText" />
+
+    <ImageView
+        android:id="@+id/sender_feeling"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:src="@drawable/ic_fb_love"
+        android:layout_toStartOf="@id/sendMessageText"
+        android:layout_alignTop="@id/sendMessageText"
+        android:layout_alignBottom="@id/sendMessageText"
+        android:visibility="gone"
+        />
+
+</RelativeLayout>
+</layout>
