@@ -15,7 +15,8 @@ import android.view.ViewGroup;
 
 import com.samsung.whatsapp.adapters.UserAdapter;
 import com.samsung.whatsapp.databinding.FragmentChatBinding;
-import com.samsung.whatsapp.viewmodel.ConversationViewModel;
+import com.samsung.whatsapp.viewmodel.ContactsViewModel;
+
 
 public class ChatFragment extends Fragment {
     private UserAdapter adapter;
@@ -32,16 +33,13 @@ public class ChatFragment extends Fragment {
 
         binding.chatsList.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        adapter = new UserAdapter(getContext());
+        ContactsViewModel viewModel = new ViewModelProvider(this).get(ContactsViewModel.class);
+        viewModel.init();
+        viewModel.getContacts().observe(getViewLifecycleOwner(), list -> adapter.notifyDataSetChanged());
 
+        adapter = new UserAdapter(getContext(), viewModel.getContacts().getValue());
         binding.chatsList.addItemDecoration(new DividerItemDecoration(binding.chatsList.getContext(), DividerItemDecoration.VERTICAL));
         binding.chatsList.setAdapter(adapter);
-
-        ConversationViewModel viewModel = new ViewModelProvider(this).get(ConversationViewModel.class);
-        viewModel.getUsers().observe(getViewLifecycleOwner(), users -> {
-            adapter.updateUserList(users);
-            adapter.notifyDataSetChanged();
-        });
 
         return binding.getRoot();
     }

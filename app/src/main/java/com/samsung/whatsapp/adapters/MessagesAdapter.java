@@ -34,22 +34,21 @@ import com.samsung.whatsapp.databinding.ItemSentBinding;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 public class MessagesAdapter extends RecyclerView.Adapter {
-    private List<Message> userMessageList;
+    private final ArrayList<Message> userMessageList;
     private final Context context;
     private final String senderId;
     private final String receiverId;
     final int ITEM_SENT = 1;
     final int ITEM_RECEIVE = 2;
 
-    public MessagesAdapter(Context context, String senderId, String receiverId) {
+    public MessagesAdapter(Context context, String senderId, String receiverId, ArrayList<Message> userMessageList) {
         this.context = context;
         this.senderId = senderId;
         this.receiverId = receiverId;
-        userMessageList = new ArrayList<>();
+        this.userMessageList = userMessageList;
     }
 
     @NonNull
@@ -322,11 +321,6 @@ public class MessagesAdapter extends RecyclerView.Adapter {
 //                    }
 //                });
 //    }
-
-    public void UpdateMessageList(final List<Message> list) {
-//        userMessageList.clear();
-        userMessageList = list;
-    }
 
     @Override
     public int getItemCount() {

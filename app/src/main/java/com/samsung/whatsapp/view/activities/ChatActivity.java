@@ -3,7 +3,6 @@ package com.samsung.whatsapp.view.activities;
 import static com.samsung.whatsapp.ApplicationClass.presenceDatabaseReference;
 import static com.samsung.whatsapp.ApplicationClass.userDatabaseReference;
 import static com.samsung.whatsapp.utils.Utils.TYPE_VIDEO_CALL;
-//import static com.samsung.whatsapp.utils.Utils.loadingBar;
 import static com.samsung.whatsapp.ApplicationClass.context;
 import static com.samsung.whatsapp.utils.Utils.showLoadingBar;
 
@@ -217,15 +216,15 @@ public class ChatActivity extends BaseActivity {
         customChatBarBinding = CustomChatBarBinding.inflate(layoutInflater);
         actionBar.setCustomView(customChatBarBinding.getRoot());
 
+        MessageViewModel viewModel = new ViewModelProvider(this).get(MessageViewModel.class);
+        viewModel.init(messageSenderId, messageReceiverId);
+        viewModel.getMessage().observe(this, messages -> messagesAdapter.notifyDataSetChanged());
+
         binding.userMessageList.setLayoutManager(new LinearLayoutManager(this));
-        messagesAdapter = new MessagesAdapter( ChatActivity.this, messageSenderId, messageReceiverId);
+        messagesAdapter = new MessagesAdapter( ChatActivity.this, messageSenderId, messageReceiverId, viewModel.getMessage().getValue());
         binding.userMessageList.setAdapter(messagesAdapter);
 
-        MessageViewModel viewModel = new ViewModelProvider(this).get(MessageViewModel.class);
-        viewModel.getMessage(messageSenderId, messageReceiverId).observe(this, messages -> {
-            messagesAdapter.UpdateMessageList(messages);
-            messagesAdapter.notifyDataSetChanged();
-        });
+
 
         handleButtonClicks();
     }

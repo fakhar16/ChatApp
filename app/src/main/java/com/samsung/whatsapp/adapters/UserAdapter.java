@@ -25,23 +25,22 @@ import com.squareup.picasso.Picasso;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
 public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder> {
-    private  List<User> userList;
+    private final ArrayList<User> userList;
     private final Context context;
 
-    public UserAdapter(Context context) {
+    public UserAdapter(Context context, ArrayList<User> userList) {
         this.context = context;
-        userList = new ArrayList<>();
+        this.userList = userList;
     }
 
     @NonNull
     @Override
     public UserViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        LayoutInflater inflater = LayoutInflater.from(context);
+        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         UsersDisplayLayoutBinding layoutBinding = DataBindingUtil.inflate(inflater, R.layout.users_display_layout, parent, false);
 
         return new UserViewHolder(layoutBinding);
@@ -83,10 +82,6 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
             chatIntent.putExtra(ApplicationClass.context.getString(R.string.CURRENT_USER_ID), Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid());
             context.startActivity(chatIntent);
         });
-    }
-
-    public void updateUserList(final List<User> list) {
-        userList = list;
     }
 
     @Override

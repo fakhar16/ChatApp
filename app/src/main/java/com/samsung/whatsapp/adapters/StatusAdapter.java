@@ -83,10 +83,6 @@ public class StatusAdapter extends RecyclerView.Adapter<StatusAdapter.StatusView
         });
     }
 
-    public void setUserStatuses(ArrayList<UserStatus> userStatuses) {
-        this.userStatuses = userStatuses;
-    }
-
     @Override
     public int getItemCount() {
         return userStatuses.size();

@@ -29,20 +29,17 @@ import com.samsung.whatsapp.R;
 import com.samsung.whatsapp.adapters.StatusAdapter;
 import com.samsung.whatsapp.databinding.FragmentStoriesBinding;
 import com.samsung.whatsapp.model.User;
-import com.samsung.whatsapp.model.UserStatus;
+import com.samsung.whatsapp.repository.StatusRepositoryImpl;
 import com.samsung.whatsapp.utils.Utils;
 import com.samsung.whatsapp.viewmodel.StatusViewModel;
 import com.squareup.picasso.Picasso;
 
-import java.util.ArrayList;
 import java.util.Objects;
 
 public class StoriesFragment extends Fragment {
     private FragmentStoriesBinding binding;
     StatusAdapter statusAdapter;
-    ArrayList<UserStatus> userStatuses;
     User user;
-    private StatusViewModel viewModel;
 
     private final ActivityResultLauncher<Intent> imagePickActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
         @Override
@@ -52,7 +49,7 @@ public class StoriesFragment extends Fragment {
 
                 Intent data = result.getData();
                 if (data != null && data.getData() != null) {
-                    viewModel.UploadStatus(data, user, binding.progressbar.getRoot(), requireActivity());
+                    StatusRepositoryImpl.getInstance().uploadStatus(data, user, binding.progressbar.getRoot(), requireActivity());
                 }
             }
         }
@@ -86,19 +83,16 @@ public class StoriesFragment extends Fragment {
             }
         });
 
-        userStatuses = new ArrayList<>();
-        statusAdapter = new StatusAdapter(getContext(), userStatuses);
+        StatusViewModel viewModel = new ViewModelProvider(this).get(StatusViewModel.class);
+        viewModel.init();
+        viewModel.getUserStatues().observe(getViewLifecycleOwner(), userStatuses -> statusAdapter.notifyDataSetChanged());
+
+        statusAdapter = new StatusAdapter(getContext(), viewModel.getUserStatues().getValue());
 
         binding.statusList.setLayoutManager(new LinearLayoutManager(getContext()));
-
         binding.statusList.addItemDecoration(new DividerItemDecoration(binding.statusList.getContext(), DividerItemDecoration.VERTICAL));
         binding.statusList.setAdapter(statusAdapter);
 
-        viewModel = new ViewModelProvider(this).get(StatusViewModel.class);
-        viewModel.getUserStatues().observe(getViewLifecycleOwner(), userStatuses -> {
-            statusAdapter.setUserStatuses(userStatuses);
-            statusAdapter.notifyDataSetChanged();
-        });
 
         binding.btnStatus.setOnClickListener(view -> {
             Intent intent = new Intent();
