@@ -1,4 +1,4 @@
-package com.samsung.whatsapp.repository;
+package com.samsung.whatsapp.repository.interfaces;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -11,7 +11,7 @@ import com.samsung.whatsapp.model.UserStatus;
 
 import java.util.ArrayList;
 
-public interface StatusRepository {
+public interface IStatusRepository {
     MutableLiveData<ArrayList<UserStatus>> getStatuses();
     void uploadStatus(Intent data, User user, View dialog, Activity activity);
 }

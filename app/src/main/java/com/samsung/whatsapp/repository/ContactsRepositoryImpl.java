@@ -13,11 +13,12 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import com.samsung.whatsapp.R;
 import com.samsung.whatsapp.model.User;
+import com.samsung.whatsapp.repository.interfaces.IContactsRepository;
 
 import java.util.ArrayList;
 import java.util.Objects;
 
-public class ContactsRepositoryImpl implements ContactsRepository {
+public class ContactsRepositoryImpl implements IContactsRepository {
     static ContactsRepositoryImpl instance;
     private final ArrayList<User> mUsers = new ArrayList<>();
     MutableLiveData<ArrayList<User>> users = new MutableLiveData<>();

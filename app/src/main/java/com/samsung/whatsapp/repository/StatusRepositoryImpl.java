@@ -20,6 +20,7 @@ import com.samsung.whatsapp.R;
 import com.samsung.whatsapp.model.Status;
 import com.samsung.whatsapp.model.User;
 import com.samsung.whatsapp.model.UserStatus;
+import com.samsung.whatsapp.repository.interfaces.IStatusRepository;
 import com.samsung.whatsapp.utils.Utils;
 
 import java.util.ArrayList;
@@ -27,7 +28,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Objects;
 
-public class StatusRepositoryImpl implements StatusRepository {
+public class StatusRepositoryImpl implements IStatusRepository {
     static StatusRepositoryImpl instance;
     private final ArrayList<UserStatus> mUserStatuses = new ArrayList<>();
     MutableLiveData<ArrayList<UserStatus>> userStatuses = new MutableLiveData<>();

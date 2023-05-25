@@ -9,10 +9,11 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import com.samsung.whatsapp.model.Message;
+import com.samsung.whatsapp.repository.interfaces.IMessageRepository;
 
 import java.util.ArrayList;
 
-public class MessageRepositoryImpl implements MessageRepository {
+public class MessageRepositoryImpl implements IMessageRepository {
     static MessageRepositoryImpl instance;
     private final ArrayList<Message> mMessages = new ArrayList<>();
     MutableLiveData<ArrayList<Message>> messages = new MutableLiveData<>();
