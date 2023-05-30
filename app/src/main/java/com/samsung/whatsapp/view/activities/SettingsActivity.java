@@ -20,7 +20,9 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.samsung.whatsapp.R;
 import com.samsung.whatsapp.databinding.ActivitySettingsBinding;
+import com.samsung.whatsapp.model.User;
 import com.samsung.whatsapp.utils.Utils;
+import com.samsung.whatsapp.utils.WhatsappLikeProfilePicPreview;
 import com.soundcloud.android.crop.Crop;
 import com.squareup.picasso.Picasso;
 
@@ -31,6 +33,7 @@ import java.util.Objects;
 public class SettingsActivity extends BaseActivity {
     private String currentUserId;
     private ActivitySettingsBinding binding;
+    private User currentUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,7 +48,8 @@ public class SettingsActivity extends BaseActivity {
         RetrieveUserInfo();
 
         binding.updateSettingsButton.setOnClickListener(view -> UpdateSettings());
-        binding.setProfileImage.setOnClickListener(view -> Crop.pickImage(SettingsActivity.this));
+        binding.editProfileImage.setOnClickListener(view -> Crop.pickImage(SettingsActivity.this));
+        binding.setProfileImage.setOnClickListener(view -> WhatsappLikeProfilePicPreview.Companion.zoomImageFromThumb(binding.setProfileImage, binding.expandedImageCardview, binding.expandedImage, binding.container, currentUser.getImage()));
     }
 
     private void beginCrop(Uri source) {
@@ -142,6 +146,7 @@ public class SettingsActivity extends BaseActivity {
                 .addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        currentUser = snapshot.getValue(User.class);
                         if ((snapshot.exists()) && (snapshot.hasChild(getString(R.string.NAME))) && (snapshot.hasChild(getString(R.string.IMAGE)))) {
                             String retrieveProfileImage = Objects.requireNonNull(snapshot.child(getString(R.string.IMAGE)).getValue()).toString();
                             Picasso.get().load(retrieveProfileImage).placeholder(R.drawable.profile_image).into(binding.setProfileImage);

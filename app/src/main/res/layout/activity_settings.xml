@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:id="@+id/container">
 <LinearLayout xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -18,27 +18,92 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:paddingHorizontal="44dp"
-        android:gravity="center_horizontal"
+        android:paddingHorizontal="20dp"
         >
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            >
 
-    <de.hdodenhof.circleimageview.CircleImageView
-        android:id="@+id/set_profile_image"
-        android:layout_width="150dp"
-        android:layout_height="150dp"
-        android:layout_marginTop="90dp"
-        android:src="@drawable/profile_image"
-        app:civ_border_width="5dp"
-        app:civ_border_color="@color/colorPrimary"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="20dp"
+                >
+                <de.hdodenhof.circleimageview.CircleImageView
+                    android:id="@+id/set_profile_image"
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
+                    android:src="@drawable/profile_image"
+                    app:civ_border_width="5dp"
+                    app:civ_border_color="@color/colorPrimary"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Enter your name and add an optional profile picture"
+                    android:layout_gravity="center"
+                    android:textSize="12sp"
+                    android:layout_marginStart="10dp"
+                    />
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/edit_profile_image"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Edit"
+                android:textColor="@android:color/holo_purple"
+                android:textSize="14sp"
+                android:layout_marginTop="5dp"
+                android:layout_marginStart="25dp"
+                android:textStyle="bold"
+                tools:ignore="HardcodedText" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/ThemeOverlay.Material3.TextInputEditText.OutlinedBox">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/set_user_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    tools:ignore="HardcodedText" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+        </LinearLayout>
+
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Profile Info"
-            android:textStyle="bold"
-            android:textColor="@android:color/black"
-            android:textSize="22sp"
-            android:layout_marginTop="16dp"
-            tools:ignore="HardcodedText" />
+            android:text="PHONE NUMBER"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="30dp"
+            android:textColor="@android:color/darker_gray"
+            />
+
+        <TextView
+            android:id="@+id/tv_phone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="phone number"
+            android:textSize="20sp"
+            android:layout_marginStart="5dp"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ABOUT"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="30dp"
+            android:textColor="@android:color/darker_gray"
+            />
 
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
@@ -46,34 +111,13 @@
             style="@style/ThemeOverlay.Material3.TextInputEditText.OutlinedBox">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/set_user_name"
+                android:id="@+id/set_profile_status"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Enter your name"
                 tools:ignore="HardcodedText" />
         </com.google.android.material.textfield.TextInputLayout>
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        style="@style/ThemeOverlay.Material3.TextInputEditText.OutlinedBox">
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/set_profile_status"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Enter status"
-            tools:ignore="HardcodedText" />
-    </com.google.android.material.textfield.TextInputLayout>
-
-        <TextView
-            android:id="@+id/tv_phone"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="phone number"
-            android:textSize="20sp"
-            android:layout_marginBottom="10dp"
-            />
 
         <Button
             android:id="@+id/updateSettingsButton"
@@ -94,4 +138,40 @@ android:layout_centerInParent="true"
 layout="@layout/progressbar"
 android:visibility="gone"
     />
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/expanded_image_cardview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="invisible">
+
+        <ImageView
+            android:id="@+id/expanded_image"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/profile_image"
+            android:background="@android:color/black"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Contact Info"
+            android:textColor="@android:color/white"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="10dp"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="&#60; Back"
+            android:textColor="@android:color/holo_blue_light"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginTop="10dp"
+            />
+    </androidx.cardview.widget.CardView>
     </RelativeLayout>
