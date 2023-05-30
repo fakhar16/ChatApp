@@ -80,8 +80,6 @@ public class MessagesAdapter extends RecyclerView.Adapter {
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         Message message = userMessageList.get(position);
 
-
-
         int[] reactions = new int[]{
                 R.drawable.ic_fb_like,
                 R.drawable.ic_fb_love,
@@ -260,7 +258,6 @@ public class MessagesAdapter extends RecyclerView.Adapter {
         });
 
         Objects.requireNonNull(delete).setOnClickListener(view -> {
-            Toast.makeText(context, "Delete clicked", Toast.LENGTH_SHORT).show();
             bottomSheetDialog.dismiss();
         });
     }

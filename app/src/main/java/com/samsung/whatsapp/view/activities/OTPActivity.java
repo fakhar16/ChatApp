@@ -92,7 +92,7 @@ public class OTPActivity extends BaseActivity {
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         Utils.dismissLoadingBar(OTPActivity.this, binding.progressbar.getRoot());
-                        SendUserToMainActivity();
+                        SendUserToMainActivity(Objects.requireNonNull(task.getResult().getUser()).getPhoneNumber());
                     } else {
                         Utils.dismissLoadingBar(OTPActivity.this, binding.progressbar.getRoot());
                         String message = Objects.requireNonNull(task.getException()).toString();
@@ -101,9 +101,10 @@ public class OTPActivity extends BaseActivity {
                 });
     }
 
-    private void SendUserToMainActivity() {
+    private void SendUserToMainActivity(String phone) {
         Intent mainIntent = new Intent(OTPActivity.this, MainActivity.class);
         mainIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        mainIntent.putExtra(getString(R.string.PHONE_NUMBER), phone);
         startActivity(mainIntent);
         finish();
     }

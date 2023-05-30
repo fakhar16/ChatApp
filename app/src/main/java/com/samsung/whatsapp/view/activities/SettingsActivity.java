@@ -105,7 +105,8 @@ public class SettingsActivity extends BaseActivity {
         setSupportActionBar(binding.settingsToolbar.mainAppBar);
         Objects.requireNonNull(getSupportActionBar()).setDisplayShowHomeEnabled(true);
         getSupportActionBar().setDisplayShowCustomEnabled(true);
-        getSupportActionBar().setTitle("Account Settings");
+        getSupportActionBar().setTitle("Settings");
+        binding.tvPhone.setText(getIntent().getStringExtra(getString(R.string.PHONE_NUMBER)));
     }
 
     private void UpdateSettings() {
@@ -119,6 +120,7 @@ public class SettingsActivity extends BaseActivity {
         } else {
             HashMap<String, Object> profileMap = new HashMap<>();
             profileMap.put(getString(R.string.UID), currentUserId);
+            profileMap.put(getString(R.string.PHONE_NUMBER), getIntent().getStringExtra(getString(R.string.PHONE_NUMBER)));
             profileMap.put(getString(R.string.NAME), setUserName);
             profileMap.put(getString(R.string.STATUS), setUserStatus);
 

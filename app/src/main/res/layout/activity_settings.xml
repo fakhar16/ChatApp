@@ -66,6 +66,15 @@
             tools:ignore="HardcodedText" />
     </com.google.android.material.textfield.TextInputLayout>
 
+        <TextView
+            android:id="@+id/tv_phone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="phone number"
+            android:textSize="20sp"
+            android:layout_marginBottom="10dp"
+            />
+
         <Button
             android:id="@+id/updateSettingsButton"
             android:layout_width="match_parent"

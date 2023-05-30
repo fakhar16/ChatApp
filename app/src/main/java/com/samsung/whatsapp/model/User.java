@@ -1,17 +1,26 @@
 package com.samsung.whatsapp.model;
 
 public class User {
-    private String uid, name, status, image, token;
+    private String uid, phone, name, status, image, token;
 
     public User() {
     }
 
-    public User(String uid, String name, String status, String image, String token) {
+    public User(String uid, String phone, String name, String status, String image, String token) {
         this.uid = uid;
+        this.phone = phone;
         this.name = name;
         this.status = status;
         this.image = image;
         this.token = token;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     public String getToken() {
