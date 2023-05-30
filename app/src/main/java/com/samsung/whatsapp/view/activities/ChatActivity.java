@@ -105,7 +105,6 @@ public class ChatActivity extends BaseActivity {
                 }
             });
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -250,9 +249,7 @@ public class ChatActivity extends BaseActivity {
             FCMMessaging.sendMessage(message, sender.getUid(), receiver.getUid());
             binding.messageInputText.setText("");
         });
-        binding.camera.setOnClickListener(view -> {
-            cameraButtonClicked();
-        });
+        binding.camera.setOnClickListener(view -> cameraButtonClicked());
         customChatBarBinding.voiceCall.setOnClickListener(view -> Toast.makeText(this, receiver.getName(), Toast.LENGTH_SHORT).show());
         customChatBarBinding.videoCall.setOnClickListener(view -> {
             Notification notification = new Notification(sender.getName(), "Incoming Video Call", TYPE_VIDEO_CALL, sender.getImage(), receiver.getToken(), sender.getUid(), receiver.getUid());
