@@ -21,6 +21,8 @@ import com.samsung.whatsapp.viewmodel.ContactsViewModel;
 public class ChatFragment extends Fragment {
     private UserAdapter adapter;
 
+    FragmentChatBinding binding;
+
     public ChatFragment() {
         // Required empty public constructor
     }
@@ -29,8 +31,15 @@ public class ChatFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        com.samsung.whatsapp.databinding.FragmentChatBinding binding = FragmentChatBinding.inflate(inflater, container, false);
+        binding = FragmentChatBinding.inflate(inflater, container, false);
 
+        return binding.getRoot();
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    @Override
+    public void onStart() {
+        super.onStart();
         binding.chatsList.setLayoutManager(new LinearLayoutManager(getContext()));
 
         ContactsViewModel viewModel = new ViewModelProvider(this).get(ContactsViewModel.class);
@@ -40,7 +49,5 @@ public class ChatFragment extends Fragment {
         adapter = new UserAdapter(getContext(), viewModel.getContacts().getValue());
         binding.chatsList.addItemDecoration(new DividerItemDecoration(binding.chatsList.getContext(), DividerItemDecoration.VERTICAL));
         binding.chatsList.setAdapter(adapter);
-
-        return binding.getRoot();
     }
 }

@@ -149,9 +149,11 @@ public class SettingsActivity extends BaseActivity {
                         if ((snapshot.exists()) && (snapshot.hasChild(getString(R.string.NAME)))) {
                             String retrieveUserName = Objects.requireNonNull(snapshot.child(getString(R.string.NAME)).getValue()).toString();
                             String retrieveUserStatus = Objects.requireNonNull(snapshot.child(getString(R.string.STATUS)).getValue()).toString();
+                            String retrieveUserPhone = Objects.requireNonNull(snapshot.child(getString(R.string.PHONE_NUMBER)).getValue()).toString();
 
                             binding.setUserName.setText(retrieveUserName);
                             binding.setProfileStatus.setText(retrieveUserStatus);
+                            binding.tvPhone.setText(retrieveUserPhone);
 
                         } else {
                             Toast.makeText(SettingsActivity.this, "Please set & update your profile information", Toast.LENGTH_SHORT).show();

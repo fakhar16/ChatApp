@@ -4,6 +4,10 @@ import static com.samsung.whatsapp.ApplicationClass.context;
 import static com.samsung.whatsapp.ApplicationClass.userDatabaseReference;
 
 
+import android.annotation.SuppressLint;
+import android.database.Cursor;
+import android.provider.ContactsContract;
+
 import androidx.annotation.NonNull;
 import androidx.lifecycle.MutableLiveData;
 
@@ -19,9 +23,11 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 public class ContactsRepositoryImpl implements IContactsRepository {
+    private static final String TAG = "ConsoleContactsRepositoryImpl";
     static ContactsRepositoryImpl instance;
     private final ArrayList<User> mUsers = new ArrayList<>();
     MutableLiveData<ArrayList<User>> users = new MutableLiveData<>();
+    private final ArrayList<String> contactList = new ArrayList<>();
 
     public static ContactsRepositoryImpl getInstance() {
         if(instance == null) {
@@ -40,6 +46,7 @@ public class ContactsRepositoryImpl implements IContactsRepository {
     }
 
     private void loadContacts() {
+        loadContactListFromPhone();
         userDatabaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -48,8 +55,7 @@ public class ContactsRepositoryImpl implements IContactsRepository {
                     for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                         if (dataSnapshot.hasChild(context.getString(R.string.NAME))) {
                             User user = dataSnapshot.getValue(User.class);
-
-                            if (!Objects.requireNonNull(user).getUid().equals(FirebaseAuth.getInstance().getUid()))
+                            if (!Objects.requireNonNull(user).getUid().equals(FirebaseAuth.getInstance().getUid()) && contactList.contains(user.getPhone_number()))
                                 mUsers.add(user);
                         }
                     }
@@ -62,5 +68,18 @@ public class ContactsRepositoryImpl implements IContactsRepository {
 
             }
         });
+
+    }
+
+    @SuppressLint("Range")
+    private void loadContactListFromPhone() {
+        Cursor phones = context.getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, null, null, null);
+        while (phones.moveToNext()) {
+            String phone = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER));
+
+            if (phone != null) {
+                contactList.add(phone);
+            }
+        }
     }
 }
