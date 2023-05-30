@@ -5,14 +5,15 @@ import static com.samsung.whatsapp.ApplicationClass.userDatabaseReference;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Color;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.databinding.DataBindingUtil;
@@ -197,6 +198,7 @@ public class MessagesAdapter extends RecyclerView.Adapter {
                 }
             });
 
+
 //            viewHolder.binding.message.setOnTouchListener((view, motionEvent) -> {
 //                popup.onTouch(view, motionEvent);
 //                return false;
@@ -244,13 +246,18 @@ public class MessagesAdapter extends RecyclerView.Adapter {
             wasMessageReceived = true;
         }
 
+        View contentView = View.inflate(context, R.layout.message_bottom_sheet_layout, null);
+
         BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(context);
-        bottomSheetDialog.setContentView(R.layout.bottom_sheet_layout);
+        bottomSheetDialog.setContentView(contentView);
+        bottomSheetDialog.setCanceledOnTouchOutside(false);
+        ((View) contentView.getParent()).setBackgroundColor(Color.TRANSPARENT);
 
         LinearLayout star = bottomSheetDialog.findViewById(R.id.star);
         LinearLayout copy = bottomSheetDialog.findViewById(R.id.copy);
         LinearLayout forward = bottomSheetDialog.findViewById(R.id.forward);
         LinearLayout delete = bottomSheetDialog.findViewById(R.id.delete);
+        Button cancel = bottomSheetDialog.findViewById(R.id.cancel);
 
         clicked_message.setOnLongClickListener(view -> {
             bottomSheetDialog.show();
@@ -260,6 +267,8 @@ public class MessagesAdapter extends RecyclerView.Adapter {
         Objects.requireNonNull(delete).setOnClickListener(view -> {
             bottomSheetDialog.dismiss();
         });
+
+        Objects.requireNonNull(cancel).setOnClickListener(view -> bottomSheetDialog.dismiss());
     }
 
 //    private void deleteSentMessage(final int position, final MessageViewHolder holder) {

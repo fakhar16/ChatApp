@@ -20,6 +20,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -29,8 +30,11 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -58,6 +62,7 @@ public class ChatActivity extends BaseActivity {
     private ActivityChatBinding binding;
     private CustomChatBarBinding customChatBarBinding;
     public static User receiver, sender;
+    private BottomSheetDialog bottomSheetDialog;
 //    private static final String TAG = "ConsoleChatActivity";
 
     private final ActivityResultLauncher<Intent> imagePickActivityResultLauncher = registerForActivityResult(
@@ -224,7 +229,12 @@ public class ChatActivity extends BaseActivity {
         messagesAdapter = new MessagesAdapter( ChatActivity.this, messageSenderId, messageReceiverId, viewModel.getMessage().getValue());
         binding.userMessageList.setAdapter(messagesAdapter);
 
+        View contentView = View.inflate(ChatActivity.this, R.layout.attachment_bottom_sheet_layout, null);
 
+        bottomSheetDialog = new BottomSheetDialog(ChatActivity.this);
+        bottomSheetDialog.setContentView(contentView);
+        bottomSheetDialog.setCanceledOnTouchOutside(false);
+        ((View) contentView.getParent()).setBackgroundColor(Color.TRANSPARENT);
 
         handleButtonClicks();
     }
@@ -241,13 +251,7 @@ public class ChatActivity extends BaseActivity {
             binding.messageInputText.setText("");
         });
         binding.camera.setOnClickListener(view -> {
-            Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-            imageCaptureActivityResultLauncher.launch(intent);
-        });
-        binding.attachment.setOnClickListener(view -> {
-            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-            intent.setType("image/*");
-            imagePickActivityResultLauncher.launch(intent);
+            cameraButtonClicked();
         });
         customChatBarBinding.voiceCall.setOnClickListener(view -> Toast.makeText(this, receiver.getName(), Toast.LENGTH_SHORT).show());
         customChatBarBinding.videoCall.setOnClickListener(view -> {
@@ -261,6 +265,36 @@ public class ChatActivity extends BaseActivity {
             startActivity(intent);
         });
         customChatBarBinding.userImage.setOnClickListener(view -> WhatsappLikeProfilePicPreview.Companion.zoomImageFromThumb(customChatBarBinding.userImage, binding.expandedImageCardview, binding.expandedImage, binding.chatToolBar.getRoot().getRootView(), receiver.getImage()));
+        binding.attachMenu.setOnClickListener(view -> showAttachmentMenu());
+    }
+
+    private void showAttachmentMenu() {
+        bottomSheetDialog.show();
+
+        LinearLayout camera = bottomSheetDialog.findViewById(R.id.camera_btn);
+        LinearLayout attachment = bottomSheetDialog.findViewById(R.id.photo_video_attachment_btn);
+        Button cancel = bottomSheetDialog.findViewById(R.id.cancel);
+
+        Objects.requireNonNull(camera).setOnClickListener(view -> {
+            cameraButtonClicked();
+            bottomSheetDialog.dismiss();
+        });
+        Objects.requireNonNull(attachment).setOnClickListener(view -> {
+            attachmentButtonClicked();
+            bottomSheetDialog.dismiss();
+        });
+        Objects.requireNonNull(cancel).setOnClickListener(view -> bottomSheetDialog.dismiss());
+    }
+
+    private void cameraButtonClicked() {
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        imageCaptureActivityResultLauncher.launch(intent);
+    }
+
+    private void attachmentButtonClicked() {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("image/*");
+        imagePickActivityResultLauncher.launch(intent);
     }
 
     @Override

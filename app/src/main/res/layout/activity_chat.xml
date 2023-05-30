@@ -19,11 +19,25 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@id/userMessageList"/>
 
+    <ImageView
+        android:id="@+id/attach_menu"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        app:srcCompat="@drawable/baseline_add_24"
+        app:tint="@color/colorPrimary"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/cardView"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="10dp"
+        android:layout_marginStart="10dp"
+        />
+
     <androidx.cardview.widget.CardView
         android:id="@+id/cardView"
         android:layout_width="0dp"
         android:layout_height="50dp"
-        android:layout_marginStart="5dp"
+        android:layout_marginStart="45dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
         app:cardCornerRadius="30dp"
@@ -46,23 +60,14 @@
                 android:hint="Type message here"
                 android:inputType="textPersonName"
                 android:padding="8dp"
-                android:layout_marginLeft="30dp"
                 android:layout_weight="1"
                 android:textSize="14sp" />
-
-            <ImageView
-                android:id="@+id/attachment"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:layout_marginEnd="12dp"
-                app:srcCompat="@drawable/baseline_attach_file_24"
-                app:tint="@color/colorPrimary" />
 
             <ImageView
                 android:id="@+id/camera"
                 android:layout_width="20dp"
                 android:layout_height="20dp"
-                android:layout_marginEnd="12dp"
+                android:layout_marginEnd="20dp"
                 app:srcCompat="@drawable/ic_camera"
                 app:tint="@color/colorPrimary" />
         </LinearLayout>
@@ -125,8 +130,6 @@
             android:layout_marginTop="10dp"
             />
     </androidx.cardview.widget.CardView>
-
-
 </androidx.constraintlayout.widget.ConstraintLayout>
     <include
         android:id="@+id/progressbar"
