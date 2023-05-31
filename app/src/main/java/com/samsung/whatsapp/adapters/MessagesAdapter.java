@@ -6,14 +6,11 @@ import static com.samsung.whatsapp.ApplicationClass.userDatabaseReference;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
-import android.view.GestureDetector;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.databinding.DataBindingUtil;
@@ -27,14 +24,15 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
-import com.samsung.whatsapp.ApplicationClass;
 import com.samsung.whatsapp.model.Message;
 import com.samsung.whatsapp.R;
 import com.samsung.whatsapp.databinding.ItemReceiveBinding;
 import com.samsung.whatsapp.databinding.ItemSentBinding;
 import com.squareup.picasso.Picasso;
+import com.stfalcon.imageviewer.StfalconImageViewer;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class MessagesAdapter extends RecyclerView.Adapter {
@@ -162,51 +160,40 @@ public class MessagesAdapter extends RecyclerView.Adapter {
                 viewHolder.binding.feeling.setVisibility(View.GONE);
             }
 
-            viewHolder.binding.message.setOnTouchListener(new View.OnTouchListener() {
-                View mView;
-                final GestureDetector gestureDetector = new GestureDetector(ApplicationClass.context, new GestureDetector.SimpleOnGestureListener() {
-                    @Override
-                    public boolean onSingleTapConfirmed(@NonNull MotionEvent e) {
-                        popup.onTouch(mView, e);
-                        return super.onSingleTapConfirmed(e);
-                    }
-                });
-
-
-                @Override
-                public boolean onTouch(View view, MotionEvent motionEvent) {
-                    mView = view;
-                    gestureDetector.onTouchEvent(motionEvent);
-                    return false;
-                }
-            });
-
-            viewHolder.binding.image.setOnTouchListener(new View.OnTouchListener() {
-                View mView;
-                final GestureDetector gestureDetector = new GestureDetector(ApplicationClass.context, new GestureDetector.SimpleOnGestureListener() {
-                    @Override
-                    public boolean onSingleTapConfirmed(@NonNull MotionEvent e) {
-                        popup.onTouch(mView, e);
-                        return super.onSingleTapConfirmed(e);
-                    }
-                });
-                @Override
-                public boolean onTouch(View view, MotionEvent motionEvent) {
-                    mView = view;
-                    gestureDetector.onTouchEvent(motionEvent);
-                    return false;
-                }
-            });
-
-
-//            viewHolder.binding.message.setOnTouchListener((view, motionEvent) -> {
-//                popup.onTouch(view, motionEvent);
-//                return false;
+//            viewHolder.binding.message.setOnTouchListener(new View.OnTouchListener() {
+//                View mView;
+//                final GestureDetector gestureDetector = new GestureDetector(ApplicationClass.context, new GestureDetector.SimpleOnGestureListener() {
+//                    @Override
+//                    public boolean onSingleTapConfirmed(@NonNull MotionEvent e) {
+//                        popup.onTouch(mView, e);
+//                        return super.onSingleTapConfirmed(e);
+//                    }
+//                });
+//
+//
+//                @Override
+//                public boolean onTouch(View view, MotionEvent motionEvent) {
+//                    mView = view;
+//                    gestureDetector.onTouchEvent(motionEvent);
+//                    return false;
+//                }
 //            });
 //
-//            viewHolder.binding.image.setOnTouchListener((view, motionEvent) -> {
-//                popup.onTouch(view, motionEvent);
-//                return false;
+//            viewHolder.binding.image.setOnTouchListener(new View.OnTouchListener() {
+//                View mView;
+//                final GestureDetector gestureDetector = new GestureDetector(ApplicationClass.context, new GestureDetector.SimpleOnGestureListener() {
+//                    @Override
+//                    public boolean onSingleTapConfirmed(@NonNull MotionEvent e) {
+//                        popup.onTouch(mView, e);
+//                        return super.onSingleTapConfirmed(e);
+//                    }
+//                });
+//                @Override
+//                public boolean onTouch(View view, MotionEvent motionEvent) {
+//                    mView = view;
+//                    gestureDetector.onTouchEvent(motionEvent);
+//                    return false;
+//                }
 //            });
 
             userDatabaseReference
@@ -229,21 +216,53 @@ public class MessagesAdapter extends RecyclerView.Adapter {
                     });
         }
 
+        previewImageOnClick(holder, message.getMessage());
         showMenuOnLongClick(holder, position);
     }
 
+    private void previewImageOnClick(RecyclerView.ViewHolder holder, String imageUrl) {
+        List<String> images = new ArrayList<>();
+        images.add(imageUrl);
+        if (holder.getClass() == SenderViewHolder.class) {
+            SenderViewHolder viewHolder = (SenderViewHolder) holder;
+            viewHolder.binding.image.setOnClickListener(view -> {
+
+               StfalconImageViewer.Builder<String> builder = new StfalconImageViewer.Builder<>(context, images, (imageView, o) -> {
+                   Picasso.get().load(o).into(imageView);
+               });
+
+               builder.show(true);
+           });
+        } else {
+            ReceiverViewHolder viewHolder = (ReceiverViewHolder) holder;
+            viewHolder.binding.image.setOnClickListener(view -> {
+                StfalconImageViewer.Builder<String> builder = new StfalconImageViewer.Builder<>(context, images, (imageView, o) -> {
+                    Picasso.get().load(o).into(imageView);
+                });
+
+                builder.show(true);
+            });
+        }
+    }
+
     private void showMenuOnLongClick(RecyclerView.ViewHolder holder, int pos) {
-        TextView clicked_message = null;
-        boolean wasMessageReceived = false;
+        View clicked_message = null;
+//        boolean wasMessageReceived = false;
 //
         if (holder.getClass() == SenderViewHolder.class) {
             SenderViewHolder viewHolder = (SenderViewHolder) holder;
-            clicked_message = viewHolder.binding.message;
+            if (viewHolder.binding.image.getVisibility() != View.VISIBLE)
+                clicked_message = viewHolder.binding.message;
+            else
+                clicked_message = viewHolder.binding.image;
 
         } else {
             ReceiverViewHolder viewHolder = (ReceiverViewHolder) holder;
-            clicked_message = viewHolder.binding.message;
-            wasMessageReceived = true;
+            if (viewHolder.binding.image.getVisibility() != View.VISIBLE)
+                clicked_message = viewHolder.binding.message;
+            else
+                clicked_message = viewHolder.binding.image;
+//            wasMessageReceived = true;
         }
 
         View contentView = View.inflate(context, R.layout.message_bottom_sheet_layout, null);
@@ -253,9 +272,9 @@ public class MessagesAdapter extends RecyclerView.Adapter {
         bottomSheetDialog.setCanceledOnTouchOutside(false);
         ((View) contentView.getParent()).setBackgroundColor(Color.TRANSPARENT);
 
-        LinearLayout star = bottomSheetDialog.findViewById(R.id.star);
-        LinearLayout copy = bottomSheetDialog.findViewById(R.id.copy);
-        LinearLayout forward = bottomSheetDialog.findViewById(R.id.forward);
+//        LinearLayout star = bottomSheetDialog.findViewById(R.id.star);
+//        LinearLayout copy = bottomSheetDialog.findViewById(R.id.copy);
+//        LinearLayout forward = bottomSheetDialog.findViewById(R.id.forward);
         LinearLayout delete = bottomSheetDialog.findViewById(R.id.delete);
         Button cancel = bottomSheetDialog.findViewById(R.id.cancel);
 
