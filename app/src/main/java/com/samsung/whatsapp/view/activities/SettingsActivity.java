@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.view.View;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -177,5 +178,14 @@ public class SettingsActivity extends BaseActivity {
         mainIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(mainIntent);
         finish();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (binding.expandedImageCardview.getVisibility() == View.VISIBLE) {
+            WhatsappLikeProfilePicPreview.Companion.dismissPhotoPreview();
+        } else {
+            finish();
+        }
     }
 }

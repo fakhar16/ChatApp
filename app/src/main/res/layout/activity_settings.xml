@@ -143,7 +143,7 @@ android:visibility="gone"
         android:id="@+id/expanded_image_cardview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="invisible">
+        android:visibility="gone">
 
         <ImageView
             android:id="@+id/expanded_image"
@@ -161,16 +161,6 @@ android:visibility="gone"
             android:textSize="20sp"
             android:textStyle="bold"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="10dp"
-            />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="&#60; Back"
-            android:textColor="@android:color/holo_blue_light"
-            android:textSize="16sp"
-            android:textStyle="bold"
             android:layout_marginTop="10dp"
             />
     </androidx.cardview.widget.CardView>

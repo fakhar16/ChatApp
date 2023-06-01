@@ -1,9 +1,10 @@
 package com.samsung.whatsapp.utils;
 
+import static com.samsung.whatsapp.ApplicationClass.imageStorageReference;
 import static com.samsung.whatsapp.ApplicationClass.messageDatabaseReference;
 import static com.samsung.whatsapp.ApplicationClass.userDatabaseReference;
+import static com.samsung.whatsapp.ApplicationClass.videoStorageReference;
 import static com.samsung.whatsapp.utils.Utils.TYPE_MESSAGE;
-//import static com.samsung.whatsapp.utils.Utils.loadingBar;
 import static com.samsung.whatsapp.ApplicationClass.context;
 
 import android.app.Activity;
@@ -14,12 +15,12 @@ import android.view.View;
 
 import androidx.annotation.NonNull;
 
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.StorageTask;
 import com.google.firebase.storage.UploadTask;
@@ -38,8 +39,8 @@ public class FCMMessaging {
     private static final String TAG = "ConsoleFCMMessaging";
     public static void sendMessage(String message, String messageSenderId, String messageReceiverId) {
         if (!TextUtils.isEmpty(message)) {
-            String messageSenderRef = "Messages" + "/" + messageSenderId + "/" + messageReceiverId;
-            String messageReceiverRef = "Messages" + "/" + messageReceiverId + "/" + messageSenderId;
+            String messageSenderRef = context.getString(R.string.MESSAGES) + "/" + messageSenderId + "/" + messageReceiverId;
+            String messageReceiverRef = context.getString(R.string.MESSAGES) + "/" + messageReceiverId + "/" + messageSenderId;
 
             DatabaseReference userMessageKeyRef =
                     messageDatabaseReference
@@ -130,10 +131,8 @@ public class FCMMessaging {
     }
 
     public static void sendImage(String messageSenderId, String messageReceiverId, Uri fileUri, Activity activity, View dialog) {
-        StorageReference storageReference = FirebaseStorage.getInstance().getReference().child("Image Files");
-
-        String messageSenderRef = "Messages" + "/" + messageSenderId + "/" + messageReceiverId;
-        String messageReceiverRef = "Messages" + "/" + messageReceiverId + "/" + messageSenderId;
+        String messageSenderRef = context.getString(R.string.MESSAGES) + "/" + messageSenderId + "/" + messageReceiverId;
+        String messageReceiverRef = context.getString(R.string.MESSAGES) + "/" + messageReceiverId + "/" + messageSenderId;
 
         DatabaseReference userMessageKeyRef =
                 messageDatabaseReference
@@ -143,7 +142,7 @@ public class FCMMessaging {
 
         String messagePushId = userMessageKeyRef.getKey();
 
-        StorageReference filePath = storageReference.child(messagePushId + ".jpg");
+        StorageReference filePath = imageStorageReference.child(messagePushId + ".jpg");
 
         StorageTask<UploadTask.TaskSnapshot> uploadTask = filePath.putFile(fileUri);
         uploadTask.continueWithTask(task -> {
@@ -153,7 +152,6 @@ public class FCMMessaging {
             return filePath.getDownloadUrl();
         }).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
-//                loadingBar.dismiss();
                 Utils.dismissLoadingBar(activity, dialog);
                 Uri downloadUrl = task.getResult();
                 String myUrl = downloadUrl.toString();
@@ -184,5 +182,54 @@ public class FCMMessaging {
                 sendNotification("Sent an image", messageReceiverId, messageSenderId, TYPE_MESSAGE);
             }
         });
+    }
+
+    public static void sendVideo(String messageSenderId, String messageReceiverId, Uri fileUri, Activity activity, View dialog) {
+        String messageSenderRef = context.getString(R.string.MESSAGES) + "/" + messageSenderId + "/" + messageReceiverId;
+        String messageReceiverRef = context.getString(R.string.MESSAGES) + "/" + messageReceiverId + "/" + messageSenderId;
+
+        DatabaseReference userMessageKeyRef =
+                messageDatabaseReference
+                        .child(messageSenderId)
+                        .child(messageReceiverId)
+                        .push();
+
+        String messagePushId = userMessageKeyRef.getKey();
+
+        StorageReference filePath = videoStorageReference.child(messagePushId + ".mp4");
+
+        filePath.putFile(fileUri)
+                .addOnSuccessListener(taskSnapshot -> {
+                    Task<Uri> uriTask = taskSnapshot.getStorage().getDownloadUrl();
+                    while (!uriTask.isSuccessful());
+
+                    Utils.dismissLoadingBar(activity, dialog);
+
+                    String downloadUri = uriTask.getResult().toString();
+                    Map<String, Object> messageTextBody = new HashMap<>();
+                    messageTextBody.put(context.getString(R.string.MESSAGE), downloadUri);
+                    messageTextBody.put(context.getString(R.string.NAME), fileUri.getLastPathSegment());
+                    messageTextBody.put(context.getString(R.string.TYPE), context.getString(R.string.VIDEO));
+                    messageTextBody.put(context.getString(R.string.FROM), messageSenderId);
+                    messageTextBody.put(context.getString(R.string.TO), messageReceiverId);
+                    messageTextBody.put(context.getString(R.string.MESSAGE_ID), messagePushId);
+                    messageTextBody.put(context.getString(R.string.TIME), new Date().getTime());
+                    messageTextBody.put(context.getString(R.string.FEELING), -1);
+
+                    Map<String, Object> messageBodyDetails = new HashMap<>();
+                    messageBodyDetails.put(messageSenderRef + "/" + messagePushId, messageTextBody);
+                    messageBodyDetails.put(messageReceiverRef + "/" + messagePushId, messageTextBody);
+
+                    FirebaseDatabase.getInstance().getReference()
+                            .updateChildren(messageBodyDetails)
+                            .addOnCompleteListener(task1 -> {
+                                if (!task1.isSuccessful()) {
+                                    Log.wtf(TAG, "SendMessage: Error while sending the message" );
+                                }
+                            });
+
+                    updateLastMessage(messageSenderId, messageReceiverId, "Video", new Date().getTime());
+                    sendNotification("Sent a video", messageReceiverId, messageSenderId, TYPE_MESSAGE);
+                });
     }
 }

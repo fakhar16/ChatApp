@@ -47,6 +47,9 @@ public class StatusAdapter extends RecyclerView.Adapter<StatusAdapter.StatusView
     public void onBindViewHolder(@NonNull StatusViewHolder holder, int position) {
         UserStatus userStatus = userStatuses.get(position);
 
+        if (userStatus.getStatuses().size() == 0)
+            return;
+
         Status lastStatus = userStatus.getStatuses().get(userStatus.getStatuses().size() - 1);
         Picasso.get().load(lastStatus.getImageUrl()).placeholder(R.drawable.profile_image).into(holder.binding.image);
 

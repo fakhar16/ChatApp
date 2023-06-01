@@ -119,4 +119,5 @@
     <string name="PHONE_VERIFICATION_DESCRIPTION">Please wait, while we are authenticating your phone...</string>
     <string name="UPDATE_PROFILE_IMAGE_TITLE">Set Profile Image</string>
     <string name="UPDATE_PROFILE_IMAGE_DESCRIPTION">Please wait, your image is updating...</string>
+    <string name="VIDEO_FILES">Video Files</string>
 </resources>

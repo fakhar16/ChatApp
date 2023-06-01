@@ -4,6 +4,8 @@ import static com.samsung.whatsapp.ApplicationClass.presenceDatabaseReference;
 import static com.samsung.whatsapp.ApplicationClass.userDatabaseReference;
 import static com.samsung.whatsapp.utils.Utils.TYPE_VIDEO_CALL;
 import static com.samsung.whatsapp.ApplicationClass.context;
+import static com.samsung.whatsapp.utils.Utils.getFileType;
+import static com.samsung.whatsapp.utils.Utils.getImageUri;
 import static com.samsung.whatsapp.utils.Utils.showLoadingBar;
 
 import androidx.activity.result.ActivityResult;
@@ -28,10 +30,12 @@ import android.os.Looper;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.MediaController;
 import android.widget.Toast;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -53,7 +57,6 @@ import com.samsung.whatsapp.databinding.CustomChatBarBinding;
 import com.samsung.whatsapp.webrtc.CallActivity;
 import com.squareup.picasso.Picasso;
 
-import java.io.ByteArrayOutputStream;
 import java.util.Objects;
 
 public class ChatActivity extends BaseActivity {
@@ -63,7 +66,7 @@ public class ChatActivity extends BaseActivity {
     private CustomChatBarBinding customChatBarBinding;
     public static User receiver, sender;
     private BottomSheetDialog bottomSheetDialog;
-//    private static final String TAG = "ConsoleChatActivity";
+    private static final String TAG = "ConsoleChatActivity";
 
     private final ActivityResultLauncher<Intent> imagePickActivityResultLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
@@ -77,9 +80,11 @@ public class ChatActivity extends BaseActivity {
                         showLoadingBar(ChatActivity.this, binding.progressbar.getRoot());
 
                         Intent data = result.getData();
-                        if (data.getData() != null) {
-                            Uri fileUri = Objects.requireNonNull(data).getData();
+                        Uri fileUri = Objects.requireNonNull(data).getData();
+                        if (getFileType(fileUri).equals("jpg")) {
                             FCMMessaging.sendImage(messageSenderId, messageReceiverId, fileUri, ChatActivity.this, binding.progressbar.getRoot());
+                        } else if (getFileType(fileUri).equals("mp4")) {
+                            FCMMessaging.sendVideo(messageSenderId, messageReceiverId, fileUri, ChatActivity.this, binding.progressbar.getRoot());
                         }
                     }
                 }
@@ -261,7 +266,7 @@ public class ChatActivity extends BaseActivity {
             intent.putExtra(getString(R.string.IS_CALL_MADE), true);
             startActivity(intent);
         });
-        customChatBarBinding.userImage.setOnClickListener(view -> WhatsappLikeProfilePicPreview.Companion.zoomImageFromThumb(customChatBarBinding.userImage, binding.expandedImageCardview, binding.expandedImage, binding.chatToolBar.getRoot().getRootView(), receiver.getImage()));
+        customChatBarBinding.userImage.setOnClickListener(view -> WhatsappLikeProfilePicPreview.Companion.zoomImageFromThumb(customChatBarBinding.userImage, binding.expandedImageCardView, binding.expandedImage, binding.chatToolBar.getRoot().getRootView(), receiver.getImage()));
         binding.attachMenu.setOnClickListener(view -> showAttachmentMenu());
     }
 
@@ -290,8 +295,23 @@ public class ChatActivity extends BaseActivity {
 
     private void attachmentButtonClicked() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.setType("image/*");
+        intent.setType("image/* video/*");
         imagePickActivityResultLauncher.launch(intent);
+    }
+
+    public void showVideoPreview(String url) {
+        binding.userMessageList.setClickable(false);
+        WhatsappLikeProfilePicPreview.Companion.zoomVideoFromThumb(binding.userMessageList, binding.expandedVideoCardView, binding.chatToolBar.getRoot().getRootView());
+
+        MediaController mediaController= new MediaController(ChatActivity.this);
+        mediaController.setAnchorView(binding.expandedVideoCardView);
+
+        binding.video.setMediaController(mediaController);
+        binding.video.setVideoURI(Uri.parse(url));
+        binding.video.requestFocus();
+        binding.video.start();
+
+        Log.wtf(TAG, "showVideoPreview: loaded " + binding.video.getBufferPercentage());
     }
 
     @Override
@@ -316,10 +336,16 @@ public class ChatActivity extends BaseActivity {
         return super.onSupportNavigateUp();
     }
 
-    public Uri getImageUri(Context inContext, Bitmap inImage) {
-        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
-        String path = MediaStore.Images.Media.insertImage(inContext.getContentResolver(), inImage, "Title", null);
-        return Uri.parse(path);
+    @Override
+    public void onBackPressed() {
+        if (binding.expandedImageCardView.getVisibility() == View.VISIBLE) {
+            WhatsappLikeProfilePicPreview.Companion.dismissPhotoPreview();
+        } else if (binding.expandedVideoCardView.getVisibility() == View.VISIBLE) {
+            binding.video.stopPlayback();
+            binding.userMessageList.setClickable(true);
+            WhatsappLikeProfilePicPreview.Companion.dismissVideoPreview();
+        } else {
+            finish();
+        }
     }
 }

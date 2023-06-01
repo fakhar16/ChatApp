@@ -18,6 +18,8 @@ public class ApplicationClass extends Application {
     public static DatabaseReference videoUserDatabaseReference;
     public static DatabaseReference profileImagesDatabaseReference;
     public static StorageReference userProfilesImagesReference;
+    public static StorageReference imageStorageReference;
+    public static StorageReference videoStorageReference;
 
     @SuppressLint("StaticFieldLeak")
     public static Context context;
@@ -37,5 +39,7 @@ public class ApplicationClass extends Application {
         profileImagesDatabaseReference = firebaseDatabase.getReference(getString(R.string.PROFILE_IMAGES));
 
         userProfilesImagesReference = FirebaseStorage.getInstance().getReference().child(getString(R.string.PROFILE_IMAGES));
+        imageStorageReference = FirebaseStorage.getInstance().getReference().child(context.getString(R.string.IMAGE_FILES));
+        videoStorageReference = FirebaseStorage.getInstance().getReference().child(context.getString(R.string.VIDEO_FILES));
     }
 }

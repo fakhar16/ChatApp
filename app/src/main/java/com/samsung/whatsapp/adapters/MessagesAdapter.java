@@ -16,6 +16,7 @@ import androidx.annotation.NonNull;
 import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.github.pgreze.reactions.ReactionPopup;
 import com.github.pgreze.reactions.ReactionsConfig;
 import com.github.pgreze.reactions.ReactionsConfigBuilder;
@@ -28,6 +29,7 @@ import com.samsung.whatsapp.model.Message;
 import com.samsung.whatsapp.R;
 import com.samsung.whatsapp.databinding.ItemReceiveBinding;
 import com.samsung.whatsapp.databinding.ItemSentBinding;
+import com.samsung.whatsapp.view.activities.ChatActivity;
 import com.squareup.picasso.Picasso;
 import com.stfalcon.imageviewer.StfalconImageViewer;
 
@@ -42,6 +44,7 @@ public class MessagesAdapter extends RecyclerView.Adapter {
     private final String receiverId;
     final int ITEM_SENT = 1;
     final int ITEM_RECEIVE = 2;
+    private static final String TAG = "ConsoleMessagesAdapter";
 
     public MessagesAdapter(Context context, String senderId, String receiverId, ArrayList<Message> userMessageList) {
         this.context = context;
@@ -133,6 +136,13 @@ public class MessagesAdapter extends RecyclerView.Adapter {
                 viewHolder.binding.image.setVisibility(View.VISIBLE);
 
                 Picasso.get().load(message.getMessage()).placeholder(R.drawable.profile_image).into(viewHolder.binding.image);
+            } else if (fromMessageType.equals(context.getString(R.string.VIDEO))) {
+                viewHolder.binding.message.setVisibility(View.GONE);
+                viewHolder.binding.image.setVisibility(View.VISIBLE);
+                Picasso.get().load(message.getMessage()).placeholder(R.drawable.baseline_play_circle_outline_24).into(viewHolder.binding.image);
+//                viewHolder.binding.video.setVisibility(View.VISIBLE);
+//
+
             }
 
             if (message.getFeeling() >= 0) {
@@ -216,30 +226,48 @@ public class MessagesAdapter extends RecyclerView.Adapter {
                     });
         }
 
-        previewImageOnClick(holder, message.getMessage());
+        if (message.getType().equals(context.getString(R.string.IMAGE))) {
+            previewImageOnClick(holder, message.getMessage());
+        }  else if(message.getType().equals(context.getString(R.string.VIDEO))) {
+            previewVideoOnClick(holder, message.getMessage());
+
+        }
         showMenuOnLongClick(holder, position);
+    }
+
+    private void previewVideoOnClick(RecyclerView.ViewHolder holder, String videoUrl) {
+        if (holder.getClass() == SenderViewHolder.class) {
+            SenderViewHolder viewHolder = (SenderViewHolder) holder;
+            Glide.with(context).load(videoUrl).centerCrop().placeholder(R.drawable.baseline_play_circle_outline_24).into(viewHolder.binding.image);
+            viewHolder.binding.image.setOnClickListener(view -> {
+                ((ChatActivity)(context)).showVideoPreview(videoUrl);
+            });
+        } else {
+            ReceiverViewHolder viewHolder = (ReceiverViewHolder) holder;
+            Glide.with(context).load(videoUrl).centerCrop().placeholder(R.drawable.baseline_play_circle_outline_24).into(viewHolder.binding.image);
+            viewHolder.binding.image.setOnClickListener(view -> {
+                ((ChatActivity)(context)).showVideoPreview(videoUrl);
+            });
+        }
     }
 
     private void previewImageOnClick(RecyclerView.ViewHolder holder, String imageUrl) {
         List<String> images = new ArrayList<>();
         images.add(imageUrl);
+
+        StfalconImageViewer.Builder<String> builder = new StfalconImageViewer.Builder<>(context, images, (imageView, o) -> {
+            Picasso.get().load(o).into(imageView);
+        });
+
+
         if (holder.getClass() == SenderViewHolder.class) {
             SenderViewHolder viewHolder = (SenderViewHolder) holder;
             viewHolder.binding.image.setOnClickListener(view -> {
-
-               StfalconImageViewer.Builder<String> builder = new StfalconImageViewer.Builder<>(context, images, (imageView, o) -> {
-                   Picasso.get().load(o).into(imageView);
-               });
-
                builder.show(true);
            });
         } else {
             ReceiverViewHolder viewHolder = (ReceiverViewHolder) holder;
             viewHolder.binding.image.setOnClickListener(view -> {
-                StfalconImageViewer.Builder<String> builder = new StfalconImageViewer.Builder<>(context, images, (imageView, o) -> {
-                    Picasso.get().load(o).into(imageView);
-                });
-
                 builder.show(true);
             });
         }
