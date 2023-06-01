@@ -81,6 +81,7 @@ public class MessagesAdapter extends RecyclerView.Adapter {
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         Message message = userMessageList.get(position);
+        holder.setIsRecyclable(false);
 
         int[] reactions = new int[]{
                 R.drawable.ic_fb_like,

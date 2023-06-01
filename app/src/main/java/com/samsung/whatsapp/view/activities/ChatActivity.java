@@ -227,7 +227,12 @@ public class ChatActivity extends BaseActivity {
 
         MessageViewModel viewModel = new ViewModelProvider(this).get(MessageViewModel.class);
         viewModel.init(messageSenderId, messageReceiverId);
-        viewModel.getMessage().observe(this, messages -> messagesAdapter.notifyDataSetChanged());
+
+        viewModel.getMessage().observe(this, messages -> {
+            messagesAdapter.notifyDataSetChanged();
+            if (messagesAdapter.getItemCount() != 0)
+                binding.userMessageList.smoothScrollToPosition(messagesAdapter.getItemCount() - 1);
+        });
 
         binding.userMessageList.setLayoutManager(new LinearLayoutManager(this));
         messagesAdapter = new MessagesAdapter( ChatActivity.this, messageSenderId, messageReceiverId, viewModel.getMessage().getValue());
@@ -239,6 +244,18 @@ public class ChatActivity extends BaseActivity {
         bottomSheetDialog.setContentView(contentView);
         bottomSheetDialog.setCanceledOnTouchOutside(false);
         ((View) contentView.getParent()).setBackgroundColor(Color.TRANSPARENT);
+
+        binding.userMessageList.addOnLayoutChangeListener((view, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+            if (bottom < oldBottom) {
+                binding.userMessageList.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (messagesAdapter.getItemCount() != 0)
+                            binding.userMessageList.smoothScrollToPosition(messagesAdapter.getItemCount() - 1);
+                    }
+                }, 100);
+            }
+        });
 
         handleButtonClicks();
     }
@@ -300,7 +317,6 @@ public class ChatActivity extends BaseActivity {
     }
 
     public void showVideoPreview(String url) {
-        binding.userMessageList.setClickable(false);
         WhatsappLikeProfilePicPreview.Companion.zoomVideoFromThumb(binding.userMessageList, binding.expandedVideoCardView, binding.chatToolBar.getRoot().getRootView());
 
         MediaController mediaController= new MediaController(ChatActivity.this);
