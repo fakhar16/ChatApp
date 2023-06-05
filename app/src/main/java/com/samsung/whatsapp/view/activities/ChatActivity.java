@@ -56,10 +56,11 @@ import com.samsung.whatsapp.databinding.ActivityChatBinding;
 import com.samsung.whatsapp.databinding.CustomChatBarBinding;
 import com.samsung.whatsapp.webrtc.CallActivity;
 import com.squareup.picasso.Picasso;
+import com.tougee.recorderview.AudioRecordView;
 
 import java.util.Objects;
 
-public class ChatActivity extends BaseActivity {
+public class ChatActivity extends BaseActivity implements AudioRecordView.Callback{
     private String messageReceiverId, messageSenderId;
     private MessagesAdapter messagesAdapter;
     private ActivityChatBinding binding;
@@ -134,11 +135,18 @@ public class ChatActivity extends BaseActivity {
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
+                if (binding.messageInputText.getText().length() != 0) {
+                    binding.camera.setVisibility(View.GONE);
+                    binding.sendMessageBtn.setVisibility(View.VISIBLE);
+                } else {
+                    binding.camera.setVisibility(View.VISIBLE);
+                    binding.sendMessageBtn.setVisibility(View.GONE);
+                }
             }
 
             @Override
             public void afterTextChanged(Editable editable) {
+
                 presenceDatabaseReference
                         .child(messageSenderId)
                         .setValue("typing...");
@@ -221,6 +229,9 @@ public class ChatActivity extends BaseActivity {
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setDisplayShowTitleEnabled(false);
 
+//        binding.recordView.activity = this;
+//        binding.recordView.callback = (AudioRecordView.Callback) this;
+
         LayoutInflater layoutInflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         customChatBarBinding = CustomChatBarBinding.inflate(layoutInflater);
         actionBar.setCustomView(customChatBarBinding.getRoot());
@@ -247,12 +258,9 @@ public class ChatActivity extends BaseActivity {
 
         binding.userMessageList.addOnLayoutChangeListener((view, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
             if (bottom < oldBottom) {
-                binding.userMessageList.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (messagesAdapter.getItemCount() != 0)
-                            binding.userMessageList.smoothScrollToPosition(messagesAdapter.getItemCount() - 1);
-                    }
+                binding.userMessageList.postDelayed(() -> {
+                    if (messagesAdapter.getItemCount() != 0)
+                        binding.userMessageList.smoothScrollToPosition(messagesAdapter.getItemCount() - 1);
                 }, 100);
             }
         });
@@ -363,5 +371,37 @@ public class ChatActivity extends BaseActivity {
         } else {
             finish();
         }
+    }
+
+    @Override
+    public boolean isReady() {
+        return true;
+    }
+
+    @Override
+    public void onRecordCancel() {
+        Log.wtf(TAG, "onRecordCancel: called");
+        binding.camera.setVisibility(View.VISIBLE);
+        binding.attachMenu.setVisibility(View.VISIBLE);
+        binding.messageInputText.setVisibility(View.VISIBLE);
+        binding.sendMessageBtn.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void onRecordEnd() {
+        Log.wtf(TAG, "onRecordEnd: called");
+        binding.camera.setVisibility(View.VISIBLE);
+        binding.attachMenu.setVisibility(View.VISIBLE);
+        binding.messageInputText.setVisibility(View.VISIBLE);
+        binding.sendMessageBtn.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void onRecordStart() {
+        Log.wtf(TAG, "onRecordStart: called");
+        binding.camera.setVisibility(View.INVISIBLE);
+        binding.attachMenu.setVisibility(View.INVISIBLE);
+        binding.messageInputText.setVisibility(View.INVISIBLE);
+        binding.sendMessageBtn.setVisibility(View.INVISIBLE);
     }
 }
