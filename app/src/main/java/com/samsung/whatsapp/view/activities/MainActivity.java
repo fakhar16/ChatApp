@@ -29,13 +29,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-
 public class MainActivity extends BaseActivity {
     private FirebaseAuth mAuth;
     private static final String TAG = "consoleMainActivity";
     public static User currentUser = null;
-
-    private final String[] fragmentLabels = {"Chats", "Status"};
+    private final String[] fragmentLabels = {"Chats", "Status", "Settings"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,7 +61,6 @@ public class MainActivity extends BaseActivity {
             setupCurrentUser();
         }
     }
-
 
     private void setupCurrentUser() {
         userDatabaseReference.child(Objects.requireNonNull(FirebaseAuth.getInstance().getUid()))
@@ -153,14 +150,9 @@ public class MainActivity extends BaseActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         super.onOptionsItemSelected(item);
 
-        switch (item.getItemId()) {
-            case R.id.main_logout_option:
-                mAuth.signOut();
-                SendUserToPhoneLoginActivity();
-                break;
-            case R.id.main_settings_option:
-                SendUserToSettingsActivity();
-                break;
+        if (item.getItemId() == R.id.main_logout_option) {
+            mAuth.signOut();
+            SendUserToPhoneLoginActivity();
         }
         return true;
     }
@@ -181,6 +173,7 @@ public class MainActivity extends BaseActivity {
 
     private void SendUserToSettingsActivity() {
         Intent settingsIntent = new Intent(MainActivity.this, SettingsActivity.class);
+        settingsIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         settingsIntent.putExtra(getString(R.string.PHONE_NUMBER), getIntent().getStringExtra(getString(R.string.PHONE_NUMBER)));
         startActivity(settingsIntent);
     }

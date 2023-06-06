@@ -70,7 +70,6 @@ public class WelcomeActivity extends BaseActivity {
                     Log.wtf(TAG, permissions[i] + " : Granted");
                 } else {
                     Log.wtf(TAG, permissions[i] + " : Denied");
-//                    ActivityCompat.requestPermissions(WelcomeActivity.this, permissions, 1);
                 }
             }
         }

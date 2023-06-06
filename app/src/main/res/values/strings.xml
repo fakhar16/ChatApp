@@ -50,10 +50,10 @@
     <string name="CROPPED">cropped</string>
     <string name="UID">uid</string>
     <string name="PROFILE_IMAGES">ProfileImages</string>
-    <string name="TYPE_MESSAGE_HINT">type message here...</string>
-    <string name="WRITE_MESSAGE_HINT">write your message here...</string>
-    <string name="EMAIL_HINT">Email...</string>
-    <string name="PASSWORD_HINT">Password...</string>
+    <string name="TYPE_MESSAGE_HINT">type message here…</string>
+    <string name="WRITE_MESSAGE_HINT">write your message here…</string>
+    <string name="EMAIL_HINT">Email…</string>
+    <string name="PASSWORD_HINT">Password…</string>
     <string name="FORGOT_PASSWORD_HINT">Forgot Password ?</string>
     <string name="LOGIN_BUTTON_TEXT">Login</string>
     <string name="NEED_NEW_ACCOUNT_TEXT">Need new Account ?</string>

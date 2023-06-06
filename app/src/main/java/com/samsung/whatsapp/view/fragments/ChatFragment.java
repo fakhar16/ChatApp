@@ -20,7 +20,6 @@ import com.samsung.whatsapp.viewmodel.ContactsViewModel;
 
 public class ChatFragment extends Fragment {
     private UserAdapter adapter;
-
     FragmentChatBinding binding;
 
     public ChatFragment() {

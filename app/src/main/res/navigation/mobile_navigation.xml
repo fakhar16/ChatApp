@@ -12,18 +12,6 @@
         tools:layout="@layout/fragment_stories" />
 
     <fragment
-        android:id="@+id/navigation_requests"
-        android:name="com.samsung.whatsapp.view.fragments.RequestsFragment"
-        android:label="@string/REQUESTS"
-        tools:layout="@layout/fragment_requests" />
-
-    <fragment
-        android:id="@+id/navigation_contacts"
-        android:name="com.samsung.whatsapp.view.fragments.ContactsFragment"
-        android:label="@string/CONTACTS"
-        tools:layout="@layout/fragment_contacts" />
-
-    <fragment
         android:id="@+id/navigation_chats"
         android:name="com.samsung.whatsapp.view.fragments.ChatFragment"
         android:label="@string/CHATS"

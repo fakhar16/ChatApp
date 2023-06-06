@@ -7,6 +7,7 @@ import androidx.lifecycle.Lifecycle;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 
 import com.samsung.whatsapp.view.fragments.ChatFragment;
+import com.samsung.whatsapp.view.fragments.SettingsFragment;
 import com.samsung.whatsapp.view.fragments.StoriesFragment;
 
 import java.util.ArrayList;
@@ -17,6 +18,7 @@ public class TabAccessorAdapter extends FragmentStateAdapter {
         super(fm, lifecycle);
         fragmentList.add(new ChatFragment());
         fragmentList.add(new StoriesFragment());
+        fragmentList.add(new SettingsFragment());
     }
 
     @NonNull

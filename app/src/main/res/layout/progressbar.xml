@@ -39,6 +39,7 @@
                 android:layout_width="220dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="10dp"
+                android:textColor="@android:color/darker_gray"
                 android:text="Please wait, while we are sending your file..." />
         </LinearLayout>
 

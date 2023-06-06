@@ -1,5 +1,7 @@
 package com.samsung.whatsapp.view.activities;
 
+import static com.samsung.whatsapp.ApplicationClass.userDatabaseReference;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -15,6 +17,8 @@ import com.samsung.whatsapp.R;
 import com.samsung.whatsapp.databinding.ActivityOtpBinding;
 import com.samsung.whatsapp.utils.Utils;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -22,6 +26,7 @@ public class OTPActivity extends BaseActivity {
     private ActivityOtpBinding binding;
     private FirebaseAuth mAuth;
     private String mVerificationId;
+
     private final PhoneAuthProvider.OnVerificationStateChangedCallbacks mCallbacks = new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
         @Override
         public void onVerificationCompleted(@NonNull PhoneAuthCredential phoneAuthCredential) {
@@ -101,10 +106,19 @@ public class OTPActivity extends BaseActivity {
                 });
     }
 
+    private void updatePhoneNumberInDB(String phone) {
+        Map<String, Object> map = new HashMap<>();
+        map.put(getString(R.string.UID), FirebaseAuth.getInstance().getUid());
+        map.put(getString(R.string.PHONE_NUMBER), phone);
+
+        userDatabaseReference.child(Objects.requireNonNull(FirebaseAuth.getInstance().getUid()))
+                .updateChildren(map);
+    }
+
     private void SendUserToMainActivity(String phone) {
         Intent mainIntent = new Intent(OTPActivity.this, MainActivity.class);
         mainIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        mainIntent.putExtra(getString(R.string.PHONE_NUMBER), phone);
+        updatePhoneNumberInDB(phone);
         startActivity(mainIntent);
         finish();
     }
