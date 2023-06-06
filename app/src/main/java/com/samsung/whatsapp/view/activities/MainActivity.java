@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.firebase.auth.FirebaseAuth;
@@ -24,6 +25,7 @@ import com.samsung.whatsapp.R;
 import com.samsung.whatsapp.adapters.TabAccessorAdapter;
 import com.samsung.whatsapp.databinding.ActivityMainBinding;
 import com.samsung.whatsapp.model.User;
+import com.samsung.whatsapp.utils.WhatsappLikeProfilePicPreview;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,10 +37,12 @@ public class MainActivity extends BaseActivity {
     public static User currentUser = null;
     private final String[] fragmentLabels = {"Chats", "Status", "Settings"};
 
+    ActivityMainBinding binding;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ActivityMainBinding binding = ActivityMainBinding.inflate(getLayoutInflater());
+        binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         mAuth = FirebaseAuth.getInstance();
@@ -178,4 +182,18 @@ public class MainActivity extends BaseActivity {
         startActivity(settingsIntent);
     }
 
+    public void showPhotoPreview(View thumbView) {
+        binding.appBarLayout.setVisibility(View.GONE);
+        WhatsappLikeProfilePicPreview.Companion.zoomImageFromThumb(thumbView, binding.expandedImageCardView, binding.expandedImage, binding.getRoot(), currentUser.getImage());
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (binding.expandedImageCardView.getVisibility() == View.VISIBLE) {
+            WhatsappLikeProfilePicPreview.Companion.dismissPhotoPreview();
+            binding.appBarLayout.setVisibility(View.VISIBLE);
+        }  else {
+            finish();
+        }
+    }
 }

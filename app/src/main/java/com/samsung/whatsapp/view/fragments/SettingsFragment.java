@@ -20,6 +20,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.samsung.whatsapp.R;
 import com.samsung.whatsapp.databinding.FragmentSettingsBinding;
 import com.samsung.whatsapp.model.User;
+import com.samsung.whatsapp.view.activities.MainActivity;
 import com.squareup.picasso.Picasso;
 
 import java.util.HashMap;
@@ -57,6 +58,8 @@ public class SettingsFragment extends Fragment {
             }
             return false;
         });
+
+        binding.setProfileImage.setOnClickListener(view -> ((MainActivity)(requireContext())).showPhotoPreview(binding.setProfileImage));
 
         return binding.getRoot();
     }
