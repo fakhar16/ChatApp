@@ -305,6 +305,10 @@ public class ChatActivity extends BaseActivity implements AudioRecordView.Callba
         imagePickActivityResultLauncher.launch(intent);
     }
 
+    public void showImagePreview(View thumbView, String url) {
+        WhatsappLikeProfilePicPreview.Companion.zoomImageFromThumb(thumbView, binding.expandedImage.cardView, binding.expandedImage.image, binding.chatToolBar.getRoot().getRootView(), url);
+    }
+
     public void showVideoPreview(String url) {
         WhatsappLikeProfilePicPreview.Companion.zoomVideoFromThumb(binding.userMessageList, binding.expandedVideoCardView, binding.chatToolBar.getRoot().getRootView());
 
@@ -315,8 +319,6 @@ public class ChatActivity extends BaseActivity implements AudioRecordView.Callba
         binding.video.setVideoURI(Uri.parse(url));
         binding.video.requestFocus();
         binding.video.start();
-
-        Log.wtf(TAG, "showVideoPreview: loaded " + binding.video.getBufferPercentage());
     }
 
     @Override

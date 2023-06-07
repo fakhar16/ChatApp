@@ -100,7 +100,6 @@ dependencies {
     implementation files('libs/StoryView-1.0.6-alpha.aar')
     implementation files('libs/ShimmerRecyclerView-v1.3.aar')
     implementation files('libs/PhotoView-2.2.0.aar')
-    implementation files('libs/StfalconImageViewer-v1.0.1.aar')
     implementation files('libs/audiorecorderview-1.0.4.aar')
 
     testImplementation 'junit:junit:4.13.2'

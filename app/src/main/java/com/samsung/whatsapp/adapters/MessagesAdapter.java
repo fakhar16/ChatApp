@@ -31,10 +31,8 @@ import com.samsung.whatsapp.databinding.ItemReceiveBinding;
 import com.samsung.whatsapp.databinding.ItemSentBinding;
 import com.samsung.whatsapp.view.activities.ChatActivity;
 import com.squareup.picasso.Picasso;
-import com.stfalcon.imageviewer.StfalconImageViewer;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 public class MessagesAdapter extends RecyclerView.Adapter {
@@ -44,7 +42,6 @@ public class MessagesAdapter extends RecyclerView.Adapter {
     private final String receiverId;
     final int ITEM_SENT = 1;
     final int ITEM_RECEIVE = 2;
-    private static final String TAG = "ConsoleMessagesAdapter";
 
     public MessagesAdapter(Context context, String senderId, String receiverId, ArrayList<Message> userMessageList) {
         this.context = context;
@@ -240,37 +237,21 @@ public class MessagesAdapter extends RecyclerView.Adapter {
         if (holder.getClass() == SenderViewHolder.class) {
             SenderViewHolder viewHolder = (SenderViewHolder) holder;
             Glide.with(context).load(videoUrl).centerCrop().placeholder(R.drawable.baseline_play_circle_outline_24).into(viewHolder.binding.image);
-            viewHolder.binding.image.setOnClickListener(view -> {
-                ((ChatActivity)(context)).showVideoPreview(videoUrl);
-            });
+            viewHolder.binding.image.setOnClickListener(view -> ((ChatActivity)(context)).showVideoPreview(videoUrl));
         } else {
             ReceiverViewHolder viewHolder = (ReceiverViewHolder) holder;
             Glide.with(context).load(videoUrl).centerCrop().placeholder(R.drawable.baseline_play_circle_outline_24).into(viewHolder.binding.image);
-            viewHolder.binding.image.setOnClickListener(view -> {
-                ((ChatActivity)(context)).showVideoPreview(videoUrl);
-            });
+            viewHolder.binding.image.setOnClickListener(view -> ((ChatActivity)(context)).showVideoPreview(videoUrl));
         }
     }
 
     private void previewImageOnClick(RecyclerView.ViewHolder holder, String imageUrl) {
-        List<String> images = new ArrayList<>();
-        images.add(imageUrl);
-
-        StfalconImageViewer.Builder<String> builder = new StfalconImageViewer.Builder<>(context, images, (imageView, o) -> {
-            Picasso.get().load(o).into(imageView);
-        });
-
-
         if (holder.getClass() == SenderViewHolder.class) {
             SenderViewHolder viewHolder = (SenderViewHolder) holder;
-            viewHolder.binding.image.setOnClickListener(view -> {
-               builder.show(true);
-           });
+            viewHolder.binding.image.setOnClickListener(view -> ((ChatActivity)(context)).showImagePreview(viewHolder.binding.image, imageUrl));
         } else {
             ReceiverViewHolder viewHolder = (ReceiverViewHolder) holder;
-            viewHolder.binding.image.setOnClickListener(view -> {
-                builder.show(true);
-            });
+            viewHolder.binding.image.setOnClickListener(view -> ((ChatActivity)(context)).showImagePreview(viewHolder.binding.image, imageUrl));
         }
     }
 
@@ -312,10 +293,7 @@ public class MessagesAdapter extends RecyclerView.Adapter {
             return true;
         });
 
-        Objects.requireNonNull(delete).setOnClickListener(view -> {
-            bottomSheetDialog.dismiss();
-        });
-
+        Objects.requireNonNull(delete).setOnClickListener(view -> bottomSheetDialog.dismiss());
         Objects.requireNonNull(cancel).setOnClickListener(view -> bottomSheetDialog.dismiss());
     }
 
