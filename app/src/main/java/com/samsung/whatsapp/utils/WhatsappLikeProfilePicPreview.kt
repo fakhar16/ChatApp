@@ -160,7 +160,7 @@ class WhatsappLikeProfilePicPreview{
             }
 
             expandVideoCardView.visibility = View.VISIBLE
-            Log.wtf(TAG, "zoomVideoFromThumb: visibilty " + container.toString() )
+            Log.wtf(TAG, "zoomVideoFromThumb: visibility $container")
 
             expandVideoCardView.pivotX = 0f
             expandVideoCardView.pivotY = 0f

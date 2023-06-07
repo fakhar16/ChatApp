@@ -43,7 +43,7 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_marginEnd="5dp"
-            android:src="@drawable/btn_endcall_normal"
+            android:src="@drawable/btn_end_call_normal"
             />
 
         <ImageView
@@ -51,7 +51,7 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_marginStart="5dp"
-            android:src="@drawable/btn_startcall_normal"
+            android:src="@drawable/btn_start_call_normal"
             />
     </LinearLayout>
 

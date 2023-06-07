@@ -5,7 +5,10 @@ import static com.samsung.whatsapp.ApplicationClass.userDatabaseReference;
 import static com.samsung.whatsapp.utils.Utils.currentUser;
 
 import androidx.annotation.NonNull;
-import androidx.viewpager2.widget.ViewPager2;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
+import androidx.navigation.ui.AppBarConfiguration;
+import androidx.navigation.ui.NavigationUI;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
@@ -15,7 +18,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -23,7 +25,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.samsung.whatsapp.R;
-import com.samsung.whatsapp.adapters.TabAccessorAdapter;
 import com.samsung.whatsapp.databinding.ActivityMainBinding;
 import com.samsung.whatsapp.model.User;
 import com.samsung.whatsapp.utils.WhatsappLikeProfilePicPreview;
@@ -35,7 +36,6 @@ import java.util.Objects;
 public class MainActivity extends BaseActivity {
     private FirebaseAuth mAuth;
     private static final String TAG = "consoleMainActivity";
-    private final String[] fragmentLabels = {"Chats", "Status", "Settings"};
     ActivityMainBinding binding;
 
     @Override
@@ -49,15 +49,12 @@ public class MainActivity extends BaseActivity {
         CheckIfUserIsLogined();
 
         setSupportActionBar(binding.mainPageToolbar.mainAppBar);
-        Objects.requireNonNull(getSupportActionBar()).setTitle(getString(R.string.app_name));
-
-        TabAccessorAdapter mTabAccessorAdapter = new TabAccessorAdapter(getSupportFragmentManager(), getLifecycle());
-        binding.mainTabsPager.setOrientation(ViewPager2.ORIENTATION_HORIZONTAL);
-        binding.mainTabsPager.setAdapter(mTabAccessorAdapter);
-
-        new TabLayoutMediator(binding.mainTabs, binding.mainTabsPager,
-                (tab, position) -> tab.setText(fragmentLabels[position])
-                ).attach();
+        AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
+                R.id.navigation_chats, R.id.navigation_stories, R.id.navigation_settings)
+                .build();
+        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_bottom_navigation);
+        NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
+        NavigationUI.setupWithNavController(binding.navView, navController);
 
         if (FirebaseAuth.getInstance().getUid() != null) {
             acquireFcmRegistrationToken();

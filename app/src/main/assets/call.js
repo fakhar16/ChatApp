@@ -67,7 +67,6 @@ function startCall(otherUserId) {
 
             remoteVideo.className = "primary-video";
             localVideo.className = "secondary-video";
-//            console.log("startcall switching videos");
         })
 
     })
