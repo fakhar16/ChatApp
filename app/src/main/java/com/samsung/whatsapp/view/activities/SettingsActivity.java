@@ -4,12 +4,14 @@ import static com.samsung.whatsapp.ApplicationClass.userDatabaseReference;
 import static com.samsung.whatsapp.ApplicationClass.userProfilesImagesReference;
 import static com.samsung.whatsapp.utils.Utils.currentUser;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Toast;
@@ -163,6 +165,15 @@ public class SettingsActivity extends AppCompatActivity {
             Utils.showLoadingBar(SettingsActivity.this, binding.progressbar.getRoot());
             handleCrop(resultCode, data);
         }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            finish();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
