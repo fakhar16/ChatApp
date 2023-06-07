@@ -47,9 +47,6 @@
             android:name=".view.activities.ChatActivity"
             android:exported="false" />
         <activity
-            android:name=".view.activities.ProfileActivity"
-            android:exported="false" />
-        <activity
             android:name=".view.activities.PhoneLoginActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />

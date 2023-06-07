@@ -4,6 +4,7 @@ import static com.samsung.whatsapp.ApplicationClass.presenceDatabaseReference;
 import static com.samsung.whatsapp.ApplicationClass.userDatabaseReference;
 import static com.samsung.whatsapp.utils.Utils.TYPE_VIDEO_CALL;
 import static com.samsung.whatsapp.ApplicationClass.context;
+import static com.samsung.whatsapp.utils.Utils.currentUser;
 import static com.samsung.whatsapp.utils.Utils.getFileType;
 import static com.samsung.whatsapp.utils.Utils.getImageUri;
 import static com.samsung.whatsapp.utils.Utils.showLoadingBar;
@@ -61,11 +62,11 @@ import com.tougee.recorderview.AudioRecordView;
 import java.util.Objects;
 
 public class ChatActivity extends BaseActivity implements AudioRecordView.Callback{
-    private String messageReceiverId, messageSenderId;
+    private String messageReceiverId;
     private MessagesAdapter messagesAdapter;
     private ActivityChatBinding binding;
     private CustomChatBarBinding customChatBarBinding;
-    public static User receiver, sender;
+    public static User receiver;
     private BottomSheetDialog bottomSheetDialog;
     private static final String TAG = "ConsoleChatActivity";
 
@@ -83,9 +84,9 @@ public class ChatActivity extends BaseActivity implements AudioRecordView.Callba
                         Intent data = result.getData();
                         Uri fileUri = Objects.requireNonNull(data).getData();
                         if (getFileType(fileUri).equals("jpg")) {
-                            FCMMessaging.sendImage(messageSenderId, messageReceiverId, fileUri, ChatActivity.this, binding.progressbar.getRoot());
+                            FCMMessaging.sendImage(currentUser.getUid(), messageReceiverId, fileUri, ChatActivity.this, binding.progressbar.getRoot());
                         } else if (getFileType(fileUri).equals("mp4")) {
-                            FCMMessaging.sendVideo(messageSenderId, messageReceiverId, fileUri, ChatActivity.this, binding.progressbar.getRoot());
+                            FCMMessaging.sendVideo(currentUser.getUid(), messageReceiverId, fileUri, ChatActivity.this, binding.progressbar.getRoot());
                         }
                     }
                 }
@@ -106,7 +107,7 @@ public class ChatActivity extends BaseActivity implements AudioRecordView.Callba
                         Bundle bundle = result.getData().getExtras();
                         Bitmap bitmap = (Bitmap) bundle.get(context.getString(R.string.DATA));
                         Uri uri = getImageUri(ApplicationClass.context, bitmap);
-                        FCMMessaging.sendImage(messageSenderId, messageReceiverId, uri, ChatActivity.this, binding.progressbar.getRoot());
+                        FCMMessaging.sendImage(currentUser.getUid(), messageReceiverId, uri, ChatActivity.this, binding.progressbar.getRoot());
                     }
                 }
             });
@@ -118,11 +119,10 @@ public class ChatActivity extends BaseActivity implements AudioRecordView.Callba
         setContentView(binding.getRoot());
 
         messageReceiverId = getIntent().getExtras().getString(getString(R.string.VISIT_USER_ID));
-        messageSenderId = getIntent().getExtras().getString(getString(R.string.CURRENT_USER_ID));
 
         initializeFields();
         updateStatusIndicator();
-        initializeSenderAndReceiver();
+        initializeReceiver();
     }
 
     private void updateStatusIndicator() {
@@ -148,20 +148,15 @@ public class ChatActivity extends BaseActivity implements AudioRecordView.Callba
             public void afterTextChanged(Editable editable) {
 
                 presenceDatabaseReference
-                        .child(messageSenderId)
+                        .child(currentUser.getUid())
                         .setValue("typing...");
                 handler.removeCallbacksAndMessages(null);
                 handler.postDelayed(userStoppedTyping, 1000);
 
             }
-            final Runnable userStoppedTyping = new Runnable() {
-                @Override
-                public void run() {
-                    presenceDatabaseReference
-                            .child(messageSenderId)
-                            .setValue("Online");
-                }
-            };
+            final Runnable userStoppedTyping = () -> presenceDatabaseReference
+                    .child(currentUser.getUid())
+                    .setValue("Online");
         });
 
         presenceDatabaseReference
@@ -189,27 +184,13 @@ public class ChatActivity extends BaseActivity implements AudioRecordView.Callba
                 });
     }
 
-    private void initializeSenderAndReceiver() {
+    private void initializeReceiver() {
         userDatabaseReference
                 .child(messageReceiverId)
                 .addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         receiver = snapshot.getValue(User.class);
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-
-                    }
-                });
-
-        userDatabaseReference
-                .child(messageSenderId)
-                .addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        sender = snapshot.getValue(User.class);
                         updateChatBarDetails();
                     }
 
@@ -237,7 +218,7 @@ public class ChatActivity extends BaseActivity implements AudioRecordView.Callba
         actionBar.setCustomView(customChatBarBinding.getRoot());
 
         MessageViewModel viewModel = new ViewModelProvider(this).get(MessageViewModel.class);
-        viewModel.init(messageSenderId, messageReceiverId);
+        viewModel.init(currentUser.getUid(), messageReceiverId);
 
         viewModel.getMessage().observe(this, messages -> {
             messagesAdapter.notifyDataSetChanged();
@@ -246,7 +227,7 @@ public class ChatActivity extends BaseActivity implements AudioRecordView.Callba
         });
 
         binding.userMessageList.setLayoutManager(new LinearLayoutManager(this));
-        messagesAdapter = new MessagesAdapter( ChatActivity.this, messageSenderId, messageReceiverId, viewModel.getMessage().getValue());
+        messagesAdapter = new MessagesAdapter( ChatActivity.this, currentUser.getUid(), messageReceiverId, viewModel.getMessage().getValue());
         binding.userMessageList.setAdapter(messagesAdapter);
 
         View contentView = View.inflate(ChatActivity.this, R.layout.attachment_bottom_sheet_layout, null);
@@ -276,17 +257,17 @@ public class ChatActivity extends BaseActivity implements AudioRecordView.Callba
     private void handleButtonClicks() {
         binding.sendMessageBtn.setOnClickListener(view -> {
             String message = binding.messageInputText.getText().toString();
-            FCMMessaging.sendMessage(message, sender.getUid(), receiver.getUid());
+            FCMMessaging.sendMessage(message, currentUser.getUid(), receiver.getUid());
             binding.messageInputText.setText("");
         });
         binding.camera.setOnClickListener(view -> cameraButtonClicked());
         customChatBarBinding.voiceCall.setOnClickListener(view -> Toast.makeText(this, receiver.getName(), Toast.LENGTH_SHORT).show());
         customChatBarBinding.videoCall.setOnClickListener(view -> {
-            Notification notification = new Notification(sender.getName(), "Incoming Video Call", TYPE_VIDEO_CALL, sender.getImage(), receiver.getToken(), sender.getUid(), receiver.getUid());
+            Notification notification = new Notification(currentUser.getName(), "Incoming Video Call", TYPE_VIDEO_CALL, currentUser.getImage(), receiver.getToken(), currentUser.getUid(), receiver.getUid());
             FCMNotificationSender.SendNotification(ApplicationClass.context, notification);
 
             Intent intent = new Intent(this, CallActivity.class);
-            intent.putExtra(context.getString(R.string.CALLER), sender.getUid());
+            intent.putExtra(context.getString(R.string.CALLER), currentUser.getUid());
             intent.putExtra(getString(R.string.RECEIVER), receiver.getUid());
             intent.putExtra(getString(R.string.IS_CALL_MADE), true);
             startActivity(intent);

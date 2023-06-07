@@ -125,7 +125,7 @@ public class SetupProfileActivity extends BaseActivity {
         getSupportActionBar().setTitle("Edit Profile");
     }
 
-    private void updateProfile() {
+    private void updateProfileName() {
         String setUserName = Objects.requireNonNull(binding.setUserName.getText()).toString();
             HashMap<String, Object> profileMap = new HashMap<>();
             profileMap.put(getString(R.string.NAME), setUserName);
@@ -182,7 +182,7 @@ public class SetupProfileActivity extends BaseActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == R.id.done) {
-            updateProfile();
+            updateProfileName();
             return true;
         }
         return super.onOptionsItemSelected(item);

@@ -1,6 +1,6 @@
 package com.samsung.whatsapp.view.fragments;
 
-import static com.samsung.whatsapp.ApplicationClass.userDatabaseReference;
+import static com.samsung.whatsapp.utils.Utils.currentUser;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -21,25 +21,17 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.ValueEventListener;
 import com.samsung.whatsapp.R;
 import com.samsung.whatsapp.adapters.StatusAdapter;
 import com.samsung.whatsapp.databinding.FragmentStoriesBinding;
-import com.samsung.whatsapp.model.User;
 import com.samsung.whatsapp.repository.StatusRepositoryImpl;
 import com.samsung.whatsapp.utils.Utils;
 import com.samsung.whatsapp.viewmodel.StatusViewModel;
 import com.squareup.picasso.Picasso;
 
-import java.util.Objects;
-
 public class StoriesFragment extends Fragment {
     private FragmentStoriesBinding binding;
     StatusAdapter statusAdapter;
-    User user;
 
     private final ActivityResultLauncher<Intent> imagePickActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
         @Override
@@ -49,7 +41,7 @@ public class StoriesFragment extends Fragment {
 
                 Intent data = result.getData();
                 if (data != null && data.getData() != null) {
-                    StatusRepositoryImpl.getInstance().uploadStatus(data, user, binding.progressbar.getRoot(), requireActivity());
+                    StatusRepositoryImpl.getInstance().uploadStatus(data, currentUser, binding.progressbar.getRoot(), requireActivity());
                 }
             }
         }
@@ -68,20 +60,8 @@ public class StoriesFragment extends Fragment {
         binding.progressbar.dialogTitle.setText("Uploading Image");
         binding.progressbar.dialogDescription.setText("Please wait, while we are uploading your image...");
 
+        Picasso.get().load(currentUser.getImage()).placeholder(R.drawable.profile_image).into(binding.image);
 
-        userDatabaseReference.child(Objects.requireNonNull(FirebaseAuth.getInstance().getUid()))
-        .addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                user = snapshot.getValue(User.class);
-                Picasso.get().load(user.getImage()).placeholder(R.drawable.profile_image).into(binding.image);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
 
         StatusViewModel viewModel = new ViewModelProvider(this).get(StatusViewModel.class);
         viewModel.init();

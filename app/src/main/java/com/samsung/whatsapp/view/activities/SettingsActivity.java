@@ -2,8 +2,8 @@ package com.samsung.whatsapp.view.activities;
 
 import static com.samsung.whatsapp.ApplicationClass.userDatabaseReference;
 import static com.samsung.whatsapp.ApplicationClass.userProfilesImagesReference;
+import static com.samsung.whatsapp.utils.Utils.currentUser;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -14,15 +14,10 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Toast;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.samsung.whatsapp.R;
 import com.samsung.whatsapp.databinding.ActivitySettingsBinding;
-import com.samsung.whatsapp.model.User;
 import com.samsung.whatsapp.utils.Utils;
 import com.samsung.whatsapp.utils.WhatsappLikeProfilePicPreview;
 import com.soundcloud.android.crop.Crop;
@@ -34,16 +29,12 @@ import java.util.Objects;
 
 public class SettingsActivity extends AppCompatActivity {
     ActivitySettingsBinding binding;
-    private User currentUser;
-    private String currentUserId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivitySettingsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
-        currentUserId = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
 
         initToolBar();
         handleItemClicks();
@@ -78,7 +69,7 @@ public class SettingsActivity extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
-        RetrieveUserInfo();
+        setupProfileInfo();
     }
     private void updateProfileName () {
         if (Objects.requireNonNull(binding.setUserName.getText()).toString().isEmpty()) {
@@ -87,7 +78,7 @@ public class SettingsActivity extends AppCompatActivity {
             HashMap<String, Object> profileMap = new HashMap<>();
             profileMap.put(getString(R.string.NAME), binding.setUserName.getText().toString());
 
-            userDatabaseReference.child(currentUserId).updateChildren(profileMap)
+            userDatabaseReference.child(currentUser.getUid()).updateChildren(profileMap)
                     .addOnCompleteListener(task -> {
                         if (!task.isSuccessful()) {
                             Toast.makeText(SettingsActivity.this, "Error: " + Objects.requireNonNull(task.getException()), Toast.LENGTH_SHORT).show();
@@ -103,7 +94,7 @@ public class SettingsActivity extends AppCompatActivity {
             HashMap<String, Object> profileMap = new HashMap<>();
             profileMap.put(getString(R.string.STATUS), binding.setProfileStatus.getText().toString());
 
-            userDatabaseReference.child(currentUserId).updateChildren(profileMap)
+            userDatabaseReference.child(currentUser.getUid()).updateChildren(profileMap)
                     .addOnCompleteListener(task -> {
                         if (!task.isSuccessful()) {
                             Toast.makeText(SettingsActivity.this, "Error: " + Objects.requireNonNull(task.getException()), Toast.LENGTH_SHORT).show();
@@ -112,31 +103,17 @@ public class SettingsActivity extends AppCompatActivity {
         }
     }
 
-    private void RetrieveUserInfo() {
-        userDatabaseReference.child(currentUserId)
-                .addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        currentUser = snapshot.getValue(User.class);
-                        if ((snapshot.exists()) && (snapshot.hasChild(getString(R.string.IMAGE)))) {
-                            Picasso.get().load(currentUser.getImage()).placeholder(R.drawable.profile_image).into(binding.setProfileImage);
-                        }
-                        if (snapshot.exists() && snapshot.hasChild(getString(R.string.STATUS))) {
-                            binding.setProfileStatus.setText(currentUser.getStatus());
-                        }
-                        if ((snapshot.exists()) && (snapshot.hasChild(getString(R.string.NAME)))) {
-                            binding.setUserName.setText(currentUser.getName());
-                            binding.tvPhone.setText(currentUser.getPhone_number());
-                        } else {
-                            Toast.makeText(SettingsActivity.this, "Please set & update your profile information", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-
-                    }
-                });
+    private void setupProfileInfo() {
+        if (!currentUser.getImage().isEmpty()) {
+            Picasso.get().load(currentUser.getImage()).placeholder(R.drawable.profile_image).into(binding.setProfileImage);
+        }
+        if (!currentUser.getStatus().isEmpty()) {
+            binding.setProfileStatus.setText(currentUser.getStatus());
+        }
+        if (!currentUser.getName().isEmpty()) {
+            binding.setUserName.setText(currentUser.getName());
+            binding.tvPhone.setText(currentUser.getPhone_number());
+        }
     }
 
     private void beginCrop(Uri source) {
@@ -155,12 +132,12 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     private void SaveUserProfileImageToFireBaseStorage(Uri resultUri) {
-        StorageReference filePath = userProfilesImagesReference.child(currentUserId + ".jpg");
+        StorageReference filePath = userProfilesImagesReference.child(currentUser.getUid() + ".jpg");
         UploadTask uploadTask = filePath.putFile(resultUri);
 
         uploadTask.addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
-                filePath.getDownloadUrl().addOnSuccessListener(uri -> userDatabaseReference.child(currentUserId).child(getString(R.string.IMAGE))
+                filePath.getDownloadUrl().addOnSuccessListener(uri -> userDatabaseReference.child(currentUser.getUid()).child(getString(R.string.IMAGE))
                         .setValue(uri.toString())
                         .addOnCompleteListener(task1 -> {
                             if (task1.isSuccessful()) {

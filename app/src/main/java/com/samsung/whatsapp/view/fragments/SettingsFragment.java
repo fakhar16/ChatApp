@@ -1,6 +1,6 @@
 package com.samsung.whatsapp.view.fragments;
 
-import static com.samsung.whatsapp.view.activities.MainActivity.currentUser;
+import static com.samsung.whatsapp.utils.Utils.currentUser;
 
 import android.content.Intent;
 import android.os.Bundle;

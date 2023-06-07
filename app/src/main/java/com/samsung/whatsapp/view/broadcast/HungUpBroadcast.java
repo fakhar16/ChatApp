@@ -16,8 +16,6 @@ import com.samsung.whatsapp.R;
 import com.samsung.whatsapp.utils.FCMMessaging;
 
 public class HungUpBroadcast extends BroadcastReceiver {
-//    private static final String TAG = "ConsoleHungUpBroadcast";
-
     @Override
     public void onReceive(Context context, Intent intent) {
         String receiverId = intent.getStringExtra(ApplicationClass.context.getString(R.string.RECEIVER_ID));

@@ -2,9 +2,9 @@ package com.samsung.whatsapp.view.activities;
 
 import static com.samsung.whatsapp.ApplicationClass.presenceDatabaseReference;
 import static com.samsung.whatsapp.ApplicationClass.userDatabaseReference;
+import static com.samsung.whatsapp.utils.Utils.currentUser;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.viewpager2.widget.ViewPager2;
 
 import android.annotation.SuppressLint;
@@ -35,9 +35,7 @@ import java.util.Objects;
 public class MainActivity extends BaseActivity {
     private FirebaseAuth mAuth;
     private static final String TAG = "consoleMainActivity";
-    public static User currentUser = null;
     private final String[] fragmentLabels = {"Chats", "Status", "Settings"};
-
     ActivityMainBinding binding;
 
     @Override
@@ -181,11 +179,6 @@ public class MainActivity extends BaseActivity {
         settingsIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         settingsIntent.putExtra(getString(R.string.PHONE_NUMBER), getIntent().getStringExtra(getString(R.string.PHONE_NUMBER)));
         startActivity(settingsIntent);
-    }
-
-    public void showPhotoPreview(View thumbView) {
-        binding.appBarLayout.setVisibility(View.GONE);
-        WhatsappLikeProfilePicPreview.Companion.zoomImageFromThumb(thumbView, binding.expandedImageCardView, binding.expandedImage, binding.getRoot(), currentUser.getImage());
     }
 
     @Override

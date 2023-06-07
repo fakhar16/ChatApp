@@ -12,6 +12,8 @@ import android.view.View;
 import android.view.WindowManager;
 import android.webkit.MimeTypeMap;
 
+import com.samsung.whatsapp.model.User;
+
 import java.io.ByteArrayOutputStream;
 
 public class Utils {
@@ -27,6 +29,7 @@ public class Utils {
     public static final String TYPE_VIDEO_CALL = "type_video_call";
     public static final String TYPE_DISCONNECT_CALL_BY_USER = "type_disconnect_call_user";
     public static final String TYPE_DISCONNECT_CALL_BY_OTHER_USER = "type_disconnect_call_other_user";
+    public static User currentUser = null;
 
     public static void showLoadingBar(Activity activity, View view) {
         view.setVisibility(View.VISIBLE);

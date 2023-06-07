@@ -79,7 +79,6 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
         holder.itemView.setOnClickListener(view -> {
             Intent chatIntent = new Intent(context, ChatActivity.class);
             chatIntent.putExtra(ApplicationClass.context.getString(R.string.VISIT_USER_ID), user.getUid());
-            chatIntent.putExtra(ApplicationClass.context.getString(R.string.CURRENT_USER_ID), Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid());
             context.startActivity(chatIntent);
         });
     }
