@@ -16,7 +16,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -27,7 +26,6 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import com.samsung.whatsapp.R;
 import com.samsung.whatsapp.databinding.ActivityMainBinding;
 import com.samsung.whatsapp.model.User;
-import com.samsung.whatsapp.utils.WhatsappLikeProfilePicPreview;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -70,7 +68,6 @@ public class MainActivity extends BaseActivity {
                         if (snapshot.exists()) {
                             currentUser = snapshot.getValue(User.class);
                         }
-
                     }
 
                     @Override
@@ -176,15 +173,5 @@ public class MainActivity extends BaseActivity {
         settingsIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         settingsIntent.putExtra(getString(R.string.PHONE_NUMBER), getIntent().getStringExtra(getString(R.string.PHONE_NUMBER)));
         startActivity(settingsIntent);
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (binding.expandedImageCardView.getVisibility() == View.VISIBLE) {
-            WhatsappLikeProfilePicPreview.Companion.dismissPhotoPreview();
-            binding.appBarLayout.setVisibility(View.VISIBLE);
-        }  else {
-            finish();
-        }
     }
 }

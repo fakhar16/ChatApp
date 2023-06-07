@@ -58,7 +58,7 @@ public class SettingsActivity extends AppCompatActivity {
         });
 
         binding.editProfileImage.setOnClickListener(view -> Crop.pickImage(SettingsActivity.this));
-        binding.setProfileImage.setOnClickListener(view -> WhatsappLikeProfilePicPreview.Companion.zoomImageFromThumb(binding.setProfileImage, binding.expandedImageCardView, binding.expandedImage, binding.toolBar.getRoot().getRootView(), currentUser.getImage()));
+        binding.setProfileImage.setOnClickListener(view -> WhatsappLikeProfilePicPreview.Companion.zoomImageFromThumb(binding.setProfileImage, binding.expandedImage.cardView, binding.expandedImage.image, binding.toolBar.getRoot().getRootView(), currentUser.getImage()));
     }
 
     private void initToolBar() {
@@ -178,7 +178,7 @@ public class SettingsActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if (binding.expandedImageCardView.getVisibility() == View.VISIBLE) {
+        if (binding.expandedImage.cardView.getVisibility() == View.VISIBLE) {
             WhatsappLikeProfilePicPreview.Companion.dismissPhotoPreview();
         } else {
             finish();

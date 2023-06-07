@@ -272,7 +272,7 @@ public class ChatActivity extends BaseActivity implements AudioRecordView.Callba
             intent.putExtra(getString(R.string.IS_CALL_MADE), true);
             startActivity(intent);
         });
-        customChatBarBinding.userImage.setOnClickListener(view -> WhatsappLikeProfilePicPreview.Companion.zoomImageFromThumb(customChatBarBinding.userImage, binding.expandedImageCardView, binding.expandedImage, binding.chatToolBar.getRoot().getRootView(), receiver.getImage()));
+        customChatBarBinding.userImage.setOnClickListener(view -> WhatsappLikeProfilePicPreview.Companion.zoomImageFromThumb(customChatBarBinding.userImage, binding.expandedImage.cardView, binding.expandedImage.image, binding.chatToolBar.getRoot().getRootView(), receiver.getImage()));
         binding.attachMenu.setOnClickListener(view -> showAttachmentMenu());
     }
 
@@ -343,7 +343,7 @@ public class ChatActivity extends BaseActivity implements AudioRecordView.Callba
 
     @Override
     public void onBackPressed() {
-        if (binding.expandedImageCardView.getVisibility() == View.VISIBLE) {
+        if (binding.expandedImage.cardView.getVisibility() == View.VISIBLE) {
             WhatsappLikeProfilePicPreview.Companion.dismissPhotoPreview();
         } else if (binding.expandedVideoCardView.getVisibility() == View.VISIBLE) {
             binding.video.stopPlayback();
