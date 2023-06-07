@@ -25,6 +25,9 @@
         android:theme="@style/Theme.Whatsapp"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".view.activities.SettingsActivity"
+            android:exported="false" />
+        <activity
             android:name=".view.activities.CallingActivity"
             android:exported="false" />
         <activity
@@ -32,7 +35,8 @@
             android:exported="false" />
         <activity
             android:name=".view.activities.OTPActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".view.activities.WelcomeActivity"
             android:exported="false" />
@@ -47,17 +51,19 @@
             android:exported="false" />
         <activity
             android:name=".view.activities.PhoneLoginActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".view.activities.GroupChatActivity"
             android:exported="false" />
         <activity
-            android:name=".view.activities.SettingsActivity"
+            android:name=".view.activities.SetupProfileActivity"
             android:exported="false"
             android:parentActivityName=".view.activities.MainActivity" />
         <activity
             android:name=".view.activities.MainActivity"
-            android:exported="true">
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

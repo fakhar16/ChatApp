@@ -4,6 +4,7 @@ import static com.samsung.whatsapp.ApplicationClass.presenceDatabaseReference;
 import static com.samsung.whatsapp.ApplicationClass.userDatabaseReference;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.viewpager2.widget.ViewPager2;
 
 import android.annotation.SuppressLint;
@@ -176,7 +177,7 @@ public class MainActivity extends BaseActivity {
     }
 
     private void SendUserToSettingsActivity() {
-        Intent settingsIntent = new Intent(MainActivity.this, SettingsActivity.class);
+        Intent settingsIntent = new Intent(MainActivity.this, SetupProfileActivity.class);
         settingsIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         settingsIntent.putExtra(getString(R.string.PHONE_NUMBER), getIntent().getStringExtra(getString(R.string.PHONE_NUMBER)));
         startActivity(settingsIntent);

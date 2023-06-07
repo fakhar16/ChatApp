@@ -5,14 +5,13 @@ import static com.samsung.whatsapp.ApplicationClass.userProfilesImagesReference;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -25,6 +24,7 @@ import com.samsung.whatsapp.R;
 import com.samsung.whatsapp.databinding.ActivitySettingsBinding;
 import com.samsung.whatsapp.model.User;
 import com.samsung.whatsapp.utils.Utils;
+import com.samsung.whatsapp.utils.WhatsappLikeProfilePicPreview;
 import com.soundcloud.android.crop.Crop;
 import com.squareup.picasso.Picasso;
 
@@ -32,10 +32,10 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Objects;
 
-public class SettingsActivity extends BaseActivity {
-    private String currentUserId;
-    private ActivitySettingsBinding binding;
+public class SettingsActivity extends AppCompatActivity {
+    ActivitySettingsBinding binding;
     private User currentUser;
+    private String currentUserId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,22 +43,92 @@ public class SettingsActivity extends BaseActivity {
         binding = ActivitySettingsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        currentUserId = FirebaseAuth.getInstance().getUid();
+        currentUserId = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
 
-        InitializeFields();
-        retrieveUserImage();
-
-        binding.editProfileImage.setOnClickListener(view -> Crop.pickImage(SettingsActivity.this));
+        initToolBar();
+        handleItemClicks();
     }
 
-    private void retrieveUserImage() {
+    private void handleItemClicks() {
+        binding.setUserName.setOnEditorActionListener((textView, i, keyEvent) -> {
+            if (i == EditorInfo.IME_ACTION_DONE) {
+                updateProfileName();
+            }
+            return false;
+        });
+
+        binding.setProfileStatus.setOnEditorActionListener((textView, i, keyEvent) -> {
+            if (i == EditorInfo.IME_ACTION_DONE) {
+                updateProfileStatus();
+            }
+            return false;
+        });
+
+        binding.editProfileImage.setOnClickListener(view -> Crop.pickImage(SettingsActivity.this));
+        binding.setProfileImage.setOnClickListener(view -> WhatsappLikeProfilePicPreview.Companion.zoomImageFromThumb(binding.setProfileImage, binding.expandedImageCardView, binding.expandedImage, binding.toolBar.getRoot().getRootView(), currentUser.getImage()));
+    }
+
+    private void initToolBar() {
+        setSupportActionBar(binding.toolBar.mainAppBar);
+        Objects.requireNonNull(getSupportActionBar()).setTitle("Edit Profile");
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        RetrieveUserInfo();
+    }
+    private void updateProfileName () {
+        if (Objects.requireNonNull(binding.setUserName.getText()).toString().isEmpty()) {
+            Toast.makeText(SettingsActivity.this, "Please write your user name...", Toast.LENGTH_SHORT).show();
+        } else {
+            HashMap<String, Object> profileMap = new HashMap<>();
+            profileMap.put(getString(R.string.NAME), binding.setUserName.getText().toString());
+
+            userDatabaseReference.child(currentUserId).updateChildren(profileMap)
+                    .addOnCompleteListener(task -> {
+                        if (!task.isSuccessful()) {
+                            Toast.makeText(SettingsActivity.this, "Error: " + Objects.requireNonNull(task.getException()), Toast.LENGTH_SHORT).show();
+                        }
+                    });
+        }
+    }
+
+    private void updateProfileStatus () {
+        if (Objects.requireNonNull(binding.setProfileStatus.getText()).toString().isEmpty()) {
+            Toast.makeText(SettingsActivity.this, "Please write your user name...", Toast.LENGTH_SHORT).show();
+        } else {
+            HashMap<String, Object> profileMap = new HashMap<>();
+            profileMap.put(getString(R.string.STATUS), binding.setProfileStatus.getText().toString());
+
+            userDatabaseReference.child(currentUserId).updateChildren(profileMap)
+                    .addOnCompleteListener(task -> {
+                        if (!task.isSuccessful()) {
+                            Toast.makeText(SettingsActivity.this, "Error: " + Objects.requireNonNull(task.getException()), Toast.LENGTH_SHORT).show();
+                        }
+                    });
+        }
+    }
+
+    private void RetrieveUserInfo() {
         userDatabaseReference.child(currentUserId)
                 .addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         currentUser = snapshot.getValue(User.class);
-                        if (snapshot.hasChild(getString(R.string.IMAGE))) {
+                        if ((snapshot.exists()) && (snapshot.hasChild(getString(R.string.IMAGE)))) {
                             Picasso.get().load(currentUser.getImage()).placeholder(R.drawable.profile_image).into(binding.setProfileImage);
+                        }
+                        if (snapshot.exists() && snapshot.hasChild(getString(R.string.STATUS))) {
+                            binding.setProfileStatus.setText(currentUser.getStatus());
+                        }
+                        if ((snapshot.exists()) && (snapshot.hasChild(getString(R.string.NAME)))) {
+                            binding.setUserName.setText(currentUser.getName());
+                            binding.tvPhone.setText(currentUser.getPhone_number());
+                        } else {
+                            Toast.makeText(SettingsActivity.this, "Please set & update your profile information", Toast.LENGTH_SHORT).show();
                         }
                     }
 
@@ -118,73 +188,12 @@ public class SettingsActivity extends BaseActivity {
         }
     }
 
-    private void InitializeFields() {
-        setSupportActionBar(binding.settingsToolbar.mainAppBar);
-        Objects.requireNonNull(getSupportActionBar()).setDisplayShowHomeEnabled(true);
-        getSupportActionBar().setDisplayShowCustomEnabled(true);
-        getSupportActionBar().setTitle("Edit Profile");
-    }
-
-    private void updateProfile() {
-        String setUserName = Objects.requireNonNull(binding.setUserName.getText()).toString();
-            HashMap<String, Object> profileMap = new HashMap<>();
-            profileMap.put(getString(R.string.NAME), setUserName);
-
-            userDatabaseReference.child(currentUserId).updateChildren(profileMap)
-                    .addOnCompleteListener(task -> {
-                        if (task.isSuccessful()) {
-                            SendUserToMainActivity();
-                            Toast.makeText(SettingsActivity.this, "Profile Updated successfully", Toast.LENGTH_SHORT).show();
-                        } else {
-                            String message = Objects.requireNonNull(task.getException()).toString();
-                            Toast.makeText(SettingsActivity.this, "Error: " + message, Toast.LENGTH_SHORT).show();
-                        }
-                    });
-    }
-
-    private void SendUserToMainActivity() {
-        Intent mainIntent = new Intent(SettingsActivity.this, MainActivity.class);
-        mainIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(mainIntent);
-        finish();
-    }
-
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.edit_profile_menu, menu);
-        menu.findItem(R.id.done).setEnabled(false);
-
-        binding.setUserName.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (editable.length() != 0) {
-                    if (!menu.findItem(R.id.done).isEnabled()) {
-                        menu.findItem(R.id.done).setEnabled(true);
-                    }
-                } else {
-                    menu.findItem(R.id.done).setEnabled(false);
-                }
-            }
-        });
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == R.id.done) {
-            updateProfile();
-            return true;
+    public void onBackPressed() {
+        if (binding.expandedImageCardView.getVisibility() == View.VISIBLE) {
+            WhatsappLikeProfilePicPreview.Companion.dismissPhotoPreview();
+        } else {
+            finish();
         }
-        return super.onOptionsItemSelected(item);
     }
 }

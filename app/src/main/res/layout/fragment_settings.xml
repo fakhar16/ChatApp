@@ -1,129 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/container">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
     <LinearLayout
+        android:id="@+id/profileInfo"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        tools:context=".view.activities.SettingsActivity"
-        android:paddingHorizontal="20dp">
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:gravity="center"
+        android:layout_margin="20dp">
 
-            >
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                >
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/user_image"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@drawable/profile_image"
+            />
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginTop="20dp"
-                    >
-                    <de.hdodenhof.circleimageview.CircleImageView
-                        android:id="@+id/set_profile_image"
-                        android:layout_width="70dp"
-                        android:layout_height="70dp"
-                        android:src="@drawable/profile_image"
-                        app:civ_border_width="5dp"
-                        app:civ_border_color="@color/colorPrimary"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Enter your name and add an optional profile picture"
-                        android:layout_gravity="center"
-                        android:textSize="12sp"
-                        android:layout_marginStart="10dp"
-                        android:textColor="@android:color/darker_gray"
-                        tools:ignore="HardcodedText" />
-
-                </LinearLayout>
-
-                <TextView
-                    android:id="@+id/edit_profile_image"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Edit"
-                    android:textSize="14sp"
-                    android:layout_marginTop="5dp"
-                    android:layout_marginStart="25dp"
-                    tools:ignore="HardcodedText" />
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    style="@style/ThemeOverlay.Material3.TextInputEditText.OutlinedBox">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/set_user_name"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:imeOptions="actionDone"
-                        android:maxLines="1"
-                        android:inputType="text"
-                        tools:ignore="HardcodedText" />
-                </com.google.android.material.textfield.TextInputLayout>
-
-            </LinearLayout>
-
-
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginStart="10dp">
             <TextView
+                android:id="@+id/user_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="PHONE NUMBER"
-                android:layout_marginStart="5dp"
-                android:layout_marginTop="30dp"
-                android:textColor="@android:color/darker_gray"
-                tools:ignore="HardcodedText" />
-
-            <TextView
-                android:id="@+id/tv_phone"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="phone number"
+                android:text="ProfileName"
+                android:textColor="@android:color/black"
                 android:textSize="20sp"
-                android:textColor="@android:color/darker_gray"
-                android:layout_marginStart="5dp"
                 tools:ignore="HardcodedText" />
 
             <TextView
+                android:id="@+id/user_status"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="ABOUT"
-                android:layout_marginStart="5dp"
-                android:layout_marginTop="30dp"
+                android:text="ProfileStatus"
                 android:textColor="@android:color/darker_gray"
+                android:textSize="15sp"
                 tools:ignore="HardcodedText" />
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                style="@style/ThemeOverlay.Material3.TextInputEditText.OutlinedBox">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/set_profile_status"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:imeOptions="actionDone"
-                    android:maxLines="1"
-                    android:inputType="text"
-                    tools:ignore="HardcodedText" />
-            </com.google.android.material.textfield.TextInputLayout>
-
         </LinearLayout>
 
-    <include
-        android:id="@+id/progressbar"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_centerInParent="true"
-        layout="@layout/progressbar"
-        android:visibility="gone"
-        />
-</RelativeLayout>
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
