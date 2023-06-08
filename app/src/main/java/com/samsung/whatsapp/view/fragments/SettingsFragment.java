@@ -53,10 +53,10 @@ public class SettingsFragment extends Fragment {
 
     private void setupProfileInfo() {
         binding.userName.setText(currentUser.getName());
-        if (!currentUser.getStatus().isEmpty()) {
+        if (currentUser.getStatus() != null && !currentUser.getStatus().isEmpty()) {
             binding.userStatus.setText(currentUser.getStatus());
         }
-        if (!currentUser.getImage().isEmpty()) {
+        if (currentUser.getImage() != null && !currentUser.getImage().isEmpty()) {
             Picasso.get().load(currentUser.getImage()).placeholder(R.drawable.profile_image).into(binding.userImage);
         }
     }

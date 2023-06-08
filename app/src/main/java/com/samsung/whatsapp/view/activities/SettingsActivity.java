@@ -109,10 +109,10 @@ public class SettingsActivity extends AppCompatActivity {
         if (!currentUser.getImage().isEmpty()) {
             Picasso.get().load(currentUser.getImage()).placeholder(R.drawable.profile_image).into(binding.setProfileImage);
         }
-        if (!currentUser.getStatus().isEmpty()) {
+        if (currentUser.getStatus() != null && !currentUser.getStatus().isEmpty()) {
             binding.setProfileStatus.setText(currentUser.getStatus());
         }
-        if (!currentUser.getName().isEmpty()) {
+        if (currentUser.getImage() != null && !currentUser.getName().isEmpty()) {
             binding.setUserName.setText(currentUser.getName());
             binding.tvPhone.setText(currentUser.getPhone_number());
         }
