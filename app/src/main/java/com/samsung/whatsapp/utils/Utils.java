@@ -15,6 +15,11 @@ import android.webkit.MimeTypeMap;
 import com.samsung.whatsapp.model.User;
 
 import java.io.ByteArrayOutputStream;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
 
 public class Utils {
 //    public static ProgressDialog loadingBar;
@@ -48,10 +53,30 @@ public class Utils {
         return Uri.parse(path);
     }
 
-
     public static String getFileType(Uri uri) {
         ContentResolver r = context.getContentResolver();
         MimeTypeMap mimeTypeMap = MimeTypeMap.getSingleton();
         return mimeTypeMap.getExtensionFromMimeType(r.getType(uri));
+    }
+
+
+    public static boolean isSameDay(long date1) {
+        Calendar calendar1 = Calendar.getInstance();
+        calendar1.setTime(new Date(date1));
+        Calendar calendar2 = Calendar.getInstance();
+        calendar2.setTime(new Date(new Timestamp(System.currentTimeMillis()).getTime()));
+        return calendar1.get(Calendar.YEAR) == calendar2.get(Calendar.YEAR)
+                && calendar1.get(Calendar.MONTH) == calendar2.get(Calendar.MONTH)
+                && calendar1.get(Calendar.DAY_OF_MONTH) == calendar2.get(Calendar.DAY_OF_MONTH);
+    }
+
+    public static String getDateTimeString(long time) {
+        SimpleDateFormat timeFormat = new SimpleDateFormat("hh:mm a", Locale.US);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy", Locale.US);
+        if (Utils.isSameDay(time))
+            return timeFormat.format(new Date(time));
+        else {
+            return dateFormat.format(new Date(time));
+        }
     }
 }

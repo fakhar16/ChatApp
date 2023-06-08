@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout>
+<layout xmlns:app="http://schemas.android.com/apk/res-auto">
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="10dp"
+    android:layout_marginTop="3dp"
     >
 
     <de.hdodenhof.circleimageview.CircleImageView
@@ -21,6 +21,7 @@
         android:gravity="center"
         android:orientation="vertical"
         android:padding="7dp"
+        android:minWidth="100dp"
         android:background="@drawable/receiver_messages_layout"
         android:layout_toEndOf="@id/profileImage">
 
@@ -40,8 +41,47 @@
             android:text="Receiver message here"
             android:textSize="14sp"
             android:textStyle="bold"
+            android:layout_gravity="start"
             android:textColor="@android:color/black"
             tools:ignore="HardcodedText" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            >
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="end">
+                <ImageView
+                    android:id="@+id/star"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/baseline_star_24"
+                    app:tint="@android:color/darker_gray"
+                    android:visibility="gone"
+                    />
+                <TextView
+                    android:id="@+id/message_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="11sp"
+                    android:textColor="@android:color/darker_gray"
+                    android:layout_gravity="center_vertical"
+                    android:maxLines="1"
+                    tools:ignore="HardcodedText" />
+
+                <ImageView
+                    android:id="@+id/message_status"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/baseline_check_24"
+                    app:tint="@android:color/darker_gray"
+                    android:visibility="gone"
+                    />
+            </LinearLayout>
+        </RelativeLayout>
     </LinearLayout>
 
     <ImageView

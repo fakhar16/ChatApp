@@ -17,15 +17,13 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import com.samsung.whatsapp.ApplicationClass;
 import com.samsung.whatsapp.model.User;
+import com.samsung.whatsapp.utils.Utils;
 import com.samsung.whatsapp.view.activities.ChatActivity;
 import com.samsung.whatsapp.R;
 import com.samsung.whatsapp.databinding.UsersDisplayLayoutBinding;
 import com.squareup.picasso.Picasso;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.Locale;
 import java.util.Objects;
 
 public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder> {
@@ -62,9 +60,8 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
                                 if (snapshot.exists()) {
                                     String lastMsg = snapshot.child(ApplicationClass.context.getString(R.string.LAST_MESSAGE_DETAILS)).getValue(String.class);
                                     long lastMsgTime = Objects.requireNonNull(snapshot.child(ApplicationClass.context.getString(R.string.LAST_MESSAGE_TIME)).getValue(Long.class));
-                                    SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm a", Locale.US);
-                                    holder.binding.userLastSeenTime.setText(dateFormat.format(new Date(lastMsgTime)));
                                     holder.binding.userProfileStatus.setText(lastMsg);
+                                    holder.binding.userLastSeenTime.setText(Utils.getDateTimeString(lastMsgTime));
                                 } else {
                                     holder.binding.userProfileStatus.setText(R.string.TAP_TO_CHAT);
                                 }

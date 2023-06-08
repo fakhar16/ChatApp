@@ -32,9 +32,7 @@ public class SettingsFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         binding = FragmentSettingsBinding.inflate(inflater, container, false);
-
         handleItemsClick();
-
         return binding.getRoot();
     }
 
@@ -48,6 +46,13 @@ public class SettingsFragment extends Fragment {
         binding.profileInfo.setOnClickListener(view -> {
             Intent intent = new Intent(getContext(), SettingsActivity.class);
             startActivity(intent);
+        });
+
+        binding.starMessages.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //todo show star messages here
+            }
         });
     }
 

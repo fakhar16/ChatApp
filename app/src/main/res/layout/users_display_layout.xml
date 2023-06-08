@@ -40,28 +40,20 @@
                     android:layout_weight="1"
                     android:layout_height="wrap_content"
                     android:text="@{user.name}"
+                    android:hint="@string/NAME"
                     android:textAlignment="textStart"
                     android:textSize="16sp"
                     android:textStyle="bold"
                     android:textColor="@color/black"
                     />
+
                 <TextView
                     android:id="@+id/user_last_seen_time"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text=""
                     android:textSize="14sp"
                     android:textColor="#2E2E2E"
                     tools:ignore="HardcodedText" />
-
-                <ImageView
-                    android:id="@+id/user_online_status"
-                    android:layout_width="18dp"
-                    android:layout_height="18dp"
-                    android:layout_marginTop="5dp"
-                    android:src="@drawable/online"
-                    android:visibility="gone"
-                    />
             </LinearLayout>
 
             <TextView
@@ -72,37 +64,6 @@
                 android:textSize="14sp"
                 android:textColor="#2E2E2E"
                 tools:ignore="HardcodedText" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                >
-                <Button
-                    android:id="@+id/request_cancel_btn"
-                    android:layout_width="wrap_content"
-                    android:layout_height="30dp"
-                    android:text="Cancel"
-                    android:textSize="16sp"
-                    android:textAllCaps="false"
-                    android:background="@android:color/holo_red_dark"
-                    android:textColor="@android:color/background_light"
-                    android:visibility="gone"
-                    tools:ignore="HardcodedText" />
-
-                <Button
-                    android:id="@+id/request_accept_btn"
-                    android:layout_width="wrap_content"
-                    android:layout_height="30dp"
-                    android:text="Accept"
-                    android:textSize="16sp"
-                    android:textAllCaps="false"
-                    android:background="@android:color/holo_green_light"
-                    android:textColor="@android:color/background_light"
-                    android:layout_marginStart="10dp"
-                    android:visibility="gone"
-                    tools:ignore="HardcodedText" />
-            </LinearLayout>
         </LinearLayout>
     </LinearLayout>
 </layout>

@@ -256,8 +256,7 @@ public class ChatActivity extends BaseActivity implements AudioRecordView.Callba
 
     private void handleButtonClicks() {
         binding.sendMessageBtn.setOnClickListener(view -> {
-            String message = binding.messageInputText.getText().toString();
-            FCMMessaging.sendMessage(message, currentUser.getUid(), receiver.getUid());
+            FCMMessaging.sendMessage(binding.messageInputText.getText().toString(), currentUser.getUid(), receiver.getUid());
             binding.messageInputText.setText("");
         });
         binding.camera.setOnClickListener(view -> cameraButtonClicked());
@@ -309,8 +308,8 @@ public class ChatActivity extends BaseActivity implements AudioRecordView.Callba
         WhatsappLikeProfilePicPreview.Companion.zoomImageFromThumb(thumbView, binding.expandedImage.cardView, binding.expandedImage.image, binding.chatToolBar.getRoot().getRootView(), url);
     }
 
-    public void showVideoPreview(String url) {
-        WhatsappLikeProfilePicPreview.Companion.zoomVideoFromThumb(binding.userMessageList, binding.expandedVideoCardView, binding.chatToolBar.getRoot().getRootView());
+    public void showVideoPreview(View thumbView, String url) {
+        WhatsappLikeProfilePicPreview.Companion.zoomVideoFromThumb(thumbView, binding.expandedVideoCardView, binding.chatToolBar.getRoot().getRootView());
 
         MediaController mediaController= new MediaController(ChatActivity.this);
         mediaController.setAnchorView(binding.expandedVideoCardView);

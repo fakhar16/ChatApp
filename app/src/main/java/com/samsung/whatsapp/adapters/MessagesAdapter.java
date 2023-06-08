@@ -29,6 +29,7 @@ import com.samsung.whatsapp.model.Message;
 import com.samsung.whatsapp.R;
 import com.samsung.whatsapp.databinding.ItemReceiveBinding;
 import com.samsung.whatsapp.databinding.ItemSentBinding;
+import com.samsung.whatsapp.utils.Utils;
 import com.samsung.whatsapp.view.activities.ChatActivity;
 import com.squareup.picasso.Picasso;
 
@@ -129,6 +130,7 @@ public class MessagesAdapter extends RecyclerView.Adapter {
         if (holder.getClass() == SenderViewHolder.class) {
             SenderViewHolder viewHolder = (SenderViewHolder) holder;
             viewHolder.binding.message.setText(message.getMessage());
+            viewHolder.binding.messageTime.setText(Utils.getDateTimeString(message.getTime()));
 
             if (fromMessageType.equals(context.getString(R.string.IMAGE))) {
                 viewHolder.binding.message.setVisibility(View.GONE);
@@ -153,7 +155,7 @@ public class MessagesAdapter extends RecyclerView.Adapter {
 
             if (message.getType().equals(context.getString(R.string.VIDEO))) {
                 Glide.with(context).load(message.getMessage()).centerCrop().placeholder(R.drawable.baseline_play_circle_outline_24).into(viewHolder.binding.image);
-                viewHolder.binding.image.setOnClickListener(view -> ((ChatActivity)(context)).showImagePreview(viewHolder.binding.image, message.getMessage()));
+                viewHolder.binding.image.setOnClickListener(view -> ((ChatActivity)(context)).showVideoPreview(viewHolder.binding.image, message.getMessage()));
             } else if (message.getType().equals(context.getString(R.string.IMAGE))) {
                 viewHolder.binding.image.setOnClickListener(view -> ((ChatActivity)(context)).showImagePreview(viewHolder.binding.image, message.getMessage()));
             }
@@ -161,6 +163,7 @@ public class MessagesAdapter extends RecyclerView.Adapter {
         } else { // Receiver view holder
             ReceiverViewHolder viewHolder = (ReceiverViewHolder) holder;
             viewHolder.binding.message.setText(message.getMessage());
+            viewHolder.binding.messageTime.setText(Utils.getDateTimeString(message.getTime()));
 
             if (fromMessageType.equals(context.getString(R.string.IMAGE))) {
                 viewHolder.binding.message.setVisibility(View.GONE);
@@ -178,7 +181,7 @@ public class MessagesAdapter extends RecyclerView.Adapter {
 
             if (message.getType().equals(context.getString(R.string.VIDEO))) {
                 Glide.with(context).load(message.getMessage()).centerCrop().placeholder(R.drawable.baseline_play_circle_outline_24).into(viewHolder.binding.image);
-                viewHolder.binding.image.setOnClickListener(view -> ((ChatActivity)(context)).showImagePreview(viewHolder.binding.image, message.getMessage()));
+                viewHolder.binding.image.setOnClickListener(view -> ((ChatActivity)(context)).showVideoPreview(viewHolder.binding.image, message.getMessage()));
             } else if (message.getType().equals(context.getString(R.string.IMAGE))) {
                 viewHolder.binding.image.setOnClickListener(view -> ((ChatActivity)(context)).showImagePreview(viewHolder.binding.image, message.getMessage()));
             }
