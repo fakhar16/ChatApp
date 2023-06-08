@@ -201,6 +201,7 @@ public class FCMMessaging {
         filePath.putFile(fileUri)
                 .addOnSuccessListener(taskSnapshot -> {
                     Task<Uri> uriTask = taskSnapshot.getStorage().getDownloadUrl();
+                    //noinspection StatementWithEmptyBody
                     while (!uriTask.isSuccessful());
 
                     Utils.dismissLoadingBar(activity, dialog);

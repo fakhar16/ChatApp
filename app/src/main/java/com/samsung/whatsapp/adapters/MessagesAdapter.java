@@ -125,6 +125,7 @@ public class MessagesAdapter extends RecyclerView.Adapter {
         String fromUserId = message.getFrom();
         String fromMessageType = message.getType();
 
+        //Sent view holder
         if (holder.getClass() == SenderViewHolder.class) {
             SenderViewHolder viewHolder = (SenderViewHolder) holder;
             viewHolder.binding.message.setText(message.getMessage());
@@ -150,7 +151,14 @@ public class MessagesAdapter extends RecyclerView.Adapter {
                 viewHolder.binding.feeling.setVisibility(View.GONE);
             }
 
-        } else {
+            if (message.getType().equals(context.getString(R.string.VIDEO))) {
+                Glide.with(context).load(message.getMessage()).centerCrop().placeholder(R.drawable.baseline_play_circle_outline_24).into(viewHolder.binding.image);
+                viewHolder.binding.image.setOnClickListener(view -> ((ChatActivity)(context)).showImagePreview(viewHolder.binding.image, message.getMessage()));
+            } else if (message.getType().equals(context.getString(R.string.IMAGE))) {
+                viewHolder.binding.image.setOnClickListener(view -> ((ChatActivity)(context)).showImagePreview(viewHolder.binding.image, message.getMessage()));
+            }
+
+        } else { // Receiver view holder
             ReceiverViewHolder viewHolder = (ReceiverViewHolder) holder;
             viewHolder.binding.message.setText(message.getMessage());
 
@@ -166,6 +174,13 @@ public class MessagesAdapter extends RecyclerView.Adapter {
                 viewHolder.binding.feeling.setVisibility(View.VISIBLE);
             } else {
                 viewHolder.binding.feeling.setVisibility(View.GONE);
+            }
+
+            if (message.getType().equals(context.getString(R.string.VIDEO))) {
+                Glide.with(context).load(message.getMessage()).centerCrop().placeholder(R.drawable.baseline_play_circle_outline_24).into(viewHolder.binding.image);
+                viewHolder.binding.image.setOnClickListener(view -> ((ChatActivity)(context)).showImagePreview(viewHolder.binding.image, message.getMessage()));
+            } else if (message.getType().equals(context.getString(R.string.IMAGE))) {
+                viewHolder.binding.image.setOnClickListener(view -> ((ChatActivity)(context)).showImagePreview(viewHolder.binding.image, message.getMessage()));
             }
 
 //            viewHolder.binding.message.setOnTouchListener(new View.OnTouchListener() {
@@ -223,36 +238,7 @@ public class MessagesAdapter extends RecyclerView.Adapter {
                         }
                     });
         }
-
-        if (message.getType().equals(context.getString(R.string.IMAGE))) {
-            previewImageOnClick(holder, message.getMessage());
-        }  else if(message.getType().equals(context.getString(R.string.VIDEO))) {
-            previewVideoOnClick(holder, message.getMessage());
-
-        }
         showMenuOnLongClick(holder, position);
-    }
-
-    private void previewVideoOnClick(RecyclerView.ViewHolder holder, String videoUrl) {
-        if (holder.getClass() == SenderViewHolder.class) {
-            SenderViewHolder viewHolder = (SenderViewHolder) holder;
-            Glide.with(context).load(videoUrl).centerCrop().placeholder(R.drawable.baseline_play_circle_outline_24).into(viewHolder.binding.image);
-            viewHolder.binding.image.setOnClickListener(view -> ((ChatActivity)(context)).showVideoPreview(videoUrl));
-        } else {
-            ReceiverViewHolder viewHolder = (ReceiverViewHolder) holder;
-            Glide.with(context).load(videoUrl).centerCrop().placeholder(R.drawable.baseline_play_circle_outline_24).into(viewHolder.binding.image);
-            viewHolder.binding.image.setOnClickListener(view -> ((ChatActivity)(context)).showVideoPreview(videoUrl));
-        }
-    }
-
-    private void previewImageOnClick(RecyclerView.ViewHolder holder, String imageUrl) {
-        if (holder.getClass() == SenderViewHolder.class) {
-            SenderViewHolder viewHolder = (SenderViewHolder) holder;
-            viewHolder.binding.image.setOnClickListener(view -> ((ChatActivity)(context)).showImagePreview(viewHolder.binding.image, imageUrl));
-        } else {
-            ReceiverViewHolder viewHolder = (ReceiverViewHolder) holder;
-            viewHolder.binding.image.setOnClickListener(view -> ((ChatActivity)(context)).showImagePreview(viewHolder.binding.image, imageUrl));
-        }
     }
 
     private void showMenuOnLongClick(RecyclerView.ViewHolder holder, int pos) {

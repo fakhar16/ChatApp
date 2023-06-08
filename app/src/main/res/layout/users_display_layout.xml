@@ -45,7 +45,6 @@
                     android:textStyle="bold"
                     android:textColor="@color/black"
                     />
-9
                 <TextView
                     android:id="@+id/user_last_seen_time"
                     android:layout_width="wrap_content"
