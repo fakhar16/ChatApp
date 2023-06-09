@@ -6,6 +6,7 @@ import static com.samsung.whatsapp.utils.Utils.currentUser;
 import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
@@ -86,6 +87,8 @@ public class StarredMessagesAdapter extends RecyclerView.Adapter<StarredMessages
         if (message.getType().equals(context.getString(R.string.TEXT))) {
             holder.binding.message.setText(message.getMessage());
         } else if (message.getType().equals(context.getString(R.string.IMAGE))) {
+                holder.binding.message.setVisibility(View.GONE);
+            holder.binding.image.setVisibility(View.VISIBLE);
             Picasso.get().load(message.getMessage()).placeholder(R.drawable.profile_image).into(holder.binding.image);
         }  else if (message.getType().equals(context.getString(R.string.VIDEO))) {
             //todo load video here
