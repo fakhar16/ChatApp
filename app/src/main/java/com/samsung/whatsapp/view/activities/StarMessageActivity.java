@@ -60,12 +60,14 @@ public class StarMessageActivity extends AppCompatActivity {
 
     public void showImagePreview(View thumbView, String url) {
         WhatsappLikeProfilePicPreview.Companion.zoomImageFromThumb(thumbView, binding.expandedImage.cardView, binding.expandedImage.image, binding.container, url);
+        binding.appBarLayout.setVisibility(View.GONE);
     }
 
     @Override
     public void onBackPressed() {
         if (binding.expandedImage.cardView.getVisibility() == View.VISIBLE) {
             WhatsappLikeProfilePicPreview.Companion.dismissPhotoPreview();
+            binding.appBarLayout.setVisibility(View.VISIBLE);
         } else {
             finish();
         }
