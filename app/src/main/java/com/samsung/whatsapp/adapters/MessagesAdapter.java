@@ -259,10 +259,13 @@ public class MessagesAdapter extends RecyclerView.Adapter {
 
         if (holder.getClass() == SenderViewHolder.class) {
             SenderViewHolder viewHolder = (SenderViewHolder) holder;
-            clicked_message = viewHolder.binding.getRoot();
+            clicked_message = viewHolder.binding.myLinearLayout;
         } else {
             ReceiverViewHolder viewHolder = (ReceiverViewHolder) holder;
-            clicked_message = viewHolder.binding.getRoot();
+            clicked_message = viewHolder.binding.myLinearLayout;
+            if (message.getType().equals(context.getString(R.string.IMAGE))) {
+                clicked_message = viewHolder.binding.image;
+            }
         }
 
         View contentView = View.inflate(context, R.layout.message_bottom_sheet_layout, null);
