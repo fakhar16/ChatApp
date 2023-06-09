@@ -73,7 +73,11 @@ public class StoriesFragment extends Fragment {
         binding.statusList.addItemDecoration(new DividerItemDecoration(binding.statusList.getContext(), DividerItemDecoration.VERTICAL));
         binding.statusList.setAdapter(statusAdapter);
 
+        handleItemsClick();
+        return binding.getRoot();
+    }
 
+    private void handleItemsClick() {
         binding.btnStatus.setOnClickListener(view -> {
             Intent intent = new Intent();
             intent.setType("image/*");
@@ -82,7 +86,5 @@ public class StoriesFragment extends Fragment {
         });
 
         binding.addStatus.setOnClickListener(view -> Toast.makeText(getContext(), "Add image from camera status here", Toast.LENGTH_SHORT).show());
-
-        return binding.getRoot();
     }
 }

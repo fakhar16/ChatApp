@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import com.samsung.whatsapp.R;
 import com.samsung.whatsapp.databinding.FragmentSettingsBinding;
 import com.samsung.whatsapp.view.activities.SettingsActivity;
+import com.samsung.whatsapp.view.activities.StarMessageActivity;
 import com.squareup.picasso.Picasso;
 
 public class SettingsFragment extends Fragment {
@@ -48,11 +49,9 @@ public class SettingsFragment extends Fragment {
             startActivity(intent);
         });
 
-        binding.starMessages.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                //todo show star messages here
-            }
+        binding.starMessages.setOnClickListener(view -> {
+            Intent intent = new Intent(getContext(), StarMessageActivity.class);
+            startActivity(intent);
         });
     }
 

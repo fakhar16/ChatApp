@@ -17,6 +17,7 @@ public class ApplicationClass extends Application {
     public static DatabaseReference presenceDatabaseReference;
     public static DatabaseReference videoUserDatabaseReference;
     public static DatabaseReference profileImagesDatabaseReference;
+    public static DatabaseReference starMessagesDatabaseReference;
     public static StorageReference userProfilesImagesReference;
     public static StorageReference imageStorageReference;
     public static StorageReference videoStorageReference;
@@ -37,6 +38,7 @@ public class ApplicationClass extends Application {
         storiesDatabaseReference = firebaseDatabase.getReference(getString(R.string.STORIES));
         videoUserDatabaseReference = firebaseDatabase.getReference(getString(R.string.VIDEO_USERS));
         profileImagesDatabaseReference = firebaseDatabase.getReference(getString(R.string.PROFILE_IMAGES));
+        starMessagesDatabaseReference = firebaseDatabase.getReference(getString(R.string.STARRED_MESSAGES));
 
         userProfilesImagesReference = FirebaseStorage.getInstance().getReference().child(getString(R.string.PROFILE_IMAGES));
         imageStorageReference = FirebaseStorage.getInstance().getReference().child(context.getString(R.string.IMAGE_FILES));

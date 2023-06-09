@@ -1,6 +1,7 @@
 package com.samsung.whatsapp.repository;
 
 import static com.samsung.whatsapp.ApplicationClass.messageDatabaseReference;
+import static com.samsung.whatsapp.ApplicationClass.starMessagesDatabaseReference;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.MutableLiveData;
@@ -16,7 +17,9 @@ import java.util.ArrayList;
 public class MessageRepositoryImpl implements IMessageRepository {
     static MessageRepositoryImpl instance;
     private final ArrayList<Message> mMessages = new ArrayList<>();
+    private final ArrayList<Message> mStarredMessages = new ArrayList<>();
     MutableLiveData<ArrayList<Message>> messages = new MutableLiveData<>();
+    MutableLiveData<ArrayList<Message>> starMessages = new MutableLiveData<>();
 
     public static MessageRepositoryImpl getInstance() {
         if(instance == null) {
@@ -34,6 +37,15 @@ public class MessageRepositoryImpl implements IMessageRepository {
         return messages;
     }
 
+    @Override
+    public MutableLiveData<ArrayList<Message>> getStarredMessages(String uid) {
+        if (mStarredMessages.size() == 0)
+            loadStarMessages(uid);
+
+        starMessages.setValue(mStarredMessages);
+        return starMessages;
+    }
+
     public void loadMessages(String messageSenderId, String messageReceiverId) {
         messageDatabaseReference
                 .child(messageSenderId)
@@ -49,6 +61,29 @@ public class MessageRepositoryImpl implements IMessageRepository {
                             }
                         }
                         messages.postValue(mMessages);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+    }
+
+    public void loadStarMessages(String uid) {
+        starMessagesDatabaseReference
+                .child(uid)
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        mStarredMessages.clear();
+                        if (snapshot.exists()) {
+                            for (DataSnapshot snapshot1 : snapshot.getChildren()) {
+                                Message message = snapshot1.getValue(Message.class);
+                                mStarredMessages.add(message);
+                            }
+                        }
+                        starMessages.postValue(mStarredMessages);
                     }
 
                     @Override

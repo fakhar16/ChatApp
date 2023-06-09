@@ -8,4 +8,5 @@ import java.util.ArrayList;
 
 public interface IMessageRepository {
     MutableLiveData<ArrayList<Message>> getMessages(String sender, String receiver);
+    MutableLiveData<ArrayList<Message>> getStarredMessages(String uid);
 }

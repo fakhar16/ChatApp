@@ -120,4 +120,6 @@
     <string name="UPDATE_PROFILE_IMAGE_TITLE">Set Profile Image</string>
     <string name="UPDATE_PROFILE_IMAGE_DESCRIPTION">Please wait, your image is updating...</string>
     <string name="VIDEO_FILES">Video Files</string>
+    <string name="STARRED_MESSAGES">StarredMessages</string>
+    <string name="STARRED">starred</string>
 </resources>

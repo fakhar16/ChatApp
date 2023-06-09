@@ -2,6 +2,7 @@ package com.samsung.whatsapp.utils;
 
 import static com.samsung.whatsapp.ApplicationClass.imageStorageReference;
 import static com.samsung.whatsapp.ApplicationClass.messageDatabaseReference;
+import static com.samsung.whatsapp.ApplicationClass.starMessagesDatabaseReference;
 import static com.samsung.whatsapp.ApplicationClass.userDatabaseReference;
 import static com.samsung.whatsapp.ApplicationClass.videoStorageReference;
 import static com.samsung.whatsapp.utils.Utils.TYPE_MESSAGE;
@@ -27,6 +28,7 @@ import com.google.firebase.storage.UploadTask;
 import com.samsung.whatsapp.ApplicationClass;
 import com.samsung.whatsapp.R;
 import com.samsung.whatsapp.fcm.FCMNotificationSender;
+import com.samsung.whatsapp.model.Message;
 import com.samsung.whatsapp.model.Notification;
 import com.samsung.whatsapp.model.User;
 
@@ -49,19 +51,11 @@ public class FCMMessaging {
                             .push();
 
             String messagePushId = userMessageKeyRef.getKey();
-
-            Map<String, Object> messageTextBody = new HashMap<>();
-            messageTextBody.put(context.getString(R.string.MESSAGE), message);
-            messageTextBody.put(context.getString(R.string.TYPE), "text");
-            messageTextBody.put(context.getString(R.string.FROM), messageSenderId);
-            messageTextBody.put(context.getString(R.string.TO), messageReceiverId);
-            messageTextBody.put(context.getString(R.string.MESSAGE_ID), messagePushId);
-            messageTextBody.put(context.getString(R.string.TIME), new Date().getTime());
-            messageTextBody.put(context.getString(R.string.FEELING), -1);
+            Message obj_message = new Message(messagePushId, message, "text", messageSenderId, messageReceiverId, new Date().getTime(), -1, "");
 
             Map<String, Object> messageBodyDetails = new HashMap<>();
-            messageBodyDetails.put(messageSenderRef + "/" + messagePushId, messageTextBody);
-            messageBodyDetails.put(messageReceiverRef + "/" + messagePushId, messageTextBody);
+            messageBodyDetails.put(messageSenderRef + "/" + messagePushId, obj_message);
+            messageBodyDetails.put(messageReceiverRef + "/" + messagePushId, obj_message);
 
             FirebaseDatabase.getInstance().getReference()
                     .updateChildren(messageBodyDetails)
@@ -156,19 +150,11 @@ public class FCMMessaging {
                 Uri downloadUrl = task.getResult();
                 String myUrl = downloadUrl.toString();
 
-                Map<String, Object> messageTextBody = new HashMap<>();
-                messageTextBody.put(context.getString(R.string.MESSAGE), myUrl);
-                messageTextBody.put(context.getString(R.string.NAME), fileUri.getLastPathSegment());
-                messageTextBody.put(context.getString(R.string.TYPE), context.getString(R.string.IMAGE));
-                messageTextBody.put(context.getString(R.string.FROM), messageSenderId);
-                messageTextBody.put(context.getString(R.string.TO), messageReceiverId);
-                messageTextBody.put(context.getString(R.string.MESSAGE_ID), messagePushId);
-                messageTextBody.put(context.getString(R.string.TIME), new Date().getTime());
-                messageTextBody.put(context.getString(R.string.FEELING), -1);
+                Message obj_message = new Message(messagePushId, myUrl, context.getString(R.string.IMAGE), messageSenderId, messageReceiverId, new Date().getTime(), -1, "");
 
                 Map<String, Object> messageBodyDetails = new HashMap<>();
-                messageBodyDetails.put(messageSenderRef + "/" + messagePushId, messageTextBody);
-                messageBodyDetails.put(messageReceiverRef + "/" + messagePushId, messageTextBody);
+                messageBodyDetails.put(messageSenderRef + "/" + messagePushId, obj_message);
+                messageBodyDetails.put(messageReceiverRef + "/" + messagePushId, obj_message);
 
                 FirebaseDatabase.getInstance().getReference()
                         .updateChildren(messageBodyDetails)
@@ -207,19 +193,11 @@ public class FCMMessaging {
                     Utils.dismissLoadingBar(activity, dialog);
 
                     String downloadUri = uriTask.getResult().toString();
-                    Map<String, Object> messageTextBody = new HashMap<>();
-                    messageTextBody.put(context.getString(R.string.MESSAGE), downloadUri);
-                    messageTextBody.put(context.getString(R.string.NAME), fileUri.getLastPathSegment());
-                    messageTextBody.put(context.getString(R.string.TYPE), context.getString(R.string.VIDEO));
-                    messageTextBody.put(context.getString(R.string.FROM), messageSenderId);
-                    messageTextBody.put(context.getString(R.string.TO), messageReceiverId);
-                    messageTextBody.put(context.getString(R.string.MESSAGE_ID), messagePushId);
-                    messageTextBody.put(context.getString(R.string.TIME), new Date().getTime());
-                    messageTextBody.put(context.getString(R.string.FEELING), -1);
+                    Message obj_message = new Message(messagePushId, downloadUri, context.getString(R.string.VIDEO), messageSenderId, messageReceiverId, new Date().getTime(), -1, "");
 
                     Map<String, Object> messageBodyDetails = new HashMap<>();
-                    messageBodyDetails.put(messageSenderRef + "/" + messagePushId, messageTextBody);
-                    messageBodyDetails.put(messageReceiverRef + "/" + messagePushId, messageTextBody);
+                    messageBodyDetails.put(messageSenderRef + "/" + messagePushId, obj_message);
+                    messageBodyDetails.put(messageReceiverRef + "/" + messagePushId, obj_message);
 
                     FirebaseDatabase.getInstance().getReference()
                             .updateChildren(messageBodyDetails)
@@ -232,5 +210,29 @@ public class FCMMessaging {
                     updateLastMessage(messageSenderId, messageReceiverId, "Video", new Date().getTime());
                     sendNotification("Sent a video", messageReceiverId, messageSenderId, TYPE_MESSAGE);
                 });
+    }
+
+    public static void starMessage(Message message) {
+        String starredUser = message.getStarred() + ":" + Utils.currentUser.getUid();
+        message.setStarred(context.getString(R.string.STARRED));
+
+        starMessagesDatabaseReference
+                .child(Utils.currentUser.getUid())
+                .child(message.getMessageId())
+                .setValue(message);
+
+        messageDatabaseReference
+                .child(message.getFrom())
+                .child(message.getTo())
+                .child(message.getMessageId())
+                .child(context.getString(R.string.STARRED))
+                .setValue(starredUser);
+
+        messageDatabaseReference
+                .child(message.getTo())
+                .child(message.getFrom())
+                .child(message.getMessageId())
+                .child(context.getString(R.string.STARRED))
+                .setValue(starredUser);
     }
 }

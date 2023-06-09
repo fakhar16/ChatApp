@@ -1,22 +1,32 @@
 package com.samsung.whatsapp.model;
 
 public class Message {
-    private String from, message, type, to, messageId, name;
+    private String message, type, from, to, messageId;
     private long time;
     private int feeling;
+    private String starred;
 
     public Message() {
 
     }
 
-    public Message(String from, String message, String type, String to, String messageId, long time, String name) {
+    public Message( String messageId, String message, String type, String from, String to, long time, int feeling, String starred) {
         this.from = from;
         this.message = message;
         this.type = type;
         this.to = to;
         this.messageId = messageId;
         this.time = time;
-        this.name = name;
+        this.feeling = feeling;
+        this.starred = starred;
+    }
+
+    public String getStarred() {
+        return starred;
+    }
+
+    public void setStarred(String starred) {
+        this.starred = starred;
     }
 
     public long getTime() {
@@ -74,13 +84,5 @@ public class Message {
 
     public void setMessageId(String messageId) {
         this.messageId = messageId;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 }

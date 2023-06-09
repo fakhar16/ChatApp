@@ -2,6 +2,8 @@ package com.samsung.whatsapp.adapters;
 
 import static com.samsung.whatsapp.ApplicationClass.messageDatabaseReference;
 import static com.samsung.whatsapp.ApplicationClass.userDatabaseReference;
+import static com.samsung.whatsapp.utils.Utils.currentUser;
+import static com.samsung.whatsapp.utils.Utils.getDateTimeString;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -29,7 +31,7 @@ import com.samsung.whatsapp.model.Message;
 import com.samsung.whatsapp.R;
 import com.samsung.whatsapp.databinding.ItemReceiveBinding;
 import com.samsung.whatsapp.databinding.ItemSentBinding;
-import com.samsung.whatsapp.utils.Utils;
+import com.samsung.whatsapp.utils.FCMMessaging;
 import com.samsung.whatsapp.view.activities.ChatActivity;
 import com.squareup.picasso.Picasso;
 
@@ -130,7 +132,11 @@ public class MessagesAdapter extends RecyclerView.Adapter {
         if (holder.getClass() == SenderViewHolder.class) {
             SenderViewHolder viewHolder = (SenderViewHolder) holder;
             viewHolder.binding.message.setText(message.getMessage());
-            viewHolder.binding.messageTime.setText(Utils.getDateTimeString(message.getTime()));
+            viewHolder.binding.messageTime.setText(getDateTimeString(message.getTime()));
+
+            if (message.getStarred().contains(currentUser.getUid())) {
+                viewHolder.binding.star.setVisibility(View.VISIBLE);
+            }
 
             if (fromMessageType.equals(context.getString(R.string.IMAGE))) {
                 viewHolder.binding.message.setVisibility(View.GONE);
@@ -163,7 +169,11 @@ public class MessagesAdapter extends RecyclerView.Adapter {
         } else { // Receiver view holder
             ReceiverViewHolder viewHolder = (ReceiverViewHolder) holder;
             viewHolder.binding.message.setText(message.getMessage());
-            viewHolder.binding.messageTime.setText(Utils.getDateTimeString(message.getTime()));
+            viewHolder.binding.messageTime.setText(getDateTimeString(message.getTime()));
+
+            if (message.getStarred().contains(currentUser.getUid())) {
+                viewHolder.binding.star.setVisibility(View.VISIBLE);
+            }
 
             if (fromMessageType.equals(context.getString(R.string.IMAGE))) {
                 viewHolder.binding.message.setVisibility(View.GONE);
@@ -241,27 +251,18 @@ public class MessagesAdapter extends RecyclerView.Adapter {
                         }
                     });
         }
-        showMenuOnLongClick(holder, position);
+        showMenuOnLongClick(holder, message);
     }
 
-    private void showMenuOnLongClick(RecyclerView.ViewHolder holder, int pos) {
+    private void showMenuOnLongClick(RecyclerView.ViewHolder holder, Message message) {
         View clicked_message = null;
-//        boolean wasMessageReceived = false;
-//
+
         if (holder.getClass() == SenderViewHolder.class) {
             SenderViewHolder viewHolder = (SenderViewHolder) holder;
-            if (viewHolder.binding.image.getVisibility() != View.VISIBLE)
-                clicked_message = viewHolder.binding.message;
-            else
-                clicked_message = viewHolder.binding.image;
-
+            clicked_message = viewHolder.binding.getRoot();
         } else {
             ReceiverViewHolder viewHolder = (ReceiverViewHolder) holder;
-            if (viewHolder.binding.image.getVisibility() != View.VISIBLE)
-                clicked_message = viewHolder.binding.message;
-            else
-                clicked_message = viewHolder.binding.image;
-//            wasMessageReceived = true;
+            clicked_message = viewHolder.binding.getRoot();
         }
 
         View contentView = View.inflate(context, R.layout.message_bottom_sheet_layout, null);
@@ -271,10 +272,10 @@ public class MessagesAdapter extends RecyclerView.Adapter {
         bottomSheetDialog.setCanceledOnTouchOutside(false);
         ((View) contentView.getParent()).setBackgroundColor(Color.TRANSPARENT);
 
-//        LinearLayout star = bottomSheetDialog.findViewById(R.id.star);
+        LinearLayout star = bottomSheetDialog.findViewById(R.id.star);
 //        LinearLayout copy = bottomSheetDialog.findViewById(R.id.copy);
 //        LinearLayout forward = bottomSheetDialog.findViewById(R.id.forward);
-        LinearLayout delete = bottomSheetDialog.findViewById(R.id.delete);
+//        LinearLayout delete = bottomSheetDialog.findViewById(R.id.delete);
         Button cancel = bottomSheetDialog.findViewById(R.id.cancel);
 
         clicked_message.setOnLongClickListener(view -> {
@@ -282,7 +283,10 @@ public class MessagesAdapter extends RecyclerView.Adapter {
             return true;
         });
 
-        Objects.requireNonNull(delete).setOnClickListener(view -> bottomSheetDialog.dismiss());
+        Objects.requireNonNull(star).setOnClickListener(view -> {
+            FCMMessaging.starMessage(message);
+            bottomSheetDialog.dismiss();
+        });
         Objects.requireNonNull(cancel).setOnClickListener(view -> bottomSheetDialog.dismiss());
     }
 

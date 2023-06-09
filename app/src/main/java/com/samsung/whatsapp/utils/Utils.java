@@ -79,4 +79,14 @@ public class Utils {
             return dateFormat.format(new Date(time));
         }
     }
+
+    public static String getDateString(long time) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy", Locale.US);
+        return dateFormat.format(new Date(time));
+    }
+
+    public static String getTimeString(long time) {
+        SimpleDateFormat timeFormat = new SimpleDateFormat("hh:mm a", Locale.US);
+        return timeFormat.format(new Date(time));
+    }
 }
