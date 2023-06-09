@@ -21,6 +21,7 @@ import com.samsung.whatsapp.databinding.ItemStarMessageBinding;
 import com.samsung.whatsapp.model.Message;
 import com.samsung.whatsapp.model.User;
 import com.samsung.whatsapp.utils.Utils;
+import com.samsung.whatsapp.view.activities.StarMessageActivity;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -72,6 +73,8 @@ public class StarredMessagesAdapter extends RecyclerView.Adapter<StarredMessages
                         }
                     });
         }
+
+        holder.binding.image.setOnClickListener(view -> ((StarMessageActivity)(context)).showImagePreview(holder.binding.image, message.getMessage()));
     }
 
     private void bindMessageDetails(StarredMessagesViewHolder holder, Message message, User user) {

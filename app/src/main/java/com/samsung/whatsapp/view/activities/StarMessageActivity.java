@@ -9,10 +9,12 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.samsung.whatsapp.adapters.StarredMessagesAdapter;
 import com.samsung.whatsapp.databinding.ActivityStarMessageBinding;
 import com.samsung.whatsapp.utils.Utils;
+import com.samsung.whatsapp.utils.WhatsappLikeProfilePicPreview;
 import com.samsung.whatsapp.viewmodel.StarredMessageViewModel;
 
 import java.util.Objects;
@@ -54,5 +56,18 @@ public class StarMessageActivity extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public void showImagePreview(View thumbView, String url) {
+        WhatsappLikeProfilePicPreview.Companion.zoomImageFromThumb(thumbView, binding.expandedImage.cardView, binding.expandedImage.image, binding.container, url);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (binding.expandedImage.cardView.getVisibility() == View.VISIBLE) {
+            WhatsappLikeProfilePicPreview.Companion.dismissPhotoPreview();
+        } else {
+            finish();
+        }
     }
 }
