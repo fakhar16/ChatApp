@@ -30,8 +30,31 @@ public class ApplicationClass extends Application {
         super.onCreate();
         context = this;
 
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
         FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
 
+        initializeDatabaseReferences(firebaseDatabase);
+        initializeStorageReferences();
+        keepSyncingReferences();
+    }
+
+    private void keepSyncingReferences() {
+        userDatabaseReference.keepSynced(true);
+        messageDatabaseReference.keepSynced(true);
+        presenceDatabaseReference.keepSynced(true);
+        storiesDatabaseReference.keepSynced(true);
+        videoUserDatabaseReference.keepSynced(true);
+        profileImagesDatabaseReference.keepSynced(true);
+        starMessagesDatabaseReference.keepSynced(true);
+    }
+
+    private void initializeStorageReferences() {
+        userProfilesImagesReference = FirebaseStorage.getInstance().getReference().child(getString(R.string.PROFILE_IMAGES));
+        imageStorageReference = FirebaseStorage.getInstance().getReference().child(context.getString(R.string.IMAGE_FILES));
+        videoStorageReference = FirebaseStorage.getInstance().getReference().child(context.getString(R.string.VIDEO_FILES));
+    }
+
+    private void initializeDatabaseReferences(FirebaseDatabase firebaseDatabase) {
         userDatabaseReference = firebaseDatabase.getReference(getString(R.string.USERS));
         messageDatabaseReference = firebaseDatabase.getReference(getString(R.string.MESSAGES));
         presenceDatabaseReference = firebaseDatabase.getReference(getString(R.string.PRESENCE));
@@ -39,9 +62,5 @@ public class ApplicationClass extends Application {
         videoUserDatabaseReference = firebaseDatabase.getReference(getString(R.string.VIDEO_USERS));
         profileImagesDatabaseReference = firebaseDatabase.getReference(getString(R.string.PROFILE_IMAGES));
         starMessagesDatabaseReference = firebaseDatabase.getReference(getString(R.string.STARRED_MESSAGES));
-
-        userProfilesImagesReference = FirebaseStorage.getInstance().getReference().child(getString(R.string.PROFILE_IMAGES));
-        imageStorageReference = FirebaseStorage.getInstance().getReference().child(context.getString(R.string.IMAGE_FILES));
-        videoStorageReference = FirebaseStorage.getInstance().getReference().child(context.getString(R.string.VIDEO_FILES));
     }
 }
