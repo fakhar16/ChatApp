@@ -3,8 +3,8 @@ package com.samsung.whatsapp.adapters;
 import static com.samsung.whatsapp.ApplicationClass.userDatabaseReference;
 import static com.samsung.whatsapp.utils.Utils.currentUser;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,13 +30,12 @@ import java.util.Objects;
 public class StarredMessagesAdapter extends RecyclerView.Adapter<StarredMessagesAdapter.StarredMessagesViewHolder> {
     private final ArrayList<Message> messageList;
     private final Context context;
-    private static final String TAG = "ConsoleStarredMessagesAdapter";
+//    private static final String TAG = "ConsoleStarredMessagesAdapter";
 
     public StarredMessagesAdapter(Context context, ArrayList<Message> messageList) {
         this.context = context;
         this.messageList = messageList;
     }
-
 
     @NonNull
     @Override
@@ -50,8 +49,6 @@ public class StarredMessagesAdapter extends RecyclerView.Adapter<StarredMessages
     public void onBindViewHolder(@NonNull StarredMessagesViewHolder holder, int position) {
         final User[] user = new User[1];
         Message message = messageList.get(position);
-
-        Log.wtf(TAG, "onBindViewHolder: " + message.toString() );
 
         if (message.getFrom().equals(currentUser.getUid())) {
             user[0] = currentUser;
@@ -73,31 +70,31 @@ public class StarredMessagesAdapter extends RecyclerView.Adapter<StarredMessages
                         }
                     });
         }
-
-        holder.binding.image.setOnClickListener(view -> ((StarMessageActivity)(context)).showImagePreview(holder.binding.image, message.getMessage()));
     }
 
+    @SuppressLint("SetTextI18n")
     private void bindMessageDetails(StarredMessagesViewHolder holder, Message message, User user) {
-        if (user.getUid().equals(currentUser.getUid())) {
-            holder.binding.userName.setText("You");
-        } else {
-            holder.binding.userName.setText(user.getName());
-        }
         holder.binding.messageTime.setText(Utils.getTimeString(message.getTime()));
         holder.binding.messageDate.setText(Utils.getDateString(message.getTime()));
         Picasso.get().load(user.getImage()).placeholder(R.drawable.profile_image).into(holder.binding.userImage);
+        holder.binding.userName.setText(user.getUid().equals(currentUser.getUid())? "You": user.getName());
 
         if (message.getType().equals(context.getString(R.string.TEXT))) {
             holder.binding.message.setText(message.getMessage());
         } else if (message.getType().equals(context.getString(R.string.IMAGE))) {
                 holder.binding.message.setVisibility(View.GONE);
-            holder.binding.image.setVisibility(View.VISIBLE);
-            Picasso.get().load(message.getMessage()).placeholder(R.drawable.profile_image).into(holder.binding.image);
+                holder.binding.image.setVisibility(View.VISIBLE);
+                Picasso.get().load(message.getMessage()).placeholder(R.drawable.profile_image).into(holder.binding.image);
         }  else if (message.getType().equals(context.getString(R.string.VIDEO))) {
             //todo load video here
         }
+
+        handleItemsClick(holder, message);
     }
 
+    private void handleItemsClick(StarredMessagesViewHolder holder, Message message) {
+        holder.binding.image.setOnClickListener(view -> ((StarMessageActivity)(context)).showImagePreview(holder.binding.image, message.getMessage()));
+    }
 
     @Override
     public int getItemCount() {

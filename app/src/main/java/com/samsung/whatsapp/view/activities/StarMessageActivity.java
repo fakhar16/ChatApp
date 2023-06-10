@@ -22,7 +22,7 @@ import java.util.Objects;
 public class StarMessageActivity extends AppCompatActivity {
     ActivityStarMessageBinding binding;
     private StarredMessagesAdapter adapter;
-    @SuppressLint("NotifyDataSetChanged")
+    StarredMessageViewModel viewModel;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -30,16 +30,22 @@ public class StarMessageActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         initToolBar();
+        setupViewModel();
+        setupRecyclerView();
+    }
 
+    private void setupRecyclerView() {
         binding.starMessagesList.setLayoutManager(new LinearLayoutManager(this));
-
-        StarredMessageViewModel viewModel = new ViewModelProvider(this).get(StarredMessageViewModel.class);
-        viewModel.init(Utils.currentUser.getUid());
-        viewModel.getStarredMessage().observe(this, list -> adapter.notifyDataSetChanged());
-
         adapter = new StarredMessagesAdapter(this, viewModel.getStarredMessage().getValue());
         binding.starMessagesList.addItemDecoration(new DividerItemDecoration(binding.starMessagesList.getContext(), DividerItemDecoration.VERTICAL));
         binding.starMessagesList.setAdapter(adapter);
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    private void setupViewModel() {
+        viewModel = new ViewModelProvider(this).get(StarredMessageViewModel.class);
+        viewModel.init(Utils.currentUser.getUid());
+        viewModel.getStarredMessage().observe(this, list -> adapter.notifyDataSetChanged());
     }
 
     private void initToolBar() {

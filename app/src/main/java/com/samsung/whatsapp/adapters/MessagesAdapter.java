@@ -12,7 +12,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.databinding.DataBindingUtil;
@@ -45,6 +47,8 @@ public class MessagesAdapter extends RecyclerView.Adapter {
     private final String receiverId;
     final int ITEM_SENT = 1;
     final int ITEM_RECEIVE = 2;
+
+//    private static final String TAG = "ConsoleMessagesAdapter";
 
     public MessagesAdapter(Context context, String senderId, String receiverId, ArrayList<Message> userMessageList) {
         this.context = context;
@@ -254,19 +258,8 @@ public class MessagesAdapter extends RecyclerView.Adapter {
         showMenuOnLongClick(holder, message);
     }
 
+    @SuppressLint("SetTextI18n")
     private void showMenuOnLongClick(RecyclerView.ViewHolder holder, Message message) {
-        View clicked_message = null;
-
-        if (holder.getClass() == SenderViewHolder.class) {
-            SenderViewHolder viewHolder = (SenderViewHolder) holder;
-            clicked_message = viewHolder.binding.myLinearLayout;
-        } else {
-            ReceiverViewHolder viewHolder = (ReceiverViewHolder) holder;
-            clicked_message = viewHolder.binding.myLinearLayout;
-            if (message.getType().equals(context.getString(R.string.IMAGE))) {
-                clicked_message = viewHolder.binding.image;
-            }
-        }
 
         View contentView = View.inflate(context, R.layout.message_bottom_sheet_layout, null);
 
@@ -281,16 +274,59 @@ public class MessagesAdapter extends RecyclerView.Adapter {
 //        LinearLayout delete = bottomSheetDialog.findViewById(R.id.delete);
         Button cancel = bottomSheetDialog.findViewById(R.id.cancel);
 
+        Objects.requireNonNull(cancel).setOnClickListener(view -> bottomSheetDialog.dismiss());
+
+        View clicked_message;
+
+        if (holder.getClass() == SenderViewHolder.class) {
+            SenderViewHolder viewHolder = (SenderViewHolder) holder;
+            clicked_message = viewHolder.binding.myLinearLayout;
+            if (message.getType().equals(context.getString(R.string.IMAGE))) {
+                clicked_message = viewHolder.binding.image;
+            }
+
+            if (viewHolder.binding.star.getVisibility() == View.VISIBLE) {
+                ((TextView)(Objects.requireNonNull(bottomSheetDialog.findViewById(R.id.star_text)))).setText("Unstar");
+                ((ImageView)(Objects.requireNonNull(bottomSheetDialog.findViewById(R.id.star_icon)))).setImageResource(R.drawable.baseline_unstar_24);
+                Objects.requireNonNull(star).setOnClickListener(view -> {
+                    FCMMessaging.unStarMessage(message);
+                    bottomSheetDialog.dismiss();
+                });
+            } else {
+                ((TextView)(Objects.requireNonNull(bottomSheetDialog.findViewById(R.id.star_text)))).setText("star");
+                ((ImageView)(Objects.requireNonNull(bottomSheetDialog.findViewById(R.id.star_icon)))).setImageResource(R.drawable.baseline_star_24);
+                Objects.requireNonNull(star).setOnClickListener(view -> {
+                    FCMMessaging.starMessage(message);
+                    bottomSheetDialog.dismiss();
+                });
+            }
+        } else {
+            ReceiverViewHolder viewHolder = (ReceiverViewHolder) holder;
+            clicked_message = viewHolder.binding.myLinearLayout;
+            if (message.getType().equals(context.getString(R.string.IMAGE))) {
+                clicked_message = viewHolder.binding.image;
+            }
+            if (viewHolder.binding.star.getVisibility() == View.VISIBLE) {
+                ((TextView)(Objects.requireNonNull(bottomSheetDialog.findViewById(R.id.star_text)))).setText("Unstar");
+                ((ImageView)(Objects.requireNonNull(bottomSheetDialog.findViewById(R.id.star_icon)))).setImageResource(R.drawable.baseline_unstar_24);
+                Objects.requireNonNull(star).setOnClickListener(view -> {
+                    FCMMessaging.unStarMessage(message);
+                    bottomSheetDialog.dismiss();
+                });
+            } else {
+                ((TextView)(Objects.requireNonNull(bottomSheetDialog.findViewById(R.id.star_text)))).setText("star");
+                ((ImageView)(Objects.requireNonNull(bottomSheetDialog.findViewById(R.id.star_icon)))).setImageResource(R.drawable.baseline_star_24);
+                Objects.requireNonNull(star).setOnClickListener(view -> {
+                    FCMMessaging.starMessage(message);
+                    bottomSheetDialog.dismiss();
+                });
+            }
+        }
+
         clicked_message.setOnLongClickListener(view -> {
             bottomSheetDialog.show();
             return true;
         });
-
-        Objects.requireNonNull(star).setOnClickListener(view -> {
-            FCMMessaging.starMessage(message);
-            bottomSheetDialog.dismiss();
-        });
-        Objects.requireNonNull(cancel).setOnClickListener(view -> bottomSheetDialog.dismiss());
     }
 
 //    private void deleteSentMessage(final int position, final MessageViewHolder holder) {

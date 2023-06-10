@@ -235,4 +235,27 @@ public class FCMMessaging {
                 .child(context.getString(R.string.STARRED))
                 .setValue(starredUser);
     }
+
+    public static void unStarMessage(Message message) {
+        String starredUser = message.getStarred().replace(":"+Utils.currentUser.getUid(), "");
+
+        starMessagesDatabaseReference
+                .child(Utils.currentUser.getUid())
+                .child(message.getMessageId())
+                .removeValue();
+
+        messageDatabaseReference
+                .child(message.getFrom())
+                .child(message.getTo())
+                .child(message.getMessageId())
+                .child(context.getString(R.string.STARRED))
+                .setValue(starredUser);
+
+        messageDatabaseReference
+                .child(message.getTo())
+                .child(message.getFrom())
+                .child(message.getMessageId())
+                .child(context.getString(R.string.STARRED))
+                .setValue(starredUser);
+    }
 }
