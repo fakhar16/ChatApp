@@ -1,7 +1,5 @@
 package com.samsung.whatsapp.adapters;
 
-import static com.samsung.whatsapp.ApplicationClass.messageDatabaseReference;
-import static com.samsung.whatsapp.ApplicationClass.userDatabaseReference;
 import static com.samsung.whatsapp.utils.Utils.currentUser;
 import static com.samsung.whatsapp.utils.Utils.getDateTimeString;
 
@@ -14,25 +12,22 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.github.pgreze.reactions.ReactionPopup;
 import com.github.pgreze.reactions.ReactionsConfig;
 import com.github.pgreze.reactions.ReactionsConfigBuilder;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.ValueEventListener;
+import com.samsung.whatsapp.databinding.ItemMessageBinding;
 import com.samsung.whatsapp.model.Message;
 import com.samsung.whatsapp.R;
-import com.samsung.whatsapp.databinding.ItemReceiveBinding;
-import com.samsung.whatsapp.databinding.ItemSentBinding;
 import com.samsung.whatsapp.utils.FCMMessaging;
 import com.samsung.whatsapp.view.activities.ChatActivity;
 import com.squareup.picasso.Picasso;
@@ -40,7 +35,7 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.Objects;
 
-public class MessagesAdapter extends RecyclerView.Adapter {
+public class MessagesAdapter extends RecyclerView.Adapter<MessagesAdapter.MessageViewHolder> {
     private final ArrayList<Message> userMessageList;
     private final Context context;
     private final String senderId;
@@ -59,16 +54,28 @@ public class MessagesAdapter extends RecyclerView.Adapter {
 
     @NonNull
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public MessageViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(context);
 
-        if (viewType == ITEM_SENT) {
-            ItemSentBinding layoutBinding = DataBindingUtil.inflate(inflater, R.layout.item_sent, parent, false);
-            return new SenderViewHolder(layoutBinding);
+        ItemMessageBinding layoutBinding = DataBindingUtil.inflate(inflater, R.layout.item_message, parent, false);
+
+        if (viewType == ITEM_RECEIVE) {
+            RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams)layoutBinding.myLinearLayout.getLayoutParams();
+            params.addRule(RelativeLayout.ALIGN_PARENT_START);
+            layoutBinding.myLinearLayout.setLayoutParams(params);
+
+            layoutBinding.myLinearLayout.setBackground(ContextCompat.getDrawable(context, R.drawable.receiver_messages_layout));
+            layoutBinding.message.setTextColor(context.getResources().getColor(R.color.black));
+            layoutBinding.star.setColorFilter(ContextCompat.getColor(context, android.R.color.darker_gray));
         } else {
-            ItemReceiveBinding layoutBinding = DataBindingUtil.inflate(inflater, R.layout.item_receive, parent, false);
-            return new ReceiverViewHolder(layoutBinding);
+            RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams)layoutBinding.myLinearLayout.getLayoutParams();
+            params.addRule(RelativeLayout.ALIGN_PARENT_END);
+            layoutBinding.myLinearLayout.setLayoutParams(params);
+
+            layoutBinding.myLinearLayout.setBackground(ContextCompat.getDrawable(context, R.drawable.sender_messages_layout));
         }
+
+        return new MessageViewHolder(layoutBinding);
     }
 
     @Override
@@ -83,7 +90,7 @@ public class MessagesAdapter extends RecyclerView.Adapter {
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
-    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull MessageViewHolder holder, int position) {
         Message message = userMessageList.get(position);
         holder.setIsRecyclable(false);
 
@@ -100,166 +107,113 @@ public class MessagesAdapter extends RecyclerView.Adapter {
                 .withReactions(reactions)
                 .build();
 
-        ReactionPopup popup = new ReactionPopup(context, config, (pos) -> {
-            if (pos < 0)
-                return false;
-
-            if (holder.getClass() == SenderViewHolder.class) {
-                SenderViewHolder viewHolder = (SenderViewHolder) holder;
-                viewHolder.binding.feeling.setImageResource(reactions[pos]);
-                viewHolder.binding.feeling.setVisibility(View.VISIBLE);
-            } else {
-                ReceiverViewHolder viewHolder = (ReceiverViewHolder) holder;
-                viewHolder.binding.feeling.setImageResource(reactions[pos]);
-                viewHolder.binding.feeling.setVisibility(View.VISIBLE);
-            }
-            message.setFeeling(pos);
-
-            messageDatabaseReference
-                    .child(senderId)
-                    .child(receiverId)
-                    .child(message.getMessageId())
-                    .setValue(message);
-
-            messageDatabaseReference
-                    .child(receiverId)
-                    .child(senderId)
-                    .child(message.getMessageId())
-                    .setValue(message);
-            return true; // true is closing popup, false is requesting a new selection
-        });
-
-        String fromUserId = message.getFrom();
-        String fromMessageType = message.getType();
-
-        //Sent view holder
-        if (holder.getClass() == SenderViewHolder.class) {
-            SenderViewHolder viewHolder = (SenderViewHolder) holder;
-            viewHolder.binding.message.setText(message.getMessage());
-            viewHolder.binding.messageTime.setText(getDateTimeString(message.getTime()));
-
-            if (message.getStarred().contains(currentUser.getUid())) {
-                viewHolder.binding.star.setVisibility(View.VISIBLE);
-            }
-
-            if (fromMessageType.equals(context.getString(R.string.IMAGE))) {
-                viewHolder.binding.message.setVisibility(View.GONE);
-                viewHolder.binding.image.setVisibility(View.VISIBLE);
-
-                Picasso.get().load(message.getMessage()).placeholder(R.drawable.profile_image).into(viewHolder.binding.image);
-            } else if (fromMessageType.equals(context.getString(R.string.VIDEO))) {
-                viewHolder.binding.message.setVisibility(View.GONE);
-                viewHolder.binding.image.setVisibility(View.VISIBLE);
-                Picasso.get().load(message.getMessage()).placeholder(R.drawable.baseline_play_circle_outline_24).into(viewHolder.binding.image);
-//                viewHolder.binding.video.setVisibility(View.VISIBLE);
+//        ReactionPopup popup = new ReactionPopup(context, config, (pos) -> {
+//            if (pos < 0)
+//                return false;
 //
-
-            }
-
-            if (message.getFeeling() >= 0) {
-                viewHolder.binding.feeling.setImageResource(reactions[message.getFeeling()]);
-                viewHolder.binding.feeling.setVisibility(View.VISIBLE);
-            } else {
-                viewHolder.binding.feeling.setVisibility(View.GONE);
-            }
-
-            if (message.getType().equals(context.getString(R.string.VIDEO))) {
-                Glide.with(context).load(message.getMessage()).centerCrop().placeholder(R.drawable.baseline_play_circle_outline_24).into(viewHolder.binding.image);
-                viewHolder.binding.image.setOnClickListener(view -> ((ChatActivity)(context)).showVideoPreview(viewHolder.binding.image, message.getMessage()));
-            } else if (message.getType().equals(context.getString(R.string.IMAGE))) {
-                viewHolder.binding.image.setOnClickListener(view -> ((ChatActivity)(context)).showImagePreview(viewHolder.binding.image, message.getMessage()));
-            }
-
-        } else { // Receiver view holder
-            ReceiverViewHolder viewHolder = (ReceiverViewHolder) holder;
-            viewHolder.binding.message.setText(message.getMessage());
-            viewHolder.binding.messageTime.setText(getDateTimeString(message.getTime()));
-
-            if (message.getStarred().contains(currentUser.getUid())) {
-                viewHolder.binding.star.setVisibility(View.VISIBLE);
-            }
-
-            if (fromMessageType.equals(context.getString(R.string.IMAGE))) {
-                viewHolder.binding.message.setVisibility(View.GONE);
-                viewHolder.binding.image.setVisibility(View.VISIBLE);
-
-                Picasso.get().load(message.getMessage()).placeholder(R.drawable.profile_image).into(viewHolder.binding.image);
-            }
-
-            if (message.getFeeling() >= 0) {
-                viewHolder.binding.feeling.setImageResource(reactions[message.getFeeling()]);
-                viewHolder.binding.feeling.setVisibility(View.VISIBLE);
-            } else {
-                viewHolder.binding.feeling.setVisibility(View.GONE);
-            }
-
-            if (message.getType().equals(context.getString(R.string.VIDEO))) {
-                Glide.with(context).load(message.getMessage()).centerCrop().placeholder(R.drawable.baseline_play_circle_outline_24).into(viewHolder.binding.image);
-                viewHolder.binding.image.setOnClickListener(view -> ((ChatActivity)(context)).showVideoPreview(viewHolder.binding.image, message.getMessage()));
-            } else if (message.getType().equals(context.getString(R.string.IMAGE))) {
-                viewHolder.binding.image.setOnClickListener(view -> ((ChatActivity)(context)).showImagePreview(viewHolder.binding.image, message.getMessage()));
-            }
-
-//            viewHolder.binding.message.setOnTouchListener(new View.OnTouchListener() {
-//                View mView;
-//                final GestureDetector gestureDetector = new GestureDetector(ApplicationClass.context, new GestureDetector.SimpleOnGestureListener() {
-//                    @Override
-//                    public boolean onSingleTapConfirmed(@NonNull MotionEvent e) {
-//                        popup.onTouch(mView, e);
-//                        return super.onSingleTapConfirmed(e);
-//                    }
-//                });
+//            if (holder.getClass() == SenderViewHolder.class) {
+//                SenderViewHolder viewHolder = (SenderViewHolder) holder;
+//                viewHolder.binding.feeling.setImageResource(reactions[pos]);
+//                viewHolder.binding.feeling.setVisibility(View.VISIBLE);
+//            } else {
+//                ReceiverViewHolder viewHolder = (ReceiverViewHolder) holder;
+//                viewHolder.binding.feeling.setImageResource(reactions[pos]);
+//                viewHolder.binding.feeling.setVisibility(View.VISIBLE);
+//            }
+//            message.setFeeling(pos);
 //
+//            messageDatabaseReference
+//                    .child(senderId)
+//                    .child(receiverId)
+//                    .child(message.getMessageId())
+//                    .setValue(message);
 //
-//                @Override
-//                public boolean onTouch(View view, MotionEvent motionEvent) {
-//                    mView = view;
-//                    gestureDetector.onTouchEvent(motionEvent);
-//                    return false;
-//                }
-//            });
-//
-//            viewHolder.binding.image.setOnTouchListener(new View.OnTouchListener() {
-//                View mView;
-//                final GestureDetector gestureDetector = new GestureDetector(ApplicationClass.context, new GestureDetector.SimpleOnGestureListener() {
-//                    @Override
-//                    public boolean onSingleTapConfirmed(@NonNull MotionEvent e) {
-//                        popup.onTouch(mView, e);
-//                        return super.onSingleTapConfirmed(e);
-//                    }
-//                });
-//                @Override
-//                public boolean onTouch(View view, MotionEvent motionEvent) {
-//                    mView = view;
-//                    gestureDetector.onTouchEvent(motionEvent);
-//                    return false;
-//                }
-//            });
+//            messageDatabaseReference
+//                    .child(receiverId)
+//                    .child(senderId)
+//                    .child(message.getMessageId())
+//                    .setValue(message);
+//            return true; // true is closing popup, false is requesting a new selection
+//        });
 
-            userDatabaseReference
-                    .child(fromUserId)
-                    .addValueEventListener(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            if (snapshot.exists()) {
-                                if (snapshot.hasChild(context.getString(R.string.IMAGE))) {
-                                    String receiverImage = Objects.requireNonNull(snapshot.child(context.getString(R.string.IMAGE)).getValue()).toString();
-                                    Picasso.get().load(receiverImage).placeholder(R.drawable.profile_image).into(viewHolder.binding.profileImage);
-                                }
-                            }
-                        }
+        //Setting message and time
+        holder.binding.message.setText(message.getMessage());
+        holder.binding.messageTime.setText(getDateTimeString(message.getTime()));
 
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-
-                        }
-                    });
+        //Setting star visibility
+        if (message.getStarred().contains(currentUser.getUid())) {
+            holder.binding.star.setVisibility(View.VISIBLE);
         }
+
+        //Setting image if message type is image
+        if (message.getType().equals(context.getString(R.string.IMAGE))) {
+            holder.binding.message.setVisibility(View.GONE);
+            holder.binding.image.setVisibility(View.VISIBLE);
+
+            Picasso.get().load(message.getMessage()).placeholder(R.drawable.profile_image).into(holder.binding.image);
+        }
+
+//        if (message.getFeeling() >= 0) {
+//            holder.binding.feeling.setImageResource(reactions[message.getFeeling()]);
+//            holder.binding.feeling.setVisibility(View.VISIBLE);
+//        } else {
+//            viewHolder.binding.feeling.setVisibility(View.GONE);
+//        }
+
+        //Setting video if message type is video
+        if (message.getType().equals(context.getString(R.string.VIDEO))) {
+            Glide.with(context).load(message.getMessage()).centerCrop().placeholder(R.drawable.baseline_play_circle_outline_24).into(holder.binding.image);
+            holder.binding.image.setOnClickListener(view -> ((ChatActivity)(context)).showVideoPreview(holder.binding.image, message.getMessage()));
+        } else if (message.getType().equals(context.getString(R.string.IMAGE))) {
+            holder.binding.image.setOnClickListener(view -> ((ChatActivity)(context)).showImagePreview(holder.binding.image, message.getMessage()));
+        }
+
+//
+//        } else { // Receiver view holder
+//            ReceiverViewHolder viewHolder = (ReceiverViewHolder) holder;
+//
+////            viewHolder.binding.message.setOnTouchListener(new View.OnTouchListener() {
+////                View mView;
+////                final GestureDetector gestureDetector = new GestureDetector(ApplicationClass.context, new GestureDetector.SimpleOnGestureListener() {
+////                    @Override
+////                    public boolean onSingleTapConfirmed(@NonNull MotionEvent e) {
+////                        popup.onTouch(mView, e);
+////                        return super.onSingleTapConfirmed(e);
+////                    }
+////                });
+////
+////
+////                @Override
+////                public boolean onTouch(View view, MotionEvent motionEvent) {
+////                    mView = view;
+////                    gestureDetector.onTouchEvent(motionEvent);
+////                    return false;
+////                }
+////            });
+////
+////            viewHolder.binding.image.setOnTouchListener(new View.OnTouchListener() {
+////                View mView;
+////                final GestureDetector gestureDetector = new GestureDetector(ApplicationClass.context, new GestureDetector.SimpleOnGestureListener() {
+////                    @Override
+////                    public boolean onSingleTapConfirmed(@NonNull MotionEvent e) {
+////                        popup.onTouch(mView, e);
+////                        return super.onSingleTapConfirmed(e);
+////                    }
+////                });
+////                @Override
+////                public boolean onTouch(View view, MotionEvent motionEvent) {
+////                    mView = view;
+////                    gestureDetector.onTouchEvent(motionEvent);
+////                    return false;
+////                }
+////            });
+//
+//        }
         showMenuOnLongClick(holder, message);
     }
 
     @SuppressLint("SetTextI18n")
-    private void showMenuOnLongClick(RecyclerView.ViewHolder holder, Message message) {
+    private void showMenuOnLongClick(MessageViewHolder holder, Message message) {
 
         View contentView = View.inflate(context, R.layout.message_bottom_sheet_layout, null);
 
@@ -276,51 +230,26 @@ public class MessagesAdapter extends RecyclerView.Adapter {
 
         Objects.requireNonNull(cancel).setOnClickListener(view -> bottomSheetDialog.dismiss());
 
-        View clicked_message;
+        View clicked_message = holder.binding.myLinearLayout;
 
-        if (holder.getClass() == SenderViewHolder.class) {
-            SenderViewHolder viewHolder = (SenderViewHolder) holder;
-            clicked_message = viewHolder.binding.myLinearLayout;
-            if (message.getType().equals(context.getString(R.string.IMAGE))) {
-                clicked_message = viewHolder.binding.image;
-            }
+        if (message.getType().equals(context.getString(R.string.IMAGE))) {
+            clicked_message = holder.binding.image;
+        }
 
-            if (viewHolder.binding.star.getVisibility() == View.VISIBLE) {
-                ((TextView)(Objects.requireNonNull(bottomSheetDialog.findViewById(R.id.star_text)))).setText("Unstar");
-                ((ImageView)(Objects.requireNonNull(bottomSheetDialog.findViewById(R.id.star_icon)))).setImageResource(R.drawable.baseline_unstar_24);
-                Objects.requireNonNull(star).setOnClickListener(view -> {
-                    FCMMessaging.unStarMessage(message);
-                    bottomSheetDialog.dismiss();
-                });
-            } else {
-                ((TextView)(Objects.requireNonNull(bottomSheetDialog.findViewById(R.id.star_text)))).setText("star");
-                ((ImageView)(Objects.requireNonNull(bottomSheetDialog.findViewById(R.id.star_icon)))).setImageResource(R.drawable.baseline_star_24);
-                Objects.requireNonNull(star).setOnClickListener(view -> {
-                    FCMMessaging.starMessage(message);
-                    bottomSheetDialog.dismiss();
-                });
-            }
+        if (holder.binding.star.getVisibility() == View.VISIBLE) {
+            ((TextView)(Objects.requireNonNull(bottomSheetDialog.findViewById(R.id.star_text)))).setText("Unstar");
+            ((ImageView)(Objects.requireNonNull(bottomSheetDialog.findViewById(R.id.star_icon)))).setImageResource(R.drawable.baseline_unstar_24);
+            Objects.requireNonNull(star).setOnClickListener(view -> {
+                FCMMessaging.unStarMessage(message);
+                bottomSheetDialog.dismiss();
+            });
         } else {
-            ReceiverViewHolder viewHolder = (ReceiverViewHolder) holder;
-            clicked_message = viewHolder.binding.myLinearLayout;
-            if (message.getType().equals(context.getString(R.string.IMAGE))) {
-                clicked_message = viewHolder.binding.image;
-            }
-            if (viewHolder.binding.star.getVisibility() == View.VISIBLE) {
-                ((TextView)(Objects.requireNonNull(bottomSheetDialog.findViewById(R.id.star_text)))).setText("Unstar");
-                ((ImageView)(Objects.requireNonNull(bottomSheetDialog.findViewById(R.id.star_icon)))).setImageResource(R.drawable.baseline_unstar_24);
-                Objects.requireNonNull(star).setOnClickListener(view -> {
-                    FCMMessaging.unStarMessage(message);
-                    bottomSheetDialog.dismiss();
-                });
-            } else {
-                ((TextView)(Objects.requireNonNull(bottomSheetDialog.findViewById(R.id.star_text)))).setText("star");
-                ((ImageView)(Objects.requireNonNull(bottomSheetDialog.findViewById(R.id.star_icon)))).setImageResource(R.drawable.baseline_star_24);
-                Objects.requireNonNull(star).setOnClickListener(view -> {
-                    FCMMessaging.starMessage(message);
-                    bottomSheetDialog.dismiss();
-                });
-            }
+            ((TextView)(Objects.requireNonNull(bottomSheetDialog.findViewById(R.id.star_text)))).setText("star");
+            ((ImageView)(Objects.requireNonNull(bottomSheetDialog.findViewById(R.id.star_icon)))).setImageResource(R.drawable.baseline_star_24);
+            Objects.requireNonNull(star).setOnClickListener(view -> {
+                FCMMessaging.starMessage(message);
+                bottomSheetDialog.dismiss();
+            });
         }
 
         clicked_message.setOnLongClickListener(view -> {
@@ -391,17 +320,9 @@ public class MessagesAdapter extends RecyclerView.Adapter {
         return userMessageList.size();
     }
 
-    static class SenderViewHolder extends RecyclerView.ViewHolder {
-        public final ItemSentBinding binding;
-        public SenderViewHolder(@NonNull ItemSentBinding binding) {
-            super(binding.getRoot());
-            this.binding = binding;
-        }
-    }
-
-     static class ReceiverViewHolder extends RecyclerView.ViewHolder {
-        public final ItemReceiveBinding binding;
-        public ReceiverViewHolder(@NonNull ItemReceiveBinding binding) {
+        static class MessageViewHolder extends RecyclerView.ViewHolder {
+        public final ItemMessageBinding binding;
+        public MessageViewHolder(@NonNull ItemMessageBinding binding) {
             super(binding.getRoot());
             this.binding = binding;
         }
