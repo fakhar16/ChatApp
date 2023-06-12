@@ -5,6 +5,7 @@ import static com.samsung.whatsapp.utils.Utils.currentUser;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +22,7 @@ import com.samsung.whatsapp.databinding.ItemStarMessageBinding;
 import com.samsung.whatsapp.model.Message;
 import com.samsung.whatsapp.model.User;
 import com.samsung.whatsapp.utils.Utils;
+import com.samsung.whatsapp.view.activities.ChatActivity;
 import com.samsung.whatsapp.view.activities.StarMessageActivity;
 import com.squareup.picasso.Picasso;
 
@@ -70,6 +72,13 @@ public class StarredMessagesAdapter extends RecyclerView.Adapter<StarredMessages
                         }
                     });
         }
+
+        holder.binding.lowerInfo.setOnClickListener(view -> {
+            Intent intent = new Intent(context, ChatActivity.class);
+            String visit_user_id = message.getFrom().equals(currentUser.getUid())? message.getTo(): message.getFrom();
+            intent.putExtra(context.getString(R.string.VISIT_USER_ID), visit_user_id);
+            context.startActivity(intent);
+        });
     }
 
     @SuppressLint("SetTextI18n")
