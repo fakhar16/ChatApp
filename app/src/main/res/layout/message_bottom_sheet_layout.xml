@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -19,6 +20,17 @@
             android:background="?android:attr/selectableItemBackground"
             android:padding="8dp">
 
+            <TextView
+                android:id="@+id/star_text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Star"
+                android:layout_weight="1"
+                android:textColor="@android:color/white"
+                android:layout_gravity="center_vertical"
+                android:padding="8dp"
+                tools:ignore="HardcodedText" />
+
             <ImageView
                 android:id="@+id/star_icon"
                 android:layout_width="24dp"
@@ -26,14 +38,6 @@
                 android:src="@drawable/baseline_star_24"
                 android:layout_margin="8dp"/>
 
-            <TextView
-                android:id="@+id/star_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Star"
-                android:textColor="@android:color/white"
-                android:layout_gravity="center_vertical"
-                android:padding="8dp"/>
         </LinearLayout>
         <LinearLayout
             android:layout_width="match_parent"
@@ -42,20 +46,21 @@
             android:id="@+id/copy"
             android:background="?android:attr/selectableItemBackground"
             android:padding="8dp">
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Copy"
+                android:layout_weight="1"
+                android:textColor="@android:color/white"
+                android:layout_gravity="center_vertical"
+                android:padding="8dp"
+                tools:ignore="HardcodedText" />
 
             <ImageView
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:src="@drawable/baseline_content_copy_24"
                 android:layout_margin="8dp"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Copy"
-                android:textColor="@android:color/white"
-                android:layout_gravity="center_vertical"
-                android:padding="8dp"/>
         </LinearLayout>
         <LinearLayout
             android:layout_width="match_parent"
@@ -64,21 +69,21 @@
             android:id="@+id/forward"
             android:background="?android:attr/selectableItemBackground"
             android:padding="8dp">
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Forward"
+                android:layout_weight="1"
+                android:textColor="@android:color/white"
+                android:layout_gravity="center_vertical"
+                android:padding="8dp"
+                tools:ignore="HardcodedText" />
 
             <ImageView
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:src="@drawable/baseline_forward_24"
                 android:layout_margin="8dp"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Forward"
-                android:textColor="@android:color/white"
-                android:layout_gravity="center_vertical"
-                android:padding="8dp"/>
-
         </LinearLayout>
         <LinearLayout
             android:layout_width="match_parent"
@@ -88,20 +93,21 @@
             android:background="?android:attr/selectableItemBackground"
             android:padding="8dp">
 
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Delete"
+                android:layout_weight="1"
+                android:textColor="@android:color/white"
+                android:layout_gravity="center_vertical"
+                android:padding="8dp"
+                tools:ignore="HardcodedText" />
+
             <ImageView
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:src="@drawable/baseline_delete_24"
                 android:layout_margin="8dp"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Delete"
-                android:textColor="@android:color/white"
-                android:layout_gravity="center_vertical"
-                android:padding="8dp"/>
-
         </LinearLayout>
     </LinearLayout>
 

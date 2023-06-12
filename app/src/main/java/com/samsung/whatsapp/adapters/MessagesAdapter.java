@@ -4,9 +4,10 @@ import static com.samsung.whatsapp.utils.Utils.currentUser;
 import static com.samsung.whatsapp.utils.Utils.getDateTimeString;
 
 import android.annotation.SuppressLint;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.graphics.Color;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -224,11 +225,17 @@ public class MessagesAdapter extends RecyclerView.Adapter<MessagesAdapter.Messag
         ((View) contentView.getParent()).setBackgroundColor(Color.TRANSPARENT);
 
         LinearLayout star = bottomSheetDialog.findViewById(R.id.star);
-//        LinearLayout copy = bottomSheetDialog.findViewById(R.id.copy);
+        LinearLayout copy = bottomSheetDialog.findViewById(R.id.copy);
 //        LinearLayout forward = bottomSheetDialog.findViewById(R.id.forward);
 //        LinearLayout delete = bottomSheetDialog.findViewById(R.id.delete);
         Button cancel = bottomSheetDialog.findViewById(R.id.cancel);
 
+        Objects.requireNonNull(copy).setOnClickListener(view -> {
+            ClipboardManager clipboardManager = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+            ClipData clipData = ClipData.newPlainText("user_message_text", message.getMessage());
+            clipboardManager.setPrimaryClip(clipData);
+            bottomSheetDialog.dismiss();
+        });
         Objects.requireNonNull(cancel).setOnClickListener(view -> bottomSheetDialog.dismiss());
 
         View clicked_message = holder.binding.myLinearLayout;
