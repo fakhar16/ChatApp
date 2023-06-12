@@ -56,7 +56,6 @@ public class FCMNotificationService extends FirebaseMessagingService {
 
     @Override
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
-        Log.wtf(TAG, "onMessageReceived: called");
         Map<String, String> data =  remoteMessage.getData();
 
         String type = data.get(context.getString(R.string.TYPE));

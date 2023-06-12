@@ -30,7 +30,7 @@ public class ApplicationClass extends Application {
         super.onCreate();
         context = this;
 
-        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+//        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
         FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
 
         initializeDatabaseReferences(firebaseDatabase);

@@ -57,11 +57,11 @@ import com.samsung.whatsapp.databinding.ActivityChatBinding;
 import com.samsung.whatsapp.databinding.CustomChatBarBinding;
 import com.samsung.whatsapp.webrtc.CallActivity;
 import com.squareup.picasso.Picasso;
-import com.tougee.recorderview.AudioRecordView;
+//import com.tougee.recorderview.AudioRecordView;
 
 import java.util.Objects;
 
-public class ChatActivity extends BaseActivity implements AudioRecordView.Callback{
+public class ChatActivity extends BaseActivity{
     private String messageReceiverId;
     private MessagesAdapter messagesAdapter;
     private ActivityChatBinding binding;
@@ -355,35 +355,35 @@ public class ChatActivity extends BaseActivity implements AudioRecordView.Callba
         }
     }
 
-    @Override
-    public boolean isReady() {
-        return true;
-    }
-
-    @Override
-    public void onRecordCancel() {
-        Log.wtf(TAG, "onRecordCancel: called");
-        binding.camera.setVisibility(View.VISIBLE);
-        binding.attachMenu.setVisibility(View.VISIBLE);
-        binding.messageInputText.setVisibility(View.VISIBLE);
-        binding.sendMessageBtn.setVisibility(View.VISIBLE);
-    }
-
-    @Override
-    public void onRecordEnd() {
-        Log.wtf(TAG, "onRecordEnd: called");
-        binding.camera.setVisibility(View.VISIBLE);
-        binding.attachMenu.setVisibility(View.VISIBLE);
-        binding.messageInputText.setVisibility(View.VISIBLE);
-        binding.sendMessageBtn.setVisibility(View.VISIBLE);
-    }
-
-    @Override
-    public void onRecordStart() {
-        Log.wtf(TAG, "onRecordStart: called");
-        binding.camera.setVisibility(View.INVISIBLE);
-        binding.attachMenu.setVisibility(View.INVISIBLE);
-        binding.messageInputText.setVisibility(View.INVISIBLE);
-        binding.sendMessageBtn.setVisibility(View.INVISIBLE);
-    }
+//    @Override
+//    public boolean isReady() {
+//        return true;
+//    }
+//
+//    @Override
+//    public void onRecordCancel() {
+//        Log.wtf(TAG, "onRecordCancel: called");
+//        binding.camera.setVisibility(View.VISIBLE);
+//        binding.attachMenu.setVisibility(View.VISIBLE);
+//        binding.messageInputText.setVisibility(View.VISIBLE);
+//        binding.sendMessageBtn.setVisibility(View.VISIBLE);
+//    }
+//
+//    @Override
+//    public void onRecordEnd() {
+//        Log.wtf(TAG, "onRecordEnd: called");
+//        binding.camera.setVisibility(View.VISIBLE);
+//        binding.attachMenu.setVisibility(View.VISIBLE);
+//        binding.messageInputText.setVisibility(View.VISIBLE);
+//        binding.sendMessageBtn.setVisibility(View.VISIBLE);
+//    }
+//
+//    @Override
+//    public void onRecordStart() {
+//        Log.wtf(TAG, "onRecordStart: called");
+//        binding.camera.setVisibility(View.INVISIBLE);
+//        binding.attachMenu.setVisibility(View.INVISIBLE);
+//        binding.messageInputText.setVisibility(View.INVISIBLE);
+//        binding.sendMessageBtn.setVisibility(View.INVISIBLE);
+//    }
 }

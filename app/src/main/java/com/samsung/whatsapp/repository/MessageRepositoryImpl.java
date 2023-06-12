@@ -16,8 +16,8 @@ import java.util.ArrayList;
 
 public class MessageRepositoryImpl implements IMessageRepository {
     static MessageRepositoryImpl instance;
-    private final ArrayList<Message> mMessages = new ArrayList<>();
-    private final ArrayList<Message> mStarredMessages = new ArrayList<>();
+    private ArrayList<Message> mMessages;
+    private  ArrayList<Message> mStarredMessages;
     MutableLiveData<ArrayList<Message>> messages = new MutableLiveData<>();
     MutableLiveData<ArrayList<Message>> starMessages = new MutableLiveData<>();
 
@@ -30,18 +30,16 @@ public class MessageRepositoryImpl implements IMessageRepository {
 
     @Override
     public MutableLiveData<ArrayList<Message>> getMessages(String sender, String receiver) {
-        if (mMessages.size() == 0)
-            loadMessages(sender, receiver);
-
+        mMessages = new ArrayList<>();
+        loadMessages(sender, receiver);
         messages.setValue(mMessages);
         return messages;
     }
 
     @Override
     public MutableLiveData<ArrayList<Message>> getStarredMessages(String uid) {
-        if (mStarredMessages.size() == 0)
-            loadStarMessages(uid);
-
+        mStarredMessages = new ArrayList<>();
+        loadStarMessages(uid);
         starMessages.setValue(mStarredMessages);
         return starMessages;
     }
