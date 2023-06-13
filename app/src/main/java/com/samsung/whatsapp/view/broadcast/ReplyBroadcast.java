@@ -13,7 +13,7 @@ import androidx.core.app.NotificationManagerCompat;
 import com.samsung.whatsapp.ApplicationClass;
 import com.samsung.whatsapp.R;
 import com.samsung.whatsapp.fcm.FCMNotificationService;
-import com.samsung.whatsapp.utils.FCMMessaging;
+import com.samsung.whatsapp.utils.FirebaseUtils;
 
 public class ReplyBroadcast extends BroadcastReceiver {
     @Override
@@ -28,7 +28,7 @@ public class ReplyBroadcast extends BroadcastReceiver {
 
         if (remoteReply != null) {
             String message = remoteReply.getCharSequence(FCMNotificationService.KEY_TEXT_REPLY).toString();
-            FCMMessaging.sendMessage(message, messageSenderId, messageReceiverId);
+            FirebaseUtils.sendMessage(message, messageSenderId, messageReceiverId);
             NotificationManagerCompat.from(context).cancel(INCOMING_MESSAGE_NOTIFICATION_ID);
         }
     }

@@ -8,6 +8,7 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.graphics.Color;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,7 +31,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.samsung.whatsapp.databinding.ItemMessageBinding;
 import com.samsung.whatsapp.model.Message;
 import com.samsung.whatsapp.R;
-import com.samsung.whatsapp.utils.FCMMessaging;
+import com.samsung.whatsapp.utils.FirebaseUtils;
 import com.samsung.whatsapp.view.activities.ChatActivity;
 import com.squareup.picasso.Picasso;
 
@@ -45,7 +46,7 @@ public class MessagesAdapter extends RecyclerView.Adapter<MessagesAdapter.Messag
     final int ITEM_SENT = 1;
     final int ITEM_RECEIVE = 2;
 
-//    private static final String TAG = "ConsoleMessagesAdapter";
+    private static final String TAG = "ConsoleMessagesAdapter";
 
     public MessagesAdapter(Context context, String senderId, String receiverId, ArrayList<Message> userMessageList) {
         this.context = context;
@@ -57,9 +58,7 @@ public class MessagesAdapter extends RecyclerView.Adapter<MessagesAdapter.Messag
     @NonNull
     @Override
     public MessageViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        LayoutInflater inflater = LayoutInflater.from(context);
-
-        ItemMessageBinding layoutBinding = DataBindingUtil.inflate(inflater, R.layout.item_message, parent, false);
+        ItemMessageBinding layoutBinding = DataBindingUtil.inflate(LayoutInflater.from(context), R.layout.item_message, parent, false);
 
         if (viewType == ITEM_RECEIVE) {
             RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams)layoutBinding.myLinearLayout.getLayoutParams();
@@ -100,18 +99,18 @@ public class MessagesAdapter extends RecyclerView.Adapter<MessagesAdapter.Messag
         Message message = userMessageList.get(position);
         holder.setIsRecyclable(false);
 
-        int[] reactions = new int[]{
-                R.drawable.ic_fb_like,
-                R.drawable.ic_fb_love,
-                R.drawable.ic_fb_laugh,
-                R.drawable.ic_fb_wow,
-                R.drawable.ic_fb_sad,
-                R.drawable.ic_fb_angry
-        };
+//        int[] reactions = new int[]{
+//                R.drawable.ic_fb_like,
+//                R.drawable.ic_fb_love,
+//                R.drawable.ic_fb_laugh,
+//                R.drawable.ic_fb_wow,
+//                R.drawable.ic_fb_sad,
+//                R.drawable.ic_fb_angry
+//        };
 
-        ReactionsConfig config = new ReactionsConfigBuilder(context)
-                .withReactions(reactions)
-                .build();
+//        ReactionsConfig config = new ReactionsConfigBuilder(context)
+//                .withReactions(reactions)
+//                .build();
 
 //        ReactionPopup popup = new ReactionPopup(context, config, (pos) -> {
 //            if (pos < 0)
@@ -215,11 +214,11 @@ public class MessagesAdapter extends RecyclerView.Adapter<MessagesAdapter.Messag
 ////            });
 //
 //        }
-        showMenuOnLongClick(holder, message);
+        messageBottomSheetHandler(holder, message);
     }
 
     @SuppressLint("SetTextI18n")
-    private void showMenuOnLongClick(MessageViewHolder holder, Message message) {
+    private void messageBottomSheetHandler(MessageViewHolder holder, Message message) {
 
         View contentView = View.inflate(context, R.layout.message_bottom_sheet_layout, null);
 
@@ -231,15 +230,18 @@ public class MessagesAdapter extends RecyclerView.Adapter<MessagesAdapter.Messag
         LinearLayout star = bottomSheetDialog.findViewById(R.id.star);
         LinearLayout copy = bottomSheetDialog.findViewById(R.id.copy);
 //        LinearLayout forward = bottomSheetDialog.findViewById(R.id.forward);
-//        LinearLayout delete = bottomSheetDialog.findViewById(R.id.delete);
+        LinearLayout delete = bottomSheetDialog.findViewById(R.id.delete);
         Button cancel = bottomSheetDialog.findViewById(R.id.cancel);
 
+        //Copy click handler
         Objects.requireNonNull(copy).setOnClickListener(view -> {
             ClipboardManager clipboardManager = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
             ClipData clipData = ClipData.newPlainText("user_message_text", message.getMessage());
             clipboardManager.setPrimaryClip(clipData);
             bottomSheetDialog.dismiss();
         });
+
+        //Cancel click handler
         Objects.requireNonNull(cancel).setOnClickListener(view -> bottomSheetDialog.dismiss());
 
         View clicked_message = holder.binding.myLinearLayout;
@@ -248,91 +250,88 @@ public class MessagesAdapter extends RecyclerView.Adapter<MessagesAdapter.Messag
             clicked_message = holder.binding.image;
         }
 
+        //Star click handler
         if (holder.binding.star.getVisibility() == View.VISIBLE) {
             ((TextView)(Objects.requireNonNull(bottomSheetDialog.findViewById(R.id.star_text)))).setText("Unstar");
             ((ImageView)(Objects.requireNonNull(bottomSheetDialog.findViewById(R.id.star_icon)))).setImageResource(R.drawable.baseline_unstar_24);
             Objects.requireNonNull(star).setOnClickListener(view -> {
-                FCMMessaging.unStarMessage(message);
+                FirebaseUtils.unStarMessage(message);
                 bottomSheetDialog.dismiss();
             });
         } else {
             ((TextView)(Objects.requireNonNull(bottomSheetDialog.findViewById(R.id.star_text)))).setText("star");
             ((ImageView)(Objects.requireNonNull(bottomSheetDialog.findViewById(R.id.star_icon)))).setImageResource(R.drawable.baseline_star_24);
             Objects.requireNonNull(star).setOnClickListener(view -> {
-                FCMMessaging.starMessage(message);
+                FirebaseUtils.starMessage(message);
                 bottomSheetDialog.dismiss();
             });
         }
 
+        Objects.requireNonNull(delete).setOnClickListener(view -> {
+            showMessageDeleteMenu(message);
+            bottomSheetDialog.dismiss();
+        });
+
+        //Showing bottom sheet dialog
         clicked_message.setOnLongClickListener(view -> {
             bottomSheetDialog.show();
             return true;
         });
     }
 
-//    private void deleteSentMessage(final int position, final MessageViewHolder holder) {
-//        DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference();
-//        rootRef.child(context.getString(R.string.MESSAGES))
-//                .child(userMessageList.get(position).getFrom())
-//                .child(userMessageList.get(position).getTo())
-//                .child(userMessageList.get(position).getMessageId())
-//                .removeValue()
-//                .addOnCompleteListener(task -> {
-//                    if (task.isSuccessful()) {
-//                        Toast.makeText(holder.itemView.getContext(), "Deleted message successfully", Toast.LENGTH_SHORT).show();
-//                    } else {
-//                        Toast.makeText(holder.itemView.getContext(), "Error while deleting messaging", Toast.LENGTH_SHORT).show();
-//                    }
-//                });
-//    }
-//
-//    private void deleteReceiveMessage(final int position, final MessageViewHolder holder) {
-//        DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference();
-//        rootRef.child(context.getString(R.string.MESSAGES))
-//                .child(userMessageList.get(position).getTo())
-//                .child(userMessageList.get(position).getFrom())
-//                .child(userMessageList.get(position).getMessageId())
-//                .removeValue()
-//                .addOnCompleteListener(task -> {
-//                    if (task.isSuccessful()) {
-//                        Toast.makeText(holder.itemView.getContext(), "Deleted message successfully", Toast.LENGTH_SHORT).show();
-//                    } else {
-//                        Toast.makeText(holder.itemView.getContext(), "Error while deleting messaging", Toast.LENGTH_SHORT).show();
-//                    }
-//                });
-//    }
-//
-//    private void deleteMessageForEveryone(final int position, final MessageViewHolder holder) {
-//        DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference();
-//        rootRef.child(context.getString(R.string.MESSAGES))
-//                .child(userMessageList.get(position).getFrom())
-//                .child(userMessageList.get(position).getTo())
-//                .child(userMessageList.get(position).getMessageId())
-//                .removeValue()
-//                .addOnCompleteListener(task -> {
-//                    if (task.isSuccessful()) {
-//                        rootRef.child(context.getString(R.string.MESSAGES))
-//                                .child(userMessageList.get(position).getTo())
-//                                .child(userMessageList.get(position).getFrom())
-//                                .child(userMessageList.get(position).getMessageId())
-//                                .removeValue()
-//                                .addOnCompleteListener(task1 -> {
-//                                    if (task1.isSuccessful()) {
-//                                        Toast.makeText(holder.itemView.getContext(), "Deleted message successfully", Toast.LENGTH_SHORT).show();
-//                                    }
-//                                });
-//                    } else {
-//                        Toast.makeText(holder.itemView.getContext(), "Error while deleting messaging", Toast.LENGTH_SHORT).show();
-//                    }
-//                });
-//    }
+    private void showMessageDeleteMenu(Message message) {
+        View contentView = View.inflate(context, R.layout.delete_message_bottom_sheet_layout, null);
+
+        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(context);
+        bottomSheetDialog.setContentView(contentView);
+        bottomSheetDialog.setCanceledOnTouchOutside(false);
+        ((View) contentView.getParent()).setBackgroundColor(Color.TRANSPARENT);
+        bottomSheetDialog.show();
+
+        TextView delete_for_everyone = bottomSheetDialog.findViewById(R.id.delete_for_everyone);
+        TextView delete_for_me = bottomSheetDialog.findViewById(R.id.delete_for_me);
+        Button cancel = bottomSheetDialog.findViewById(R.id.cancel);
+
+        if (getItemViewType(userMessageList.indexOf(message)) == ITEM_RECEIVE) {
+            Objects.requireNonNull(delete_for_everyone).setVisibility(View.GONE);
+        }
+
+        //Cancel button handler
+        Objects.requireNonNull(cancel).setOnClickListener(view -> bottomSheetDialog.dismiss());
+
+        //Delete for everyone clicked
+        Objects.requireNonNull(delete_for_everyone).setOnClickListener(view -> {
+            FirebaseUtils.deleteMessageForEveryone(message);
+            updateLastMessage(message);
+            bottomSheetDialog.dismiss();
+        });
+
+        Objects.requireNonNull(delete_for_me).setOnClickListener(view -> {
+            FirebaseUtils.deleteMessage(message);
+            updateLastMessage(message);
+            bottomSheetDialog.dismiss();
+        });
+    }
+
+    private void updateLastMessage(Message message) {
+        // if user removed last message in the list
+        if (userMessageList.indexOf(message) == userMessageList.size() -1 && userMessageList.size() >= 2)
+            FirebaseUtils.updateLastMessage(userMessageList.get(userMessageList.size() - 2));
+        //if user removed the only message
+        if (userMessageList.size() == 1)
+            FirebaseUtils.removeLastMessages(message.getFrom(), message.getTo());
+
+        //if deleted message is starred
+        if (message.getStarred().contains(":" + currentUser.getUid()))
+            FirebaseUtils.deleteStarredMessage(message.getMessageId());
+    }
 
     @Override
     public int getItemCount() {
         return userMessageList.size();
     }
 
-        static class MessageViewHolder extends RecyclerView.ViewHolder {
+    static class MessageViewHolder extends RecyclerView.ViewHolder {
         public final ItemMessageBinding binding;
         public MessageViewHolder(@NonNull ItemMessageBinding binding) {
             super(binding.getRoot());

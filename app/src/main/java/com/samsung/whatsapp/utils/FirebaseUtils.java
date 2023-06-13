@@ -37,7 +37,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public class FCMMessaging {
+public class FirebaseUtils {
     private static final String TAG = "ConsoleFCMMessaging";
     public static void sendMessage(String message, String messageSenderId, String messageReceiverId) {
         if (!TextUtils.isEmpty(message)) {
@@ -65,7 +65,7 @@ public class FCMMessaging {
                         }
                     });
 
-            updateLastMessage(messageSenderId, messageReceiverId, message, new Date().getTime());
+            updateLastMessage(obj_message);
             sendNotification(message, messageReceiverId, messageSenderId, TYPE_MESSAGE);
         }
     }
@@ -108,20 +108,27 @@ public class FCMMessaging {
 
     }
 
-    private static void updateLastMessage(String senderId, String receiverId, String message, long time) {
+    public static void updateLastMessage(Message message) {
         Map<String, Object> lastMsgObj = new HashMap<>();
-        lastMsgObj.put(context.getString(R.string.LAST_MESSAGE_DETAILS), message);
-        lastMsgObj.put(context.getString(R.string.LAST_MESSAGE_TIME), time);
+        lastMsgObj.put(context.getString(R.string.LAST_MESSAGE_DETAILS), message.getMessage());
+        lastMsgObj.put(context.getString(R.string.LAST_MESSAGE_TIME), message.getTime());
 
         messageDatabaseReference
-                .child(senderId)
-                .child(context.getString(R.string.LAST_MESSAGE_WITH_) + receiverId)
+                .child(message.getFrom())
+                .child(context.getString(R.string.LAST_MESSAGE_WITH_) + message.getTo())
                 .updateChildren(lastMsgObj);
 
         messageDatabaseReference
-                .child(receiverId)
-                .child(context.getString(R.string.LAST_MESSAGE_WITH_) + senderId)
+                .child(message.getTo())
+                .child(context.getString(R.string.LAST_MESSAGE_WITH_) + message.getFrom())
                 .updateChildren(lastMsgObj);
+    }
+
+    public static void removeLastMessages(String sender, String receiver) {
+        messageDatabaseReference
+                .child(sender)
+                .child(context.getString(R.string.LAST_MESSAGE_WITH_) + receiver)
+                .removeValue();
     }
 
     public static void sendImage(String messageSenderId, String messageReceiverId, Uri fileUri, Activity activity, View dialog) {
@@ -164,7 +171,7 @@ public class FCMMessaging {
                             }
                         });
 
-                updateLastMessage(messageSenderId, messageReceiverId, "Photo", new Date().getTime());
+                updateLastMessage(obj_message);
                 sendNotification("Sent an image", messageReceiverId, messageSenderId, TYPE_MESSAGE);
             }
         });
@@ -207,7 +214,7 @@ public class FCMMessaging {
                                 }
                             });
 
-                    updateLastMessage(messageSenderId, messageReceiverId, "Video", new Date().getTime());
+                    updateLastMessage(obj_message);
                     sendNotification("Sent a video", messageReceiverId, messageSenderId, TYPE_MESSAGE);
                 });
     }
@@ -257,5 +264,34 @@ public class FCMMessaging {
                 .child(message.getMessageId())
                 .child(context.getString(R.string.STARRED))
                 .setValue(starredUser);
+    }
+
+    public static void deleteStarredMessage(String message_id) {
+        starMessagesDatabaseReference
+                .child(Utils.currentUser.getUid())
+                .child(message_id)
+                .removeValue();
+    }
+
+    public static void deleteMessage(Message message) {
+        messageDatabaseReference
+                .child(message.getFrom())
+                .child(message.getTo())
+                .child(message.getMessageId())
+                .removeValue();
+    }
+
+    public static void deleteMessageForEveryone(Message message) {
+        messageDatabaseReference
+                .child(message.getFrom())
+                .child(message.getTo())
+                .child(message.getMessageId())
+                .removeValue();
+
+        messageDatabaseReference
+                .child(message.getTo())
+                .child(message.getFrom())
+                .child(message.getMessageId())
+                .removeValue();
     }
 }

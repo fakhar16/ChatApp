@@ -13,7 +13,7 @@ import android.content.Intent;
 
 import com.samsung.whatsapp.ApplicationClass;
 import com.samsung.whatsapp.R;
-import com.samsung.whatsapp.utils.FCMMessaging;
+import com.samsung.whatsapp.utils.FirebaseUtils;
 
 public class HungUpBroadcast extends BroadcastReceiver {
     @Override
@@ -24,7 +24,7 @@ public class HungUpBroadcast extends BroadcastReceiver {
         videoUserDatabaseReference.child(receiverId).setValue(null);
 
         NotificationManagerCompat.from(context).cancel(INCOMING_CALL_NOTIFICATION_ID);
-        FCMMessaging.sendNotification("", senderId, receiverId, TYPE_DISCONNECT_CALL_BY_OTHER_USER);
+        FirebaseUtils.sendNotification("", senderId, receiverId, TYPE_DISCONNECT_CALL_BY_OTHER_USER);
     }
 
 }

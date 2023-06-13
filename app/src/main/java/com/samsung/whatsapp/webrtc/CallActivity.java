@@ -29,7 +29,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.samsung.whatsapp.R;
 import com.samsung.whatsapp.databinding.ActivityCallBinding;
 import com.samsung.whatsapp.model.User;
-import com.samsung.whatsapp.utils.FCMMessaging;
+import com.samsung.whatsapp.utils.FirebaseUtils;
 import com.samsung.whatsapp.view.activities.BaseActivity;
 import com.samsung.whatsapp.webrtc.models.JavaScriptInterface;
 import com.squareup.picasso.Picasso;
@@ -40,7 +40,6 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class CallActivity extends BaseActivity {
-
     ActivityCallBinding binding;
     String sender = "";
     String receiver = "";
@@ -240,7 +239,7 @@ public class CallActivity extends BaseActivity {
     }
 
     private void disconnectCall() {
-        FCMMessaging.sendNotification("", receiver, sender, TYPE_DISCONNECT_CALL_BY_USER);
+        FirebaseUtils.sendNotification("", receiver, sender, TYPE_DISCONNECT_CALL_BY_USER);
         videoUserDatabaseReference.child(receiver).setValue(null);
         callJavaScriptFunction("javascript:disconnectCall()");
         finish();

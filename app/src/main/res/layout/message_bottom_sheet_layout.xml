@@ -119,6 +119,6 @@
         android:layout_marginTop="10dp"
         android:text="@string/CANCEL"
         android:textAllCaps="false"
-        android:textColor="@android:color/white"
+        android:textColor="@android:color/holo_blue_bright"
         />
 </LinearLayout>

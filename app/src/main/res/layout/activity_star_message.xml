@@ -31,4 +31,31 @@
         android:id="@+id/expanded_image"
         layout="@layout/layout_expanded_image_view"/>
 
+    <LinearLayout
+        android:id="@+id/no_star_message_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:visibility="gone"
+        android:gravity="center">
+        <ImageView
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:src="@drawable/baseline_stars_24"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="No Starred Messages"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:layout_marginTop="15dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="10dp"
+            android:text="Tap and hold on any message to star it, so you can easily find it later"
+            android:gravity="center"
+            android:textSize="16sp" />
+    </LinearLayout>
 </RelativeLayout>

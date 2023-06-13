@@ -20,9 +20,9 @@ import com.samsung.whatsapp.viewmodel.StarredMessageViewModel;
 import java.util.Objects;
 
 public class StarMessageActivity extends AppCompatActivity {
-    ActivityStarMessageBinding binding;
+    private ActivityStarMessageBinding binding;
     private StarredMessagesAdapter adapter;
-    StarredMessageViewModel viewModel;
+    private StarredMessageViewModel viewModel;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,11 +41,22 @@ public class StarMessageActivity extends AppCompatActivity {
         binding.starMessagesList.setAdapter(adapter);
     }
 
+    private void updateStarredMessageLayout() {
+        if (adapter.getItemCount() == 0) {
+            binding.noStarMessageLayout.setVisibility(View.VISIBLE);
+        } else {
+            binding.noStarMessageLayout.setVisibility(View.GONE);
+        }
+    }
+
     @SuppressLint("NotifyDataSetChanged")
     private void setupViewModel() {
         viewModel = new ViewModelProvider(this).get(StarredMessageViewModel.class);
         viewModel.init(Utils.currentUser.getUid());
-        viewModel.getStarredMessage().observe(this, list -> adapter.notifyDataSetChanged());
+        viewModel.getStarredMessage().observe(this, list -> {
+            adapter.notifyDataSetChanged();
+            updateStarredMessageLayout();
+        });
     }
 
     private void initToolBar() {

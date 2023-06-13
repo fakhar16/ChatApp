@@ -50,7 +50,7 @@ import com.samsung.whatsapp.adapters.MessagesAdapter;
 import com.samsung.whatsapp.fcm.FCMNotificationSender;
 import com.samsung.whatsapp.model.Notification;
 import com.samsung.whatsapp.model.User;
-import com.samsung.whatsapp.utils.FCMMessaging;
+import com.samsung.whatsapp.utils.FirebaseUtils;
 import com.samsung.whatsapp.utils.WhatsappLikeProfilePicPreview;
 import com.samsung.whatsapp.viewmodel.MessageViewModel;
 import com.samsung.whatsapp.R;
@@ -85,9 +85,9 @@ public class ChatActivity extends BaseActivity{
                         Intent data = result.getData();
                         Uri fileUri = Objects.requireNonNull(data).getData();
                         if (getFileType(fileUri).equals("jpg")) {
-                            FCMMessaging.sendImage(currentUser.getUid(), messageReceiverId, fileUri, ChatActivity.this, binding.progressbar.getRoot());
+                            FirebaseUtils.sendImage(currentUser.getUid(), messageReceiverId, fileUri, ChatActivity.this, binding.progressbar.getRoot());
                         } else if (getFileType(fileUri).equals("mp4")) {
-                            FCMMessaging.sendVideo(currentUser.getUid(), messageReceiverId, fileUri, ChatActivity.this, binding.progressbar.getRoot());
+                            FirebaseUtils.sendVideo(currentUser.getUid(), messageReceiverId, fileUri, ChatActivity.this, binding.progressbar.getRoot());
                         }
                     }
                 }
@@ -108,7 +108,7 @@ public class ChatActivity extends BaseActivity{
                         Bundle bundle = result.getData().getExtras();
                         Bitmap bitmap = (Bitmap) bundle.get(context.getString(R.string.DATA));
                         Uri uri = getImageUri(ApplicationClass.context, bitmap);
-                        FCMMessaging.sendImage(currentUser.getUid(), messageReceiverId, uri, ChatActivity.this, binding.progressbar.getRoot());
+                        FirebaseUtils.sendImage(currentUser.getUid(), messageReceiverId, uri, ChatActivity.this, binding.progressbar.getRoot());
                     }
                 }
             });
@@ -118,8 +118,6 @@ public class ChatActivity extends BaseActivity{
         super.onCreate(savedInstanceState);
         binding = ActivityChatBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
-        messageReceiverId = getIntent().getExtras().getString(getString(R.string.VISIT_USER_ID));
 
         initializeFields();
         updateStatusIndicator();
@@ -202,8 +200,7 @@ public class ChatActivity extends BaseActivity{
                 });
     }
 
-    @SuppressLint("NotifyDataSetChanged")
-    private void initializeFields() {
+    private void initToolBar() {
         setSupportActionBar(binding.chatToolBar.mainAppBar);
 
         ActionBar actionBar = getSupportActionBar();
@@ -211,12 +208,18 @@ public class ChatActivity extends BaseActivity{
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setDisplayShowTitleEnabled(false);
 
-//        binding.recordView.activity = this;
-//        binding.recordView.callback = (AudioRecordView.Callback) this;
-
         LayoutInflater layoutInflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         customChatBarBinding = CustomChatBarBinding.inflate(layoutInflater);
         actionBar.setCustomView(customChatBarBinding.getRoot());
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    private void initializeFields() {
+        messageReceiverId = getIntent().getExtras().getString(getString(R.string.VISIT_USER_ID));
+        initToolBar();
+
+//        binding.recordView.activity = this;
+//        binding.recordView.callback = (AudioRecordView.Callback) this;
 
         MessageViewModel viewModel = new ViewModelProvider(this).get(MessageViewModel.class);
         viewModel.init(currentUser.getUid(), messageReceiverId);
@@ -271,7 +274,7 @@ public class ChatActivity extends BaseActivity{
 
     private void handleButtonClicks() {
         binding.sendMessageBtn.setOnClickListener(view -> {
-            FCMMessaging.sendMessage(binding.messageInputText.getText().toString(), currentUser.getUid(), receiver.getUid());
+            FirebaseUtils.sendMessage(binding.messageInputText.getText().toString(), currentUser.getUid(), receiver.getUid());
             binding.messageInputText.setText("");
         });
         binding.camera.setOnClickListener(view -> cameraButtonClicked());
