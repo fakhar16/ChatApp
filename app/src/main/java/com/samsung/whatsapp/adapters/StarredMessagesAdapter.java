@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -77,6 +78,7 @@ public class StarredMessagesAdapter extends RecyclerView.Adapter<StarredMessages
             Intent intent = new Intent(context, ChatActivity.class);
             String visit_user_id = message.getFrom().equals(currentUser.getUid())? message.getTo(): message.getFrom();
             intent.putExtra(context.getString(R.string.VISIT_USER_ID), visit_user_id);
+            intent.putExtra(context.getString(R.string.MESSAGE_ID), message.getMessageId());
             context.startActivity(intent);
         });
     }
@@ -87,6 +89,7 @@ public class StarredMessagesAdapter extends RecyclerView.Adapter<StarredMessages
         holder.binding.messageDate.setText(Utils.getDateString(message.getTime()));
         Picasso.get().load(user.getImage()).placeholder(R.drawable.profile_image).into(holder.binding.userImage);
         holder.binding.userName.setText(user.getUid().equals(currentUser.getUid())? "You": user.getName());
+        holder.binding.myLinearLayout.setBackground(user.getUid().equals(currentUser.getUid())? ContextCompat.getDrawable(context, R.drawable.sender_messages_layout) : ContextCompat.getDrawable(context, R.drawable.receiver_messages_layout));
 
         if (message.getType().equals(context.getString(R.string.TEXT))) {
             holder.binding.message.setText(message.getMessage());

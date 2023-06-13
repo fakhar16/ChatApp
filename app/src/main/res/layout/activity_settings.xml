@@ -59,6 +59,7 @@
                 android:textSize="14sp"
                 android:layout_marginTop="5dp"
                 android:layout_marginStart="25dp"
+                android:textColor="@color/color_blue"
                 tools:ignore="HardcodedText" />
 
             <com.google.android.material.textfield.TextInputLayout

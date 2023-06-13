@@ -15,6 +15,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
@@ -222,8 +223,7 @@ public class ChatActivity extends BaseActivity{
 
         viewModel.getMessage().observe(this, messages -> {
             messagesAdapter.notifyDataSetChanged();
-            if (messagesAdapter.getItemCount() != 0)
-                binding.userMessageList.smoothScrollToPosition(messagesAdapter.getItemCount() - 1);
+            scrollToMessage();
         });
 
         binding.userMessageList.setLayoutManager(new LinearLayoutManager(this));
@@ -247,6 +247,21 @@ public class ChatActivity extends BaseActivity{
         });
 
         handleButtonClicks();
+    }
+
+    private void scrollToMessage() {
+        if (messagesAdapter.getItemCount() != 0) {
+            if (getIntent().hasExtra(getString(R.string.MESSAGE_ID))) {
+                int position = messagesAdapter.getItemPosition(getIntent().getStringExtra(getString(R.string.MESSAGE_ID)));
+                getIntent().removeExtra(getString(R.string.MESSAGE_ID));
+                binding.userMessageList.postDelayed(() -> {
+                    Objects.requireNonNull(binding.userMessageList.findViewHolderForAdapterPosition(position)).itemView.findViewById(R.id.my_linear_layout).setBackgroundTintList(ContextCompat.getColorStateList(ChatActivity.this, R.color.colorPrimary));
+                    new Handler().postDelayed(() -> Objects.requireNonNull(binding.userMessageList.findViewHolderForAdapterPosition(position)).itemView.findViewById(R.id.my_linear_layout).setBackgroundTintList(null), 500);
+                }, 200);
+            } else {
+                binding.userMessageList.smoothScrollToPosition(messagesAdapter.getItemCount() - 1);
+            }
+        }
     }
 
     private void updateChatBarDetails() {

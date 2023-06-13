@@ -65,15 +65,11 @@ public class MessagesAdapter extends RecyclerView.Adapter<MessagesAdapter.Messag
             RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams)layoutBinding.myLinearLayout.getLayoutParams();
             params.addRule(RelativeLayout.ALIGN_PARENT_START);
             layoutBinding.myLinearLayout.setLayoutParams(params);
-
             layoutBinding.myLinearLayout.setBackground(ContextCompat.getDrawable(context, R.drawable.receiver_messages_layout));
-            layoutBinding.message.setTextColor(context.getResources().getColor(R.color.black));
-            layoutBinding.star.setColorFilter(ContextCompat.getColor(context, android.R.color.darker_gray));
         } else {
             RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams)layoutBinding.myLinearLayout.getLayoutParams();
             params.addRule(RelativeLayout.ALIGN_PARENT_END);
             layoutBinding.myLinearLayout.setLayoutParams(params);
-
             layoutBinding.myLinearLayout.setBackground(ContextCompat.getDrawable(context, R.drawable.sender_messages_layout));
         }
 
@@ -88,6 +84,14 @@ public class MessagesAdapter extends RecyclerView.Adapter<MessagesAdapter.Messag
         } else {
             return ITEM_RECEIVE;
         }
+    }
+
+    public int getItemPosition(String message_id) {
+        for (Message message : userMessageList) {
+            if (message.getMessageId().equals(message_id))
+                return userMessageList.indexOf(message);
+        }
+        return -1;
     }
 
     @SuppressLint("ClickableViewAccessibility")
