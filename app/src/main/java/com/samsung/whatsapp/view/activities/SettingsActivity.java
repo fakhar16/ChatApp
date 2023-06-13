@@ -11,6 +11,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -40,6 +42,37 @@ public class SettingsActivity extends AppCompatActivity {
 
         initToolBar();
         handleItemClicks();
+        updateProfileNameLimitTextOnFocus();
+    }
+
+    private void updateProfileNameLimitTextOnFocus() {
+        binding.setUserName.setOnFocusChangeListener((view, hasFocus) -> {
+            if (hasFocus) {
+                int remainingLimit = 25 - Objects.requireNonNull(binding.setUserName.getText()).length();
+                binding.profileNameLimiter.setVisibility(View.VISIBLE);
+                binding.profileNameLimiter.setText(String.valueOf(remainingLimit));
+            } else {
+                binding.profileNameLimiter.setVisibility(View.GONE);
+            }
+        });
+
+        binding.setUserName.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                int remainingLimit = 25 - editable.length();
+                binding.profileNameLimiter.setText(String.valueOf(remainingLimit));
+            }
+        });
     }
 
     private void handleItemClicks() {

@@ -13,6 +13,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -47,8 +48,42 @@ public class SetupProfileActivity extends BaseActivity {
 
         InitializeFields();
         retrieveUserImage();
+        handleItemsClick();
+    }
 
+    private void handleItemsClick() {
         binding.editProfileImage.setOnClickListener(view -> Crop.pickImage(SetupProfileActivity.this));
+        updateProfileNameLimitTextOnFocus();
+    }
+
+    private void updateProfileNameLimitTextOnFocus() {
+        binding.setUserName.setOnFocusChangeListener((view, hasFocus) -> {
+            if (hasFocus) {
+                int remainingLimit = 25 - Objects.requireNonNull(binding.setUserName.getText()).length();
+                binding.profileNameLimiter.setVisibility(View.VISIBLE);
+                binding.profileNameLimiter.setText(String.valueOf(remainingLimit));
+            } else {
+                binding.profileNameLimiter.setVisibility(View.GONE);
+            }
+        });
+
+        binding.setUserName.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                int remainingLimit = 25 - editable.length();
+                binding.profileNameLimiter.setText(String.valueOf(remainingLimit));
+            }
+        });
     }
 
     private void retrieveUserImage() {
