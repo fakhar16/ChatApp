@@ -3,6 +3,8 @@ package com.samsung.whatsapp.utils;
 import static com.samsung.whatsapp.ApplicationClass.context;
 
 import android.app.Activity;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -22,19 +24,18 @@ import java.util.Date;
 import java.util.Locale;
 
 public class Utils {
-//    public static ProgressDialog loadingBar;
     public static String MESSAGE_CHANNEL_ID = "MESSAGE";
     public static String INCOMING_CALL_CHANNEL_ID = "incoming_call";
     public static int INCOMING_CALL_NOTIFICATION_ID = 16;
     public static int INCOMING_MESSAGE_NOTIFICATION_ID = 17;
-//    public static final String ACTION_ACCEPT_CALL = "accept_call";
     public static final String ACTION_REJECT_CALL = "reject_call";
-//    public static final String ACTION_SHOW_INCOMING_CALL_SCREEN = "show_incoming_call_screen";
     public static final String TYPE_MESSAGE = "type_message";
     public static final String TYPE_VIDEO_CALL = "type_video_call";
     public static final String TYPE_DISCONNECT_CALL_BY_USER = "type_disconnect_call_user";
     public static final String TYPE_DISCONNECT_CALL_BY_OTHER_USER = "type_disconnect_call_other_user";
     public static User currentUser = null;
+    public static final int ITEM_SENT = 1;
+    public static final int ITEM_RECEIVE = 2;
 
     public static void showLoadingBar(Activity activity, View view) {
         view.setVisibility(View.VISIBLE);
@@ -88,5 +89,11 @@ public class Utils {
     public static String getTimeString(long time) {
         SimpleDateFormat timeFormat = new SimpleDateFormat("hh:mm a", Locale.US);
         return timeFormat.format(new Date(time));
+    }
+
+    public static void copyMessage(String message) {
+        ClipboardManager clipboardManager = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clipData = ClipData.newPlainText("user_message_text", message);
+        clipboardManager.setPrimaryClip(clipData);
     }
 }

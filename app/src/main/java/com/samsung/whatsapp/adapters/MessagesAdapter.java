@@ -1,22 +1,16 @@
 package com.samsung.whatsapp.adapters;
 
+import static com.samsung.whatsapp.utils.Utils.ITEM_RECEIVE;
+import static com.samsung.whatsapp.utils.Utils.ITEM_SENT;
 import static com.samsung.whatsapp.utils.Utils.currentUser;
 import static com.samsung.whatsapp.utils.Utils.getDateTimeString;
 
 import android.annotation.SuppressLint;
-import android.content.ClipData;
-import android.content.ClipboardManager;
 import android.content.Context;
-import android.graphics.Color;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
@@ -24,14 +18,11 @@ import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.github.pgreze.reactions.ReactionsConfig;
-import com.github.pgreze.reactions.ReactionsConfigBuilder;
-import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.firebase.auth.FirebaseAuth;
 import com.samsung.whatsapp.databinding.ItemMessageBinding;
 import com.samsung.whatsapp.model.Message;
 import com.samsung.whatsapp.R;
-import com.samsung.whatsapp.utils.FirebaseUtils;
+import com.samsung.whatsapp.utils.bottomsheethandler.MessageBottomSheetHandler;
 import com.samsung.whatsapp.view.activities.ChatActivity;
 import com.squareup.picasso.Picasso;
 
@@ -43,8 +34,6 @@ public class MessagesAdapter extends RecyclerView.Adapter<MessagesAdapter.Messag
     private final Context context;
     private final String senderId;
     private final String receiverId;
-    final int ITEM_SENT = 1;
-    final int ITEM_RECEIVE = 2;
 
     private static final String TAG = "ConsoleMessagesAdapter";
 
@@ -60,13 +49,12 @@ public class MessagesAdapter extends RecyclerView.Adapter<MessagesAdapter.Messag
     public MessageViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         ItemMessageBinding layoutBinding = DataBindingUtil.inflate(LayoutInflater.from(context), R.layout.item_message, parent, false);
 
+        RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams)layoutBinding.myLinearLayout.getLayoutParams();
         if (viewType == ITEM_RECEIVE) {
-            RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams)layoutBinding.myLinearLayout.getLayoutParams();
             params.addRule(RelativeLayout.ALIGN_PARENT_START);
             layoutBinding.myLinearLayout.setLayoutParams(params);
             layoutBinding.myLinearLayout.setBackground(ContextCompat.getDrawable(context, R.drawable.receiver_messages_layout));
         } else {
-            RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams)layoutBinding.myLinearLayout.getLayoutParams();
             params.addRule(RelativeLayout.ALIGN_PARENT_END);
             layoutBinding.myLinearLayout.setLayoutParams(params);
             layoutBinding.myLinearLayout.setBackground(ContextCompat.getDrawable(context, R.drawable.sender_messages_layout));
@@ -214,116 +202,11 @@ public class MessagesAdapter extends RecyclerView.Adapter<MessagesAdapter.Messag
 ////            });
 //
 //        }
-        messageBottomSheetHandler(holder, message);
-    }
-
-    @SuppressLint("SetTextI18n")
-    private void messageBottomSheetHandler(MessageViewHolder holder, Message message) {
-
-        View contentView = View.inflate(context, R.layout.message_bottom_sheet_layout, null);
-
-        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(context);
-        bottomSheetDialog.setContentView(contentView);
-        bottomSheetDialog.setCanceledOnTouchOutside(false);
-        ((View) contentView.getParent()).setBackgroundColor(Color.TRANSPARENT);
-
-        LinearLayout star = bottomSheetDialog.findViewById(R.id.star);
-        LinearLayout copy = bottomSheetDialog.findViewById(R.id.copy);
-//        LinearLayout forward = bottomSheetDialog.findViewById(R.id.forward);
-        LinearLayout delete = bottomSheetDialog.findViewById(R.id.delete);
-        Button cancel = bottomSheetDialog.findViewById(R.id.cancel);
-
-        //Copy click handler
-        Objects.requireNonNull(copy).setOnClickListener(view -> {
-            ClipboardManager clipboardManager = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
-            ClipData clipData = ClipData.newPlainText("user_message_text", message.getMessage());
-            clipboardManager.setPrimaryClip(clipData);
-            bottomSheetDialog.dismiss();
-        });
-
-        //Cancel click handler
-        Objects.requireNonNull(cancel).setOnClickListener(view -> bottomSheetDialog.dismiss());
-
         View clicked_message = holder.binding.myLinearLayout;
-
         if (message.getType().equals(context.getString(R.string.IMAGE))) {
             clicked_message = holder.binding.image;
         }
-
-        //Star click handler
-        if (holder.binding.star.getVisibility() == View.VISIBLE) {
-            ((TextView)(Objects.requireNonNull(bottomSheetDialog.findViewById(R.id.star_text)))).setText("Unstar");
-            ((ImageView)(Objects.requireNonNull(bottomSheetDialog.findViewById(R.id.star_icon)))).setImageResource(R.drawable.baseline_unstar_24);
-            Objects.requireNonNull(star).setOnClickListener(view -> {
-                FirebaseUtils.unStarMessage(message);
-                bottomSheetDialog.dismiss();
-            });
-        } else {
-            ((TextView)(Objects.requireNonNull(bottomSheetDialog.findViewById(R.id.star_text)))).setText("star");
-            ((ImageView)(Objects.requireNonNull(bottomSheetDialog.findViewById(R.id.star_icon)))).setImageResource(R.drawable.baseline_star_24);
-            Objects.requireNonNull(star).setOnClickListener(view -> {
-                FirebaseUtils.starMessage(message);
-                bottomSheetDialog.dismiss();
-            });
-        }
-
-        Objects.requireNonNull(delete).setOnClickListener(view -> {
-            showMessageDeleteMenu(message);
-            bottomSheetDialog.dismiss();
-        });
-
-        //Showing bottom sheet dialog
-        clicked_message.setOnLongClickListener(view -> {
-            bottomSheetDialog.show();
-            return true;
-        });
-    }
-
-    private void showMessageDeleteMenu(Message message) {
-        View contentView = View.inflate(context, R.layout.delete_message_bottom_sheet_layout, null);
-
-        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(context);
-        bottomSheetDialog.setContentView(contentView);
-        bottomSheetDialog.setCanceledOnTouchOutside(false);
-        ((View) contentView.getParent()).setBackgroundColor(Color.TRANSPARENT);
-        bottomSheetDialog.show();
-
-        TextView delete_for_everyone = bottomSheetDialog.findViewById(R.id.delete_for_everyone);
-        TextView delete_for_me = bottomSheetDialog.findViewById(R.id.delete_for_me);
-        Button cancel = bottomSheetDialog.findViewById(R.id.cancel);
-
-        if (getItemViewType(userMessageList.indexOf(message)) == ITEM_RECEIVE) {
-            Objects.requireNonNull(delete_for_everyone).setVisibility(View.GONE);
-        }
-
-        //Cancel button handler
-        Objects.requireNonNull(cancel).setOnClickListener(view -> bottomSheetDialog.dismiss());
-
-        //Delete for everyone clicked
-        Objects.requireNonNull(delete_for_everyone).setOnClickListener(view -> {
-            FirebaseUtils.deleteMessageForEveryone(message);
-            updateLastMessage(message);
-            bottomSheetDialog.dismiss();
-        });
-
-        Objects.requireNonNull(delete_for_me).setOnClickListener(view -> {
-            FirebaseUtils.deleteMessage(message);
-            updateLastMessage(message);
-            bottomSheetDialog.dismiss();
-        });
-    }
-
-    private void updateLastMessage(Message message) {
-        // if user removed last message in the list
-        if (userMessageList.indexOf(message) == userMessageList.size() -1 && userMessageList.size() >= 2)
-            FirebaseUtils.updateLastMessage(userMessageList.get(userMessageList.size() - 2));
-        //if user removed the only message
-        if (userMessageList.size() == 1)
-            FirebaseUtils.removeLastMessages(message.getFrom(), message.getTo());
-
-        //if deleted message is starred
-        if (message.getStarred().contains(":" + currentUser.getUid()))
-            FirebaseUtils.deleteStarredMessage(message.getMessageId());
+        MessageBottomSheetHandler.start(context, message, holder.binding.star.getVisibility(), getItemViewType(userMessageList.indexOf(message)), userMessageList, clicked_message);
     }
 
     @Override

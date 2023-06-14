@@ -6,6 +6,7 @@
             type="com.samsung.whatsapp.model.User" />
     </data>
     <LinearLayout
+        android:id="@+id/itemView"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
