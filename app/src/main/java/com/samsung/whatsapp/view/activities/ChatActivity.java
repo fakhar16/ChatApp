@@ -273,24 +273,35 @@ public class ChatActivity extends BaseActivity{
     }
 
     private void handleButtonClicks() {
-        binding.sendMessageBtn.setOnClickListener(view -> {
-            FirebaseUtils.sendMessage(binding.messageInputText.getText().toString(), currentUser.getUid(), receiver.getUid());
-            binding.messageInputText.setText("");
-        });
+        binding.sendMessageBtn.setOnClickListener(view -> sendMessage());
         binding.camera.setOnClickListener(view -> cameraButtonClicked());
         customChatBarBinding.voiceCall.setOnClickListener(view -> Toast.makeText(this, receiver.getName(), Toast.LENGTH_SHORT).show());
-        customChatBarBinding.videoCall.setOnClickListener(view -> {
-            Notification notification = new Notification(currentUser.getName(), "Incoming Video Call", TYPE_VIDEO_CALL, currentUser.getImage(), receiver.getToken(), currentUser.getUid(), receiver.getUid());
-            FCMNotificationSender.SendNotification(ApplicationClass.context, notification);
-
-            Intent intent = new Intent(this, CallActivity.class);
-            intent.putExtra(context.getString(R.string.CALLER), currentUser.getUid());
-            intent.putExtra(getString(R.string.RECEIVER), receiver.getUid());
-            intent.putExtra(getString(R.string.IS_CALL_MADE), true);
-            startActivity(intent);
-        });
+        customChatBarBinding.videoCall.setOnClickListener(view -> createVoiceCall());
         customChatBarBinding.userImage.setOnClickListener(view -> WhatsappLikeProfilePicPreview.Companion.zoomImageFromThumb(customChatBarBinding.userImage, binding.expandedImage.cardView, binding.expandedImage.image, binding.chatToolBar.getRoot().getRootView(), receiver.getImage()));
         binding.attachMenu.setOnClickListener(view -> showAttachmentMenu());
+        customChatBarBinding.userInfo.setOnClickListener(view -> sendUserToProfileActivity());
+    }
+
+    private void sendMessage() {
+        FirebaseUtils.sendMessage(binding.messageInputText.getText().toString(), currentUser.getUid(), receiver.getUid());
+        binding.messageInputText.setText("");
+    }
+
+    private void createVoiceCall() {
+        Notification notification = new Notification(currentUser.getName(), "Incoming Video Call", TYPE_VIDEO_CALL, currentUser.getImage(), receiver.getToken(), currentUser.getUid(), receiver.getUid());
+        FCMNotificationSender.SendNotification(ApplicationClass.context, notification);
+
+        Intent intent = new Intent(this, CallActivity.class);
+        intent.putExtra(context.getString(R.string.CALLER), currentUser.getUid());
+        intent.putExtra(getString(R.string.RECEIVER), receiver.getUid());
+        intent.putExtra(getString(R.string.IS_CALL_MADE), true);
+        startActivity(intent);
+    }
+
+    private void sendUserToProfileActivity() {
+        Intent intent = new Intent(this, ProfileActivity.class);
+        intent.putExtra(getString(R.string.RECEIVER_ID), receiver.getUid());
+        startActivity(intent);
     }
 
     private void showAttachmentMenu() {
@@ -299,16 +310,20 @@ public class ChatActivity extends BaseActivity{
         LinearLayout camera = bottomSheetDialog.findViewById(R.id.camera_btn);
         LinearLayout attachment = bottomSheetDialog.findViewById(R.id.photo_video_attachment_btn);
         Button cancel = bottomSheetDialog.findViewById(R.id.cancel);
+        
+        assert camera != null;
+        assert attachment != null;
+        assert cancel != null;
 
-        Objects.requireNonNull(camera).setOnClickListener(view -> {
+        camera.setOnClickListener(view -> {
             cameraButtonClicked();
             bottomSheetDialog.dismiss();
         });
-        Objects.requireNonNull(attachment).setOnClickListener(view -> {
+        attachment.setOnClickListener(view -> {
             attachmentButtonClicked();
             bottomSheetDialog.dismiss();
         });
-        Objects.requireNonNull(cancel).setOnClickListener(view -> bottomSheetDialog.dismiss());
+        cancel.setOnClickListener(view -> bottomSheetDialog.dismiss());
     }
 
     private void cameraButtonClicked() {

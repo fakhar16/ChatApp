@@ -25,6 +25,9 @@
         android:theme="@style/Theme.Whatsapp"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".view.activities.ProfileActivity"
+            android:exported="false" />
+        <activity
             android:name=".view.activities.StarMessageActivity"
             android:exported="false" />
         <activity
