@@ -146,13 +146,6 @@ public class MessagesAdapter extends RecyclerView.Adapter<MessagesAdapter.Messag
             Picasso.get().load(message.getMessage()).placeholder(R.drawable.profile_image).into(holder.binding.image);
         }
 
-//        if (message.getFeeling() >= 0) {
-//            holder.binding.feeling.setImageResource(reactions[message.getFeeling()]);
-//            holder.binding.feeling.setVisibility(View.VISIBLE);
-//        } else {
-//            viewHolder.binding.feeling.setVisibility(View.GONE);
-//        }
-
         //Setting video if message type is video
         if (message.getType().equals(context.getString(R.string.VIDEO))) {
             Glide.with(context).load(message.getMessage()).centerCrop().placeholder(R.drawable.baseline_play_circle_outline_24).into(holder.binding.image);
@@ -160,6 +153,13 @@ public class MessagesAdapter extends RecyclerView.Adapter<MessagesAdapter.Messag
         } else if (message.getType().equals(context.getString(R.string.IMAGE))) {
             holder.binding.image.setOnClickListener(view -> ((ChatActivity)(context)).showImagePreview(holder.binding.image, message.getMessage()));
         }
+
+        //        if (message.getFeeling() >= 0) {
+//            holder.binding.feeling.setImageResource(reactions[message.getFeeling()]);
+//            holder.binding.feeling.setVisibility(View.VISIBLE);
+//        } else {
+//            viewHolder.binding.feeling.setVisibility(View.GONE);
+//        }
 
 //
 //        } else { // Receiver view holder

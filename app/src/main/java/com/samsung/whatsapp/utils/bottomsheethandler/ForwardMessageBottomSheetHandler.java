@@ -4,6 +4,8 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
@@ -18,10 +20,14 @@ import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.samsung.whatsapp.R;
 import com.samsung.whatsapp.adapters.ContactAdapter;
 import com.samsung.whatsapp.model.Message;
+import com.samsung.whatsapp.model.User;
 import com.samsung.whatsapp.repository.ContactsRepositoryImpl;
 import com.samsung.whatsapp.utils.FirebaseUtils;
 import com.samsung.whatsapp.utils.Utils;
 import com.samsung.whatsapp.view.activities.ChatActivity;
+
+import java.util.ArrayList;
+import java.util.Objects;
 
 public class ForwardMessageBottomSheetHandler {
     @SuppressLint("StaticFieldLeak")
@@ -29,6 +35,8 @@ public class ForwardMessageBottomSheetHandler {
     private static Message message;
     @SuppressLint("StaticFieldLeak")
     private static Context mContext;
+
+    private static ContactAdapter adapter;
 
     public static void start(Context context, Message msg) {
         View contentView = View.inflate(context, R.layout.forward_message_bottom_sheet_layout, null);
@@ -68,6 +76,37 @@ public class ForwardMessageBottomSheetHandler {
             if (b)
                 ll.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
         });
+
+        //search filter handler
+        search.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                filter(editable.toString());
+            }
+        });
+    }
+
+    private static void filter(String text) {
+        ArrayList<User> filteredList = new ArrayList<>();
+
+        for (User item : Objects.requireNonNull(ContactsRepositoryImpl.getInstance().getContacts().getValue())) {
+            if (item.getName().toLowerCase().contains(text.toLowerCase())) {
+                filteredList.add(item);
+            }
+        }
+        if (!filteredList.isEmpty()) {
+            adapter.filterList(filteredList);
+        }
     }
 
     private static void showContactList(BottomSheetDialog dialog, Context context) {
@@ -75,7 +114,7 @@ public class ForwardMessageBottomSheetHandler {
         assert contactList != null;
         contactList.setLayoutManager(new LinearLayoutManager(context));
 
-        ContactAdapter adapter = new ContactAdapter(ContactsRepositoryImpl.getInstance().getContacts().getValue());
+        adapter = new ContactAdapter(ContactsRepositoryImpl.getInstance().getContacts().getValue());
         contactList.addItemDecoration(new DividerItemDecoration(contactList.getContext(), DividerItemDecoration.VERTICAL));
         contactList.setAdapter(adapter);
     }
