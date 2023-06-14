@@ -2,6 +2,7 @@ package com.samsung.whatsapp.adapters;
 
 import static com.samsung.whatsapp.ApplicationClass.messageDatabaseReference;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.view.LayoutInflater;
@@ -27,7 +28,7 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder> {
-    private final ArrayList<User> userList;
+    private ArrayList<User> userList;
     private final Context context;
 
     public UserAdapter(Context context, ArrayList<User> userList) {
@@ -78,6 +79,12 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
             chatIntent.putExtra(ApplicationClass.context.getString(R.string.VISIT_USER_ID), user.getUid());
             context.startActivity(chatIntent);
         });
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    public void filterList(ArrayList<User> filterList) {
+        userList = filterList;
+        notifyDataSetChanged();
     }
 
     @Override

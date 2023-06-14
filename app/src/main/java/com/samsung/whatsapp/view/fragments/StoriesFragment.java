@@ -16,6 +16,7 @@ import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -24,14 +25,19 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.samsung.whatsapp.R;
 import com.samsung.whatsapp.adapters.StatusAdapter;
 import com.samsung.whatsapp.databinding.FragmentStoriesBinding;
+import com.samsung.whatsapp.model.UserStatus;
 import com.samsung.whatsapp.repository.StatusRepositoryImpl;
 import com.samsung.whatsapp.utils.Utils;
 import com.samsung.whatsapp.viewmodel.StatusViewModel;
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
+import java.util.Objects;
+
 public class StoriesFragment extends Fragment {
     private FragmentStoriesBinding binding;
-    StatusAdapter statusAdapter;
+    private StatusAdapter statusAdapter;
+    StatusViewModel viewModel;
 
     private final ActivityResultLauncher<Intent> imagePickActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
         @Override
@@ -57,24 +63,38 @@ public class StoriesFragment extends Fragment {
                              Bundle savedInstanceState) {
         binding = FragmentStoriesBinding.inflate(inflater, container, false);
 
+        initProgressBarDetails();
+        loadUserInfo();
+        setupViewModel();
+        setupRecyclerView();
+        handleItemsClick();
+
+        return binding.getRoot();
+    }
+
+    private void loadUserInfo() {
+        Picasso.get().load(currentUser.getImage()).placeholder(R.drawable.profile_image).into(binding.image);
+    }
+
+    @SuppressLint("SetTextI18n")
+    private void initProgressBarDetails() {
         binding.progressbar.dialogTitle.setText("Uploading Image");
         binding.progressbar.dialogDescription.setText("Please wait, while we are uploading your image...");
+    }
 
-        Picasso.get().load(currentUser.getImage()).placeholder(R.drawable.profile_image).into(binding.image);
-
-
-        StatusViewModel viewModel = new ViewModelProvider(this).get(StatusViewModel.class);
-        viewModel.init();
-        viewModel.getUserStatues().observe(getViewLifecycleOwner(), userStatuses -> statusAdapter.notifyDataSetChanged());
-
+    private void setupRecyclerView() {
         statusAdapter = new StatusAdapter(getContext(), viewModel.getUserStatues().getValue());
 
         binding.statusList.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.statusList.addItemDecoration(new DividerItemDecoration(binding.statusList.getContext(), DividerItemDecoration.VERTICAL));
         binding.statusList.setAdapter(statusAdapter);
+    }
 
-        handleItemsClick();
-        return binding.getRoot();
+    @SuppressLint("NotifyDataSetChanged")
+    private void setupViewModel() {
+        viewModel = new ViewModelProvider(this).get(StatusViewModel.class);
+        viewModel.init();
+        viewModel.getUserStatues().observe(getViewLifecycleOwner(), userStatuses -> statusAdapter.notifyDataSetChanged());
     }
 
     private void handleItemsClick() {
@@ -86,5 +106,33 @@ public class StoriesFragment extends Fragment {
         });
 
         binding.addStatus.setOnClickListener(view -> Toast.makeText(getContext(), "Add image from camera status here", Toast.LENGTH_SHORT).show());
+
+        binding.searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                filter(newText);
+                return true;
+            }
+        });
+    }
+
+    private void filter(String text) {
+        ArrayList<UserStatus> filteredList = new ArrayList<>();
+
+        for (UserStatus item : Objects.requireNonNull(StatusRepositoryImpl.getInstance().getStatuses().getValue())) {
+            if (item.getName().toLowerCase().contains(text.toLowerCase())) {
+                filteredList.add(item);
+            }
+        }
+        if (!filteredList.isEmpty()) {
+            statusAdapter.filterList(filteredList);
+        } else {
+            statusAdapter.filterList(new ArrayList<>());
+        }
     }
 }

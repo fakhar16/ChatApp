@@ -7,7 +7,6 @@ import static com.samsung.whatsapp.utils.Utils.currentUser;
 import androidx.annotation.NonNull;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
-import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 import android.content.Intent;
@@ -43,12 +42,7 @@ public class MainActivity extends BaseActivity {
 
         CheckIfUserIsLogined();
 
-        setSupportActionBar(binding.mainPageToolbar.mainAppBar);
-        AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.navigation_chats, R.id.navigation_stories, R.id.navigation_settings)
-                .build();
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_bottom_navigation);
-        NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(binding.navView, navController);
 
         if (FirebaseAuth.getInstance().getUid() != null) {

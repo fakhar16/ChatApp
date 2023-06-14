@@ -12,9 +12,34 @@
     android:background="#F1F1F1"
     tools:context=".view.fragments.StoriesFragment">
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Status"
+        android:textStyle="bold"
+        android:textColor="@android:color/black"
+        android:textSize="35sp"
+        android:layout_marginHorizontal="15dp"
+        android:layout_marginTop="10dp"
+        />
+
+    <androidx.appcompat.widget.SearchView
+        android:id="@+id/searchView"
+        android:layout_width="match_parent"
+        android:layout_height="35dp"
+        app:queryHint="Search..."
+        app:queryBackground="@android:color/transparent"
+        app:searchIcon="@drawable/search"
+        app:iconifiedByDefault="false"
+        android:layout_marginTop="5dp"
+        android:layout_marginHorizontal="15dp"
+        android:background="@drawable/background_edit_text"
+        />
+
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp">
 
     <LinearLayout
         android:id="@+id/btn_status"

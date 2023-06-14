@@ -6,6 +6,34 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/grayish">
 
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Settings"
+        android:textStyle="bold"
+        android:textColor="@android:color/black"
+        android:textSize="35sp"
+        android:layout_marginHorizontal="15dp"
+        android:layout_marginTop="10dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        />
+
+    <androidx.appcompat.widget.SearchView
+        android:id="@+id/searchView"
+        android:layout_width="match_parent"
+        android:layout_height="35dp"
+        app:queryHint="Search..."
+        app:searchIcon="@drawable/search"
+        app:iconifiedByDefault="false"
+        android:layout_marginTop="5dp"
+        android:layout_marginHorizontal="15dp"
+        android:background="@drawable/background_edit_text"
+        app:layout_constraintTop_toBottomOf="@id/title"
+        app:queryBackground="@android:color/transparent"
+        />
+
 <!--    User Profile-->
     <RelativeLayout
         android:id="@+id/layout_user_profile"
@@ -13,7 +41,8 @@
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/searchView"
+        android:layout_marginTop="20dp"
         android:background="@android:color/white">
 
         <LinearLayout

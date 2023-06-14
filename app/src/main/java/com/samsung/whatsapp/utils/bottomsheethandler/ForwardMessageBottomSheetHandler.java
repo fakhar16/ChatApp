@@ -4,14 +4,12 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.appcompat.widget.SearchView;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -50,7 +48,7 @@ public class ForwardMessageBottomSheetHandler {
 
 
         TextView cancel = bottomSheetDialog.findViewById(R.id.cancel);
-        EditText search = bottomSheetDialog.findViewById(R.id.search);
+        SearchView search = bottomSheetDialog.findViewById(R.id.search);
         LinearLayout ll = bottomSheetDialog.findViewById(R.id.upperBar);
 
         assert cancel != null;
@@ -72,26 +70,23 @@ public class ForwardMessageBottomSheetHandler {
         });
 
         //search focus handler
-        search.setOnFocusChangeListener((view, b) -> {
+        search.setOnQueryTextFocusChangeListener((view, b) -> {
             if (b)
                 ll.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
         });
 
+
         //search filter handler
-        search.addTextChangedListener(new TextWatcher() {
+        search.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
+            public boolean onQueryTextSubmit(String query) {
+                return false;
             }
 
             @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                filter(editable.toString());
+            public boolean onQueryTextChange(String newText) {
+                filter(newText);
+                return true;
             }
         });
     }
@@ -106,6 +101,8 @@ public class ForwardMessageBottomSheetHandler {
         }
         if (!filteredList.isEmpty()) {
             adapter.filterList(filteredList);
+        }else {
+            adapter.filterList(new ArrayList<>());
         }
     }
 

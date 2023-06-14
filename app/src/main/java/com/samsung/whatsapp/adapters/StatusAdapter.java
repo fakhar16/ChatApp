@@ -1,5 +1,6 @@
 package com.samsung.whatsapp.adapters;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
@@ -84,6 +85,12 @@ public class StatusAdapter extends RecyclerView.Adapter<StatusAdapter.StatusView
                     .build() // Must be called before calling show method
                     .show();
         });
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    public void filterList(ArrayList<UserStatus> filterList) {
+        userStatuses = filterList;
+        notifyDataSetChanged();
     }
 
     @Override
