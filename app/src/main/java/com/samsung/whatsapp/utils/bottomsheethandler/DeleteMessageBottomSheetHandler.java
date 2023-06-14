@@ -15,7 +15,6 @@ import com.samsung.whatsapp.model.Message;
 import com.samsung.whatsapp.utils.FirebaseUtils;
 
 import java.util.ArrayList;
-import java.util.Objects;
 
 public class DeleteMessageBottomSheetHandler {
     public static void start(Context context, int VIEW_TYPE, Message message, ArrayList<Message> messages) {
@@ -31,21 +30,25 @@ public class DeleteMessageBottomSheetHandler {
         TextView delete_for_me = bottomSheetDialog.findViewById(R.id.delete_for_me);
         Button cancel = bottomSheetDialog.findViewById(R.id.cancel);
 
+        assert delete_for_everyone != null;
+        assert  delete_for_me != null;
+        assert cancel != null;
+
         if (VIEW_TYPE == ITEM_RECEIVE) {
-            Objects.requireNonNull(delete_for_everyone).setVisibility(View.GONE);
+            delete_for_everyone.setVisibility(View.GONE);
         }
 
         //Cancel button handler
-        Objects.requireNonNull(cancel).setOnClickListener(view -> bottomSheetDialog.dismiss());
+        cancel.setOnClickListener(view -> bottomSheetDialog.dismiss());
 
         //Delete for everyone clicked
-        Objects.requireNonNull(delete_for_everyone).setOnClickListener(view -> {
+        delete_for_everyone.setOnClickListener(view -> {
             FirebaseUtils.deleteMessageForEveryone(message);
             updateLastMessage(messages, message);
             bottomSheetDialog.dismiss();
         });
 
-        Objects.requireNonNull(delete_for_me).setOnClickListener(view -> {
+        delete_for_me.setOnClickListener(view -> {
             FirebaseUtils.deleteMessage(message);
             updateLastMessage(messages, message);
             bottomSheetDialog.dismiss();
@@ -61,7 +64,7 @@ public class DeleteMessageBottomSheetHandler {
             FirebaseUtils.removeLastMessages(message.getFrom(), message.getTo());
 
         //if deleted message is starred
-        if (message.getStarred().contains(":" + currentUser.getUid()))
+        if (message.getStarred().contains(":" + currentUser.getUid()) || message.getStarred().equals("starred"))
             FirebaseUtils.deleteStarredMessage(message.getMessageId());
     }
 }

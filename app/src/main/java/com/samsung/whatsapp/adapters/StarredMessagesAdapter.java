@@ -23,6 +23,7 @@ import com.samsung.whatsapp.databinding.ItemStarMessageBinding;
 import com.samsung.whatsapp.model.Message;
 import com.samsung.whatsapp.model.User;
 import com.samsung.whatsapp.utils.Utils;
+import com.samsung.whatsapp.utils.bottomsheethandler.MessageBottomSheetHandler;
 import com.samsung.whatsapp.view.activities.ChatActivity;
 import com.samsung.whatsapp.view.activities.StarMessageActivity;
 import com.squareup.picasso.Picasso;
@@ -81,6 +82,12 @@ public class StarredMessagesAdapter extends RecyclerView.Adapter<StarredMessages
             intent.putExtra(context.getString(R.string.MESSAGE_ID), message.getMessageId());
             context.startActivity(intent);
         });
+
+        View clicked_message = holder.binding.myLinearLayout;
+        if (message.getType().equals(context.getString(R.string.IMAGE))) {
+            clicked_message = holder.binding.image;
+        }
+        MessageBottomSheetHandler.start(context, message, holder.binding.star.getVisibility(), 0, messageList, clicked_message);
     }
 
     @SuppressLint("SetTextI18n")

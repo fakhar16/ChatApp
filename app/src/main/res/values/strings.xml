@@ -122,6 +122,6 @@
     <string name="VIDEO_FILES">Video Files</string>
     <string name="STARRED_MESSAGES">StarredMessages</string>
     <string name="STARRED">starred</string>
-    <string name="UNSTAR">un_star</string>
+    <string name="UNSTAR">Unstar</string>
     <string name="STAR">star</string>
 </resources>
