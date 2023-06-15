@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="#D8F3F6"
     tools:context=".view.fragments.ChatFragment">
    <TextView
       android:id="@+id/title"

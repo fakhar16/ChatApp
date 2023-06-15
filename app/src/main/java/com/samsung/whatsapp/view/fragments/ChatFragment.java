@@ -17,7 +17,6 @@ import android.view.ViewGroup;
 import com.samsung.whatsapp.adapters.UserAdapter;
 import com.samsung.whatsapp.databinding.FragmentChatBinding;
 import com.samsung.whatsapp.model.User;
-import com.samsung.whatsapp.repository.ContactsRepositoryImpl;
 import com.samsung.whatsapp.viewmodel.ContactsViewModel;
 
 import java.util.ArrayList;
@@ -81,7 +80,7 @@ public class ChatFragment extends Fragment {
     private void filter(String text) {
         ArrayList<User> filteredList = new ArrayList<>();
 
-        for (User item : Objects.requireNonNull(ContactsRepositoryImpl.getInstance().getContacts().getValue())) {
+        for (User item : Objects.requireNonNull(viewModel.getContacts().getValue())) {
             if (item.getName().toLowerCase().contains(text.toLowerCase())) {
                 filteredList.add(item);
             }

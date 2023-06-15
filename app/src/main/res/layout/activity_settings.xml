@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/container"
-    android:background="@color/grayish">
+    android:background="#D8F3F6">
 
     <include
         android:id="@+id/toolBar"

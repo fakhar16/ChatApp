@@ -124,7 +124,7 @@ public class StoriesFragment extends Fragment {
     private void filter(String text) {
         ArrayList<UserStatus> filteredList = new ArrayList<>();
 
-        for (UserStatus item : Objects.requireNonNull(StatusRepositoryImpl.getInstance().getStatuses().getValue())) {
+        for (UserStatus item : Objects.requireNonNull(viewModel.getUserStatues().getValue())) {
             if (item.getName().toLowerCase().contains(text.toLowerCase())) {
                 filteredList.add(item);
             }

@@ -2,6 +2,7 @@ package com.samsung.whatsapp.view.activities;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -13,10 +14,12 @@ import android.view.View;
 
 import com.samsung.whatsapp.adapters.StarredMessagesAdapter;
 import com.samsung.whatsapp.databinding.ActivityStarMessageBinding;
+import com.samsung.whatsapp.model.Message;
 import com.samsung.whatsapp.utils.Utils;
 import com.samsung.whatsapp.utils.WhatsappLikeProfilePicPreview;
 import com.samsung.whatsapp.viewmodel.StarredMessageViewModel;
 
+import java.util.ArrayList;
 import java.util.Objects;
 
 public class StarMessageActivity extends AppCompatActivity {
@@ -32,6 +35,22 @@ public class StarMessageActivity extends AppCompatActivity {
         initToolBar();
         setupViewModel();
         setupRecyclerView();
+        handleItemsClick();
+    }
+
+    private void handleItemsClick() {
+        binding.searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                filter(newText);
+                return true;
+            }
+        });
     }
 
     private void setupRecyclerView() {
@@ -78,6 +97,21 @@ public class StarMessageActivity extends AppCompatActivity {
     public void showImagePreview(View thumbView, String url) {
         WhatsappLikeProfilePicPreview.Companion.zoomImageFromThumb(thumbView, binding.expandedImage.cardView, binding.expandedImage.image, binding.container, url);
         binding.appBarLayout.setVisibility(View.GONE);
+    }
+
+    private void filter(String text) {
+        ArrayList<Message> filteredList = new ArrayList<>();
+
+        for (Message item : Objects.requireNonNull(viewModel.getStarredMessage().getValue())) {
+            if (item.getMessage().toLowerCase().contains(text.toLowerCase())) {
+                filteredList.add(item);
+            }
+        }
+        if (!filteredList.isEmpty()) {
+            adapter.filterList(filteredList);
+        } else {
+            adapter.filterList(new ArrayList<>());
+        }
     }
 
     @Override

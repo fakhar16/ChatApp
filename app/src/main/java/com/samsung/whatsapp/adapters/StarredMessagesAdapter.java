@@ -32,7 +32,7 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 public class StarredMessagesAdapter extends RecyclerView.Adapter<StarredMessagesAdapter.StarredMessagesViewHolder> {
-    private final ArrayList<Message> messageList;
+    private ArrayList<Message> messageList;
     private final Context context;
 //    private static final String TAG = "ConsoleStarredMessagesAdapter";
 
@@ -113,6 +113,12 @@ public class StarredMessagesAdapter extends RecyclerView.Adapter<StarredMessages
 
     private void handleItemsClick(StarredMessagesViewHolder holder, Message message) {
         holder.binding.image.setOnClickListener(view -> ((StarMessageActivity)(context)).showImagePreview(holder.binding.image, message.getMessage()));
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    public void filterList(ArrayList<Message> filterList) {
+        messageList = filterList;
+        notifyDataSetChanged();
     }
 
     @Override
