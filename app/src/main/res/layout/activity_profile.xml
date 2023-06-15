@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -99,6 +100,7 @@
             />
     </LinearLayout>
 
+<!--    Status view-->
     <RelativeLayout
         android:id="@+id/status_parent"
         android:layout_width="match_parent"
@@ -121,6 +123,96 @@
 
     </RelativeLayout>
 
+<!--    Media and starred view-->
+    <LinearLayout
+        android:id="@+id/media_parent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_below="@id/status_parent"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/buttons"
+        android:layout_marginHorizontal="15dp"
+        >
+        <LinearLayout
+            android:id="@+id/media_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginHorizontal="10dp">
+            <ImageView
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/media"
+                />
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Media, Links, and Docs"
+                android:textSize="16sp"
+                android:textColor="@color/black"
+                android:layout_marginStart="5dp"
+                />
+            <TextView
+                android:id="@+id/media_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                android:text="None"
+                />
+            <ImageView
+                android:layout_width="15dp"
+                android:layout_height="15dp"
+                android:src="@drawable/baseline_arrow_forward_ios_24"
+                android:layout_marginStart="5dp"
+                app:tint="@android:color/darker_gray" />
+        </LinearLayout>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:background="@android:color/darker_gray"
+            android:layout_marginStart="55dp"/>
+        <LinearLayout
+            android:id="@+id/star_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginHorizontal="10dp"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="5dp">
+            <ImageView
+                android:layout_width="26dp"
+                android:layout_height="26dp"
+                android:src="@drawable/star"
+                android:layout_marginStart="9dp"
+                />
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Starred Messages"
+                android:textSize="16sp"
+                android:textColor="@color/black"
+                android:layout_marginStart="10dp"
+                />
+            <TextView
+                android:id="@+id/starredMessages_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                />
+            <ImageView
+                android:layout_width="15dp"
+                android:layout_height="15dp"
+                android:src="@drawable/baseline_arrow_forward_ios_24"
+                android:layout_marginStart="5dp"
+                app:tint="@android:color/darker_gray" />
+        </LinearLayout>
+
+    </LinearLayout>
     <!--    expanded image view-->
     <include
         android:id="@+id/expanded_image"

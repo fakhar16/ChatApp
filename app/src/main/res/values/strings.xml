@@ -124,4 +124,5 @@
     <string name="STARRED">starred</string>
     <string name="UNSTAR">Unstar</string>
     <string name="STAR">star</string>
+    <string name="STAR_MESSAGE_WITH_RECEIVER">StarMessageWithReceiver</string>
 </resources>

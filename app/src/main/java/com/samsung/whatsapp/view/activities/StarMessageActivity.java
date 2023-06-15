@@ -12,10 +12,10 @@ import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.samsung.whatsapp.R;
 import com.samsung.whatsapp.adapters.StarredMessagesAdapter;
 import com.samsung.whatsapp.databinding.ActivityStarMessageBinding;
 import com.samsung.whatsapp.model.Message;
-import com.samsung.whatsapp.utils.Utils;
 import com.samsung.whatsapp.utils.WhatsappLikeProfilePicPreview;
 import com.samsung.whatsapp.viewmodel.StarredMessageViewModel;
 
@@ -55,7 +55,6 @@ public class StarMessageActivity extends AppCompatActivity {
 
     private void setupRecyclerView() {
         binding.starMessagesList.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new StarredMessagesAdapter(this, viewModel.getStarredMessage().getValue());
         binding.starMessagesList.addItemDecoration(new DividerItemDecoration(binding.starMessagesList.getContext(), DividerItemDecoration.VERTICAL));
         binding.starMessagesList.setAdapter(adapter);
     }
@@ -71,11 +70,24 @@ public class StarMessageActivity extends AppCompatActivity {
     @SuppressLint("NotifyDataSetChanged")
     private void setupViewModel() {
         viewModel = new ViewModelProvider(this).get(StarredMessageViewModel.class);
-        viewModel.init(Utils.currentUser.getUid());
-        viewModel.getStarredMessage().observe(this, list -> {
-            adapter.notifyDataSetChanged();
-            updateStarredMessageLayout();
-        });
+
+        if (getIntent().getBooleanExtra(getString(R.string.STAR_MESSAGE_WITH_RECEIVER), false)) {
+            viewModel.initStarMessagesWithReceiver();
+            viewModel.getStarredMessageWithReceiver().observe(this, list -> {
+                adapter.notifyDataSetChanged();
+                updateStarredMessageLayout();
+            });
+            adapter = new StarredMessagesAdapter(this, viewModel.getStarredMessageWithReceiver().getValue());
+        } else {
+            viewModel.initStarMessages();
+            viewModel.getStarredMessage().observe(this, list -> {
+                adapter.notifyDataSetChanged();
+                updateStarredMessageLayout();
+            });
+            adapter = new StarredMessagesAdapter(this, viewModel.getStarredMessage().getValue());
+        }
+
+
     }
 
     private void initToolBar() {
@@ -102,7 +114,15 @@ public class StarMessageActivity extends AppCompatActivity {
     private void filter(String text) {
         ArrayList<Message> filteredList = new ArrayList<>();
 
-        for (Message item : Objects.requireNonNull(viewModel.getStarredMessage().getValue())) {
+        ArrayList<Message> list;
+
+        if (getIntent().getBooleanExtra(getString(R.string.STAR_MESSAGE_WITH_RECEIVER), false)) {
+            list = viewModel.getStarredMessageWithReceiver().getValue();
+        } else {
+            list = viewModel.getStarredMessage().getValue();
+        }
+
+        for (Message item : Objects.requireNonNull(list)) {
             if (item.getMessage().toLowerCase().contains(text.toLowerCase())) {
                 filteredList.add(item);
             }

@@ -11,14 +11,25 @@ import java.util.ArrayList;
 
 public class StarredMessageViewModel extends ViewModel {
     MutableLiveData<ArrayList<Message>> messages;
+    MutableLiveData<ArrayList<Message>> messagesWithReceiver;
     public LiveData<ArrayList<Message>> getStarredMessage() {
         return messages;
     }
+    public LiveData<ArrayList<Message>> getStarredMessageWithReceiver() {
+        return messagesWithReceiver;
+    }
 
-    public void init(String uid) {
+    public void initStarMessages() {
         if (messages != null)
             return;
 
-        messages = MessageRepositoryImpl.getInstance().getStarredMessages(uid);
+        messages = MessageRepositoryImpl.getInstance().getStarredMessages();
+    }
+
+    public void initStarMessagesWithReceiver() {
+        if (messagesWithReceiver != null)
+            return;
+
+        messagesWithReceiver = MessageRepositoryImpl.getInstance().getStarredMessagesMatchingReceiver();
     }
 }

@@ -5,6 +5,7 @@ import static com.samsung.whatsapp.ApplicationClass.userDatabaseReference;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
@@ -14,15 +15,20 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import com.samsung.whatsapp.R;
 import com.samsung.whatsapp.databinding.ActivityProfileBinding;
+import com.samsung.whatsapp.model.Message;
 import com.samsung.whatsapp.model.User;
+import com.samsung.whatsapp.repository.MessageRepositoryImpl;
 import com.samsung.whatsapp.utils.WhatsappLikeProfilePicPreview;
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.Objects;
 
 public class ProfileActivity extends AppCompatActivity {
     private ActivityProfileBinding binding;
     private User receiver;
+    String receiverId;
+    ArrayList<Message> starMessages;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,17 +36,27 @@ public class ProfileActivity extends AppCompatActivity {
         binding = ActivityProfileBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        receiverId = getIntent().getStringExtra(getString(R.string.RECEIVER_ID));
+        starMessages = MessageRepositoryImpl.getInstance().getStarredMessagesMatchingReceiver().getValue();
+
         loadUserInfo();
         initToolBar();
         handleItemsClick();
+
     }
 
     private void handleItemsClick() {
         binding.userImage.setOnClickListener(view -> showImagePreview(binding.userImage, receiver.getImage()));
+        binding.starLayout.setOnClickListener(view -> sendUserToStarActivity());
+    }
+
+    private void sendUserToStarActivity() {
+        Intent intent = new Intent(this, StarMessageActivity.class);
+        intent.putExtra(getString(R.string.STAR_MESSAGE_WITH_RECEIVER), true);
+        startActivity(intent);
     }
 
     private void loadUserInfo() {
-        String receiverId = getIntent().getStringExtra(getString(R.string.RECEIVER_ID));
         userDatabaseReference.child(receiverId)
                 .addValueEventListener(new ValueEventListener() {
                     @Override
@@ -63,6 +79,12 @@ public class ProfileActivity extends AppCompatActivity {
         binding.userPhone.setText(receiver.getPhone_number());
         binding.userStatus.setText(receiver.getStatus());
         Picasso.get().load(receiver.getImage()).placeholder(R.drawable.profile_image).into(binding.userImage);
+        updateStarredMessageCount();
+    }
+
+    private void updateStarredMessageCount() {
+        int starredMessageCount = starMessages.size();
+        binding.starredMessagesCount.setText(starredMessageCount == 0? "None": String.valueOf(starredMessageCount));
     }
 
     private void initToolBar() {
