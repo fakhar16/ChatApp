@@ -48,11 +48,19 @@ public class ProfileActivity extends AppCompatActivity {
     private void handleItemsClick() {
         binding.userImage.setOnClickListener(view -> showImagePreview(binding.userImage, receiver.getImage()));
         binding.starLayout.setOnClickListener(view -> sendUserToStarActivity());
+        binding.search.setOnClickListener(view -> sendUserToChatActivity());
     }
 
     private void sendUserToStarActivity() {
         Intent intent = new Intent(this, StarMessageActivity.class);
         intent.putExtra(getString(R.string.STAR_MESSAGE_WITH_RECEIVER), true);
+        startActivity(intent);
+    }
+
+    private void sendUserToChatActivity() {
+        Intent intent = new Intent(this, ChatActivity.class);
+        intent.putExtra(getString(R.string.VISIT_USER_ID), receiverId);
+        intent.putExtra(getString(R.string.SEARCH_MESSAGE), true);
         startActivity(intent);
     }
 

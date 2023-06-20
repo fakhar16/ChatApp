@@ -15,6 +15,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.widget.SearchView;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -32,7 +33,6 @@ import android.os.Looper;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -48,6 +48,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.samsung.whatsapp.ApplicationClass;
 import com.samsung.whatsapp.adapters.MessagesAdapter;
 import com.samsung.whatsapp.fcm.FCMNotificationSender;
+import com.samsung.whatsapp.model.Message;
 import com.samsung.whatsapp.model.Notification;
 import com.samsung.whatsapp.model.User;
 import com.samsung.whatsapp.utils.FirebaseUtils;
@@ -60,6 +61,7 @@ import com.samsung.whatsapp.webrtc.CallActivity;
 import com.squareup.picasso.Picasso;
 //import com.tougee.recorderview.AudioRecordView;
 
+import java.util.ArrayList;
 import java.util.Objects;
 
 public class ChatActivity extends BaseActivity{
@@ -69,6 +71,7 @@ public class ChatActivity extends BaseActivity{
     private CustomChatBarBinding customChatBarBinding;
     public static User receiver;
     private BottomSheetDialog bottomSheetDialog;
+    private MessageViewModel viewModel;
     private static final String TAG = "ConsoleChatActivity";
 
     private final ActivityResultLauncher<Intent> imagePickActivityResultLauncher = registerForActivityResult(
@@ -215,30 +218,76 @@ public class ChatActivity extends BaseActivity{
 
     @SuppressLint("NotifyDataSetChanged")
     private void initializeFields() {
-        messageReceiverId = getIntent().getExtras().getString(getString(R.string.VISIT_USER_ID));
-        initToolBar();
-
 //        binding.recordView.activity = this;
 //        binding.recordView.callback = (AudioRecordView.Callback) this;
 
-        MessageViewModel viewModel = new ViewModelProvider(this).get(MessageViewModel.class);
+        messageReceiverId = getIntent().getExtras().getString(getString(R.string.VISIT_USER_ID));
+        initToolBar();
+        setupViewModel();
+        setupRecyclerView();
+        setupAttachmentBottomSheetMenu();
+        handleButtonClicks();
+        checkIfSearchMessageTriggered();
+    }
+
+    private void checkIfSearchMessageTriggered() {
+        if (getIntent().getBooleanExtra(getString(R.string.SEARCH_MESSAGE), false)) {
+            binding.chatToolBar.getRoot().setVisibility(View.INVISIBLE);
+            binding.searchBar.setVisibility(View.VISIBLE);
+            binding.search.requestFocus();
+        }
+
+        binding.search.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                filter(newText);
+                return true;
+            }
+        });
+
+        binding.cancel.setOnClickListener(view -> {
+            binding.search.setQuery("", false);
+            binding.chatToolBar.getRoot().setVisibility(View.VISIBLE);
+            binding.searchBar.setVisibility(View.GONE);
+        });
+    }
+
+    private void filter(String text) {
+        ArrayList<Message> filteredList = new ArrayList<>();
+
+        for (Message item : Objects.requireNonNull(viewModel.getMessage().getValue())) {
+            if (item.getMessage().toLowerCase().contains(text.toLowerCase())) {
+                filteredList.add(item);
+            }
+        }
+        if (!filteredList.isEmpty()) {
+            messagesAdapter.filterList(filteredList);
+        } else {
+            messagesAdapter.filterList(new ArrayList<>());
+        }
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    private void setupViewModel() {
+        viewModel = new ViewModelProvider(this).get(MessageViewModel.class);
         viewModel.init(currentUser.getUid(), messageReceiverId);
 
         viewModel.getMessage().observe(this, messages -> {
             messagesAdapter.notifyDataSetChanged();
             scrollToMessage();
         });
+    }
 
+    private void setupRecyclerView() {
         binding.userMessageList.setLayoutManager(new LinearLayoutManager(this));
         messagesAdapter = new MessagesAdapter( ChatActivity.this, currentUser.getUid(), messageReceiverId, viewModel.getMessage().getValue());
         binding.userMessageList.setAdapter(messagesAdapter);
 
-        View contentView = View.inflate(ChatActivity.this, R.layout.attachment_bottom_sheet_layout, null);
-
-        bottomSheetDialog = new BottomSheetDialog(ChatActivity.this);
-        bottomSheetDialog.setContentView(contentView);
-        bottomSheetDialog.setCanceledOnTouchOutside(false);
-        ((View) contentView.getParent()).setBackgroundColor(Color.TRANSPARENT);
 
         binding.userMessageList.addOnLayoutChangeListener((view, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
             if (bottom < oldBottom) {
@@ -248,8 +297,15 @@ public class ChatActivity extends BaseActivity{
                 }, 100);
             }
         });
+    }
 
-        handleButtonClicks();
+    private void setupAttachmentBottomSheetMenu() {
+        View contentView = View.inflate(ChatActivity.this, R.layout.attachment_bottom_sheet_layout, null);
+
+        bottomSheetDialog = new BottomSheetDialog(ChatActivity.this);
+        bottomSheetDialog.setContentView(contentView);
+        bottomSheetDialog.setCanceledOnTouchOutside(false);
+        ((View) contentView.getParent()).setBackgroundColor(Color.TRANSPARENT);
     }
 
     private void scrollToMessage() {

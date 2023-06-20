@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 public class MessagesAdapter extends RecyclerView.Adapter<MessagesAdapter.MessageViewHolder> {
-    private final ArrayList<Message> userMessageList;
+    private ArrayList<Message> userMessageList;
     private final Context context;
     private final String senderId;
     private final String receiverId;
@@ -207,6 +207,12 @@ public class MessagesAdapter extends RecyclerView.Adapter<MessagesAdapter.Messag
             clicked_message = holder.binding.image;
         }
         MessageBottomSheetHandler.start(context, message, holder.binding.star.getVisibility(), getItemViewType(userMessageList.indexOf(message)), userMessageList, clicked_message);
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    public void filterList(ArrayList<Message> filterList) {
+        userMessageList = filterList;
+        notifyDataSetChanged();
     }
 
     @Override
