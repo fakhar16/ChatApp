@@ -332,7 +332,7 @@ public class ChatActivity extends BaseActivity{
         binding.sendMessageBtn.setOnClickListener(view -> sendMessage());
         binding.camera.setOnClickListener(view -> cameraButtonClicked());
         customChatBarBinding.voiceCall.setOnClickListener(view -> Toast.makeText(this, receiver.getName(), Toast.LENGTH_SHORT).show());
-        customChatBarBinding.videoCall.setOnClickListener(view -> createVoiceCall());
+        customChatBarBinding.videoCall.setOnClickListener(view -> createVideoCall());
         customChatBarBinding.userImage.setOnClickListener(view -> WhatsappLikeProfilePicPreview.Companion.zoomImageFromThumb(customChatBarBinding.userImage, binding.expandedImage.cardView, binding.expandedImage.image, binding.chatToolBar.getRoot().getRootView(), receiver.getImage()));
         binding.attachMenu.setOnClickListener(view -> showAttachmentMenu());
         customChatBarBinding.userInfo.setOnClickListener(view -> sendUserToProfileActivity());
@@ -343,7 +343,7 @@ public class ChatActivity extends BaseActivity{
         binding.messageInputText.setText("");
     }
 
-    private void createVoiceCall() {
+    private void createVideoCall() {
         Notification notification = new Notification(currentUser.getName(), "Incoming Video Call", TYPE_VIDEO_CALL, currentUser.getImage(), receiver.getToken(), currentUser.getUid(), receiver.getUid());
         FCMNotificationSender.SendNotification(ApplicationClass.context, notification);
 

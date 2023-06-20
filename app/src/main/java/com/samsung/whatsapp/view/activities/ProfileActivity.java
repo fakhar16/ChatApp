@@ -1,6 +1,9 @@
 package com.samsung.whatsapp.view.activities;
 
+import static com.samsung.whatsapp.ApplicationClass.context;
 import static com.samsung.whatsapp.ApplicationClass.userDatabaseReference;
+import static com.samsung.whatsapp.utils.Utils.TYPE_VIDEO_CALL;
+import static com.samsung.whatsapp.utils.Utils.currentUser;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -13,12 +16,16 @@ import android.view.View;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
+import com.samsung.whatsapp.ApplicationClass;
 import com.samsung.whatsapp.R;
 import com.samsung.whatsapp.databinding.ActivityProfileBinding;
+import com.samsung.whatsapp.fcm.FCMNotificationSender;
 import com.samsung.whatsapp.model.Message;
+import com.samsung.whatsapp.model.Notification;
 import com.samsung.whatsapp.model.User;
 import com.samsung.whatsapp.repository.MessageRepositoryImpl;
 import com.samsung.whatsapp.utils.WhatsappLikeProfilePicPreview;
+import com.samsung.whatsapp.webrtc.CallActivity;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -49,6 +56,18 @@ public class ProfileActivity extends AppCompatActivity {
         binding.userImage.setOnClickListener(view -> showImagePreview(binding.userImage, receiver.getImage()));
         binding.starLayout.setOnClickListener(view -> sendUserToStarActivity());
         binding.search.setOnClickListener(view -> sendUserToChatActivity());
+        binding.videoCall.setOnClickListener(view -> createVideoCall());
+    }
+
+    private void createVideoCall() {
+        Notification notification = new Notification(currentUser.getName(), "Incoming Video Call", TYPE_VIDEO_CALL, currentUser.getImage(), receiver.getToken(), currentUser.getUid(), receiver.getUid());
+        FCMNotificationSender.SendNotification(ApplicationClass.context, notification);
+
+        Intent intent = new Intent(this, CallActivity.class);
+        intent.putExtra(context.getString(R.string.CALLER), currentUser.getUid());
+        intent.putExtra(getString(R.string.RECEIVER), receiver.getUid());
+        intent.putExtra(getString(R.string.IS_CALL_MADE), true);
+        startActivity(intent);
     }
 
     private void sendUserToStarActivity() {
