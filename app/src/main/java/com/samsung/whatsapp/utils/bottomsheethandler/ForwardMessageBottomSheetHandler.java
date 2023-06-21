@@ -34,6 +34,7 @@ public class ForwardMessageBottomSheetHandler {
     @SuppressLint("StaticFieldLeak")
     private static Context mContext;
 
+    @SuppressLint("StaticFieldLeak")
     private static ContactAdapter adapter;
 
     public static void start(Context context, Message msg) {
@@ -111,15 +112,18 @@ public class ForwardMessageBottomSheetHandler {
         assert contactList != null;
         contactList.setLayoutManager(new LinearLayoutManager(context));
 
-        adapter = new ContactAdapter(ContactsRepositoryImpl.getInstance().getContacts().getValue());
+        adapter = new ContactAdapter(context, ContactsRepositoryImpl.getInstance().getContacts().getValue());
         contactList.addItemDecoration(new DividerItemDecoration(contactList.getContext(), DividerItemDecoration.VERTICAL));
         contactList.setAdapter(adapter);
     }
 
-    public static void forwardMessage(String receiver) {
-        FirebaseUtils.sendMessage(message.getMessage(), Utils.currentUser.getUid(), receiver);
+    public static void forwardMessage(Context context, String receiver) {
+        if (message.getType().equals(context.getString(R.string.TEXT)))
+            FirebaseUtils.sendMessage(message.getMessage(), Utils.currentUser.getUid(), receiver);
+        else if (message.getType().equals(context.getString(R.string.IMAGE))) {
+            FirebaseUtils.forwardImage(context, message, receiver);
+        }
         bottomSheetDialog.dismiss();
-
         sendUserToChatActivity(receiver);
     }
 

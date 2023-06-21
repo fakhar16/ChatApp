@@ -49,10 +49,12 @@ import com.google.firebase.database.ValueEventListener;
 import com.samsung.whatsapp.ApplicationClass;
 import com.samsung.whatsapp.adapters.MessagesAdapter;
 import com.samsung.whatsapp.fcm.FCMNotificationSender;
+import com.samsung.whatsapp.interfaces.MessageListenerCallback;
 import com.samsung.whatsapp.model.Message;
 import com.samsung.whatsapp.model.Notification;
 import com.samsung.whatsapp.model.User;
 import com.samsung.whatsapp.utils.FirebaseUtils;
+import com.samsung.whatsapp.utils.Utils;
 import com.samsung.whatsapp.utils.WhatsappLikeProfilePicPreview;
 import com.samsung.whatsapp.viewmodel.MessageViewModel;
 import com.samsung.whatsapp.R;
@@ -67,7 +69,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Objects;
 
-public class ChatActivity extends BaseActivity{
+public class ChatActivity extends BaseActivity implements MessageListenerCallback {
     private String messageReceiverId;
     private MessagesAdapter messagesAdapter;
     private ActivityChatBinding binding;
@@ -85,14 +87,12 @@ public class ChatActivity extends BaseActivity{
                 public void onActivityResult(ActivityResult result) {
                     if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
 
-                        binding.progressbar.dialogTitle.setText(R.string.SENDING_FILE_TITLE);
-                        binding.progressbar.dialogDescription.setText(getString(R.string.SENDING_FILE_DESCRIPTION));
                         showLoadingBar(ChatActivity.this, binding.progressbar.getRoot());
 
                         Intent data = result.getData();
                         Uri fileUri = Objects.requireNonNull(data).getData();
                         if (getFileType(fileUri).equals("jpg")) {
-                            FirebaseUtils.sendImage(currentUser.getUid(), messageReceiverId, fileUri, ChatActivity.this, binding.progressbar.getRoot());
+                            FirebaseUtils.sendImage(ChatActivity.this, currentUser.getUid(), messageReceiverId, fileUri);
                         } else if (getFileType(fileUri).equals("mp4")) {
                             FirebaseUtils.sendVideo(currentUser.getUid(), messageReceiverId, fileUri, ChatActivity.this, binding.progressbar.getRoot());
                         }
@@ -115,10 +115,8 @@ public class ChatActivity extends BaseActivity{
                             OutputStream os=getContentResolver().openOutputStream(imageUri);
                             finalBitmap.compress(Bitmap.CompressFormat.PNG,100,os);
 
-                            binding.progressbar.dialogTitle.setText(getString(R.string.SENDING_FILE_TITLE));
-                            binding.progressbar.dialogDescription.setText(getString(R.string.SENDING_FILE_DESCRIPTION));
                             showLoadingBar(ChatActivity.this, binding.progressbar.getRoot());
-                            FirebaseUtils.sendImage(currentUser.getUid(), messageReceiverId, imageUri, ChatActivity.this, binding.progressbar.getRoot());
+                            FirebaseUtils.sendImage(ChatActivity.this, currentUser.getUid(), messageReceiverId, imageUri);
                         } catch (IOException e) {
                             throw new RuntimeException(e);
                         }
@@ -239,6 +237,12 @@ public class ChatActivity extends BaseActivity{
         setupAttachmentBottomSheetMenu();
         handleButtonClicks();
         checkIfSearchMessageTriggered();
+        initProgressBar();
+    }
+
+    private void initProgressBar() {
+        binding.progressbar.dialogTitle.setText(getString(R.string.SENDING_FILE_TITLE));
+        binding.progressbar.dialogDescription.setText(getString(R.string.SENDING_FILE_DESCRIPTION));
     }
 
     private void checkIfSearchMessageTriggered() {
@@ -458,6 +462,11 @@ public class ChatActivity extends BaseActivity{
         } else {
             finish();
         }
+    }
+
+    @Override
+    public void onMessageSent() {
+        Utils.dismissLoadingBar(this, binding.progressbar.getRoot());
     }
 
 //    @Override

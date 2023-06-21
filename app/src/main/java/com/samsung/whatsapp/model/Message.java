@@ -10,7 +10,7 @@ public class Message {
 
     }
 
-    public Message( String messageId, String message, String type, String from, String to, long time, int feeling, String starred) {
+    public Message(String messageId, String message, String type, String from, String to, long time, int feeling, String starred) {
         this.from = from;
         this.message = message;
         this.type = type;

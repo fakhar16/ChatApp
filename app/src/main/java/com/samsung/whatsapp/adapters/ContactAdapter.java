@@ -1,6 +1,7 @@
 package com.samsung.whatsapp.adapters;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,8 +21,10 @@ import java.util.ArrayList;
 
 public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactViewHolder> {
     private ArrayList<User> userList;
+    private final Context context;
 
-    public ContactAdapter(ArrayList<User> userList) {
+    public ContactAdapter(Context context, ArrayList<User> userList) {
+        this.context = context;
         this.userList = userList;
     }
 
@@ -44,8 +47,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactV
 
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(125, 125);
         holder.binding.usersProfileImage.setLayoutParams(layoutParams);
-
-        holder.binding.itemView.setOnClickListener(view -> ForwardMessageBottomSheetHandler.forwardMessage(user.getUid()));
+        holder.binding.itemView.setOnClickListener(view -> ForwardMessageBottomSheetHandler.forwardMessage(context, user.getUid()));
     }
 
     @SuppressLint("NotifyDataSetChanged")

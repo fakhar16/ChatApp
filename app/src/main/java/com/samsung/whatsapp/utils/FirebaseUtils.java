@@ -9,9 +9,9 @@ import static com.samsung.whatsapp.utils.Utils.TYPE_MESSAGE;
 import static com.samsung.whatsapp.ApplicationClass.context;
 
 import android.app.Activity;
+import android.content.Context;
 import android.net.Uri;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -28,6 +28,7 @@ import com.google.firebase.storage.UploadTask;
 import com.samsung.whatsapp.ApplicationClass;
 import com.samsung.whatsapp.R;
 import com.samsung.whatsapp.fcm.FCMNotificationSender;
+import com.samsung.whatsapp.interfaces.MessageListenerCallback;
 import com.samsung.whatsapp.model.Message;
 import com.samsung.whatsapp.model.Notification;
 import com.samsung.whatsapp.model.User;
@@ -38,7 +39,6 @@ import java.util.Map;
 import java.util.Objects;
 
 public class FirebaseUtils {
-    private static final String TAG = "ConsoleFCMMessaging";
     public static void sendMessage(String message, String messageSenderId, String messageReceiverId) {
         if (!TextUtils.isEmpty(message)) {
             String messageSenderRef = context.getString(R.string.MESSAGES) + "/" + messageSenderId + "/" + messageReceiverId;
@@ -58,12 +58,7 @@ public class FirebaseUtils {
             messageBodyDetails.put(messageReceiverRef + "/" + messagePushId, obj_message);
 
             FirebaseDatabase.getInstance().getReference()
-                    .updateChildren(messageBodyDetails)
-                    .addOnCompleteListener(task -> {
-                        if (!task.isSuccessful()) {
-                            Log.wtf(TAG, "SendMessage: Error while sending the message" );
-                        }
-                    });
+                    .updateChildren(messageBodyDetails);
 
             updateLastMessage(obj_message);
             sendNotification(message, messageReceiverId, messageSenderId, TYPE_MESSAGE);
@@ -136,7 +131,8 @@ public class FirebaseUtils {
                 .removeValue();
     }
 
-    public static void sendImage(String messageSenderId, String messageReceiverId, Uri fileUri, Activity activity, View dialog) {
+    public static void sendImage(Context context, String messageSenderId, String messageReceiverId, Uri fileUri) {
+        MessageListenerCallback callback = (MessageListenerCallback) context;
         String messageSenderRef = context.getString(R.string.MESSAGES) + "/" + messageSenderId + "/" + messageReceiverId;
         String messageReceiverRef = context.getString(R.string.MESSAGES) + "/" + messageReceiverId + "/" + messageSenderId;
 
@@ -158,7 +154,7 @@ public class FirebaseUtils {
             return filePath.getDownloadUrl();
         }).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
-                Utils.dismissLoadingBar(activity, dialog);
+                callback.onMessageSent();
                 Uri downloadUrl = task.getResult();
                 String myUrl = downloadUrl.toString();
 
@@ -169,17 +165,42 @@ public class FirebaseUtils {
                 messageBodyDetails.put(messageReceiverRef + "/" + messagePushId, obj_message);
 
                 FirebaseDatabase.getInstance().getReference()
-                        .updateChildren(messageBodyDetails)
-                        .addOnCompleteListener(task1 -> {
-                            if (!task1.isSuccessful()) {
-                                Log.wtf(TAG, "SendMessage: Error while sending the message" );
-                            }
-                        });
+                        .updateChildren(messageBodyDetails);
 
                 updateLastMessage(obj_message);
                 sendNotification("Sent an image", messageReceiverId, messageSenderId, TYPE_MESSAGE);
             }
         });
+    }
+
+    public static void forwardImage(Context context, Message message, String receiver) {
+        MessageListenerCallback callback = (MessageListenerCallback) context;
+        DatabaseReference userMessageKeyRef =
+                messageDatabaseReference
+                        .child(message.getFrom())
+                        .child(message.getTo())
+                        .push();
+
+        String messagePushId = userMessageKeyRef.getKey();
+        Message obj_message = new Message(messagePushId, message.getMessage(), message.getType(), message.getFrom(), receiver,new Date().getTime(), -1, "");
+
+        String messageSenderRef = context.getString(R.string.MESSAGES) + "/" + obj_message.getFrom() + "/" + obj_message.getTo();
+        String messageReceiverRef = context.getString(R.string.MESSAGES) + "/" + obj_message.getTo() + "/" + obj_message.getFrom();
+
+        Map<String, Object> messageBodyDetails = new HashMap<>();
+        messageBodyDetails.put(messageSenderRef + "/" + messagePushId, obj_message);
+        messageBodyDetails.put(messageReceiverRef + "/" + messagePushId, obj_message);
+
+        FirebaseDatabase.getInstance().getReference()
+                .updateChildren(messageBodyDetails)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()){
+                        callback.onMessageSent();
+                    }
+                });
+
+        updateLastMessage(message);
+        sendNotification("Sent an image", message.getTo(), message.getFrom(), TYPE_MESSAGE);
     }
 
     public static void sendVideo(String messageSenderId, String messageReceiverId, Uri fileUri, Activity activity, View dialog) {
@@ -212,12 +233,7 @@ public class FirebaseUtils {
                     messageBodyDetails.put(messageReceiverRef + "/" + messagePushId, obj_message);
 
                     FirebaseDatabase.getInstance().getReference()
-                            .updateChildren(messageBodyDetails)
-                            .addOnCompleteListener(task1 -> {
-                                if (!task1.isSuccessful()) {
-                                    Log.wtf(TAG, "SendMessage: Error while sending the message" );
-                                }
-                            });
+                            .updateChildren(messageBodyDetails);
 
                     updateLastMessage(obj_message);
                     sendNotification("Sent a video", messageReceiverId, messageSenderId, TYPE_MESSAGE);
