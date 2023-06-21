@@ -110,8 +110,13 @@ public class FirebaseUtils {
 
     public static void updateLastMessage(Message message) {
         Map<String, Object> lastMsgObj = new HashMap<>();
-        lastMsgObj.put(context.getString(R.string.LAST_MESSAGE_DETAILS), message.getMessage());
         lastMsgObj.put(context.getString(R.string.LAST_MESSAGE_TIME), message.getTime());
+        if (message.getType().equals(context.getString(R.string.IMAGE)))
+            lastMsgObj.put(context.getString(R.string.LAST_MESSAGE_DETAILS), "Photo");
+        else if (message.getType().equals(context.getString(R.string.VIDEO)))
+            lastMsgObj.put(context.getString(R.string.LAST_MESSAGE_DETAILS), "Video");
+        else
+            lastMsgObj.put(context.getString(R.string.LAST_MESSAGE_DETAILS), message.getMessage());
 
         messageDatabaseReference
                 .child(message.getFrom())
