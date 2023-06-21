@@ -4,12 +4,16 @@ import static com.samsung.whatsapp.utils.Utils.currentUser;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.ContentValues;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Matrix;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
@@ -31,13 +35,16 @@ import com.samsung.whatsapp.utils.Utils;
 import com.samsung.whatsapp.viewmodel.StatusViewModel;
 import com.squareup.picasso.Picasso;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Objects;
 
 public class StoriesFragment extends Fragment {
     private FragmentStoriesBinding binding;
     private StatusAdapter statusAdapter;
-    StatusViewModel viewModel;
+    private StatusViewModel viewModel;
+    private Uri imageUri;
 
     private final ActivityResultLauncher<Intent> imagePickActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
         @Override
@@ -47,11 +54,35 @@ public class StoriesFragment extends Fragment {
 
                 Intent data = result.getData();
                 if (data != null && data.getData() != null) {
-                    StatusRepositoryImpl.getInstance().uploadStatus(data, currentUser, binding.progressbar.getRoot(), requireActivity());
+                    StatusRepositoryImpl.getInstance().uploadStatus(data.getData(), currentUser, binding.progressbar.getRoot(), requireActivity());
                 }
             }
         }
     });
+
+    private final ActivityResultLauncher<Intent> imageCaptureActivityResultLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            new ActivityResultCallback<ActivityResult>() {
+                @SuppressLint("SetTextI18n")
+                @Override
+                public void onActivityResult(ActivityResult result) {
+                    if (result.getResultCode() == Activity.RESULT_OK) {
+                        try {
+                            Bitmap bitmap = MediaStore.Images.Media.getBitmap(requireContext().getContentResolver(), imageUri);
+                            Matrix matrix = new Matrix();
+                            matrix.postRotate(-90);
+                            Bitmap finalBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+                            OutputStream os= requireContext().getContentResolver().openOutputStream(imageUri);
+                            finalBitmap.compress(Bitmap.CompressFormat.PNG,100,os);
+
+                            Utils.showLoadingBar(requireActivity(), binding.progressbar.getRoot());
+                            StatusRepositoryImpl.getInstance().uploadStatus(imageUri, currentUser, binding.progressbar.getRoot(), requireActivity());
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                }
+            });
 
     public StoriesFragment() {
         // Required empty public constructor
@@ -105,7 +136,7 @@ public class StoriesFragment extends Fragment {
             imagePickActivityResultLauncher.launch(intent);
         });
 
-        binding.addStatus.setOnClickListener(view -> Toast.makeText(getContext(), "Add image from camera status here", Toast.LENGTH_SHORT).show());
+        binding.addStatus.setOnClickListener(view -> cameraButtonClicked());
 
         binding.searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
@@ -119,6 +150,16 @@ public class StoriesFragment extends Fragment {
                 return true;
             }
         });
+    }
+
+    private void cameraButtonClicked() {
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.Images.Media.TITLE, "New Picture");
+        values.put(MediaStore.Images.Media.DESCRIPTION, "From your Camera");
+        imageUri = requireContext().getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
+        imageCaptureActivityResultLauncher.launch(intent);
     }
 
     private void filter(String text) {

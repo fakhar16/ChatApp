@@ -4,7 +4,7 @@ import static com.samsung.whatsapp.ApplicationClass.context;
 import static com.samsung.whatsapp.ApplicationClass.storiesDatabaseReference;
 
 import android.app.Activity;
-import android.content.Intent;
+import android.net.Uri;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -50,12 +50,12 @@ public class StatusRepositoryImpl implements IStatusRepository {
     }
 
     @Override
-    public void uploadStatus(Intent data, User user, View dialog, Activity activity) {
+    public void uploadStatus(Uri data, User user, View dialog, Activity activity) {
         Date date = new Date();
         FirebaseStorage storage = FirebaseStorage.getInstance();
         StorageReference reference = storage.getReference().child(context.getString(R.string.STATUS)).child(date.getTime() + "");
 
-        reference.putFile(data.getData())
+        reference.putFile(data)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         reference.getDownloadUrl()
