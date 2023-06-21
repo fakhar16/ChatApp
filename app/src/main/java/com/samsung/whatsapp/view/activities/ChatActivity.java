@@ -6,7 +6,6 @@ import static com.samsung.whatsapp.utils.Utils.TYPE_VIDEO_CALL;
 import static com.samsung.whatsapp.ApplicationClass.context;
 import static com.samsung.whatsapp.utils.Utils.currentUser;
 import static com.samsung.whatsapp.utils.Utils.getFileType;
-import static com.samsung.whatsapp.utils.Utils.getImageUri;
 import static com.samsung.whatsapp.utils.Utils.showLoadingBar;
 
 import androidx.activity.result.ActivityResult;
@@ -22,10 +21,12 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -61,6 +62,8 @@ import com.samsung.whatsapp.webrtc.CallActivity;
 import com.squareup.picasso.Picasso;
 //import com.tougee.recorderview.AudioRecordView;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -72,6 +75,7 @@ public class ChatActivity extends BaseActivity{
     public static User receiver;
     private BottomSheetDialog bottomSheetDialog;
     private MessageViewModel viewModel;
+    private Uri imageUri;
     private static final String TAG = "ConsoleChatActivity";
 
     private final ActivityResultLauncher<Intent> imagePickActivityResultLauncher = registerForActivityResult(
@@ -102,16 +106,22 @@ public class ChatActivity extends BaseActivity{
                 @SuppressLint("SetTextI18n")
                 @Override
                 public void onActivityResult(ActivityResult result) {
-                    if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                    if (result.getResultCode() == Activity.RESULT_OK) {
+                        try {
+                            Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imageUri);
+                            Matrix matrix = new Matrix();
+                            matrix.postRotate(-90);
+                            Bitmap finalBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+                            OutputStream os=getContentResolver().openOutputStream(imageUri);
+                            finalBitmap.compress(Bitmap.CompressFormat.PNG,100,os);
 
-                        binding.progressbar.dialogTitle.setText(getString(R.string.SENDING_FILE_TITLE));
-                        binding.progressbar.dialogDescription.setText(getString(R.string.SENDING_FILE_DESCRIPTION));
-                        showLoadingBar(ChatActivity.this, binding.progressbar.getRoot());
-
-                        Bundle bundle = result.getData().getExtras();
-                        Bitmap bitmap = (Bitmap) bundle.get(context.getString(R.string.DATA));
-                        Uri uri = getImageUri(ApplicationClass.context, bitmap);
-                        FirebaseUtils.sendImage(currentUser.getUid(), messageReceiverId, uri, ChatActivity.this, binding.progressbar.getRoot());
+                            binding.progressbar.dialogTitle.setText(getString(R.string.SENDING_FILE_TITLE));
+                            binding.progressbar.dialogDescription.setText(getString(R.string.SENDING_FILE_DESCRIPTION));
+                            showLoadingBar(ChatActivity.this, binding.progressbar.getRoot());
+                            FirebaseUtils.sendImage(currentUser.getUid(), messageReceiverId, imageUri, ChatActivity.this, binding.progressbar.getRoot());
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
                     }
                 }
             });
@@ -222,6 +232,7 @@ public class ChatActivity extends BaseActivity{
 //        binding.recordView.callback = (AudioRecordView.Callback) this;
 
         messageReceiverId = getIntent().getExtras().getString(getString(R.string.VISIT_USER_ID));
+
         initToolBar();
         setupViewModel();
         setupRecyclerView();
@@ -383,7 +394,12 @@ public class ChatActivity extends BaseActivity{
     }
 
     private void cameraButtonClicked() {
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.Images.Media.TITLE, "New Picture");
+        values.put(MediaStore.Images.Media.DESCRIPTION, "From your Camera");
+        imageUri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
         imageCaptureActivityResultLauncher.launch(intent);
     }
 
