@@ -126,4 +126,6 @@
     <string name="STAR">star</string>
     <string name="STAR_MESSAGE_WITH_RECEIVER">StarMessageWithReceiver</string>
     <string name="SEARCH_MESSAGE">search_message</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

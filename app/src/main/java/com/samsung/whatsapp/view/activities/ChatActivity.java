@@ -345,12 +345,20 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
 
     private void handleButtonClicks() {
         binding.sendMessageBtn.setOnClickListener(view -> sendMessage());
-        binding.camera.setOnClickListener(view -> cameraButtonClicked());
+//        binding.camera.setOnClickListener(view -> cameraButtonClicked());
         customChatBarBinding.voiceCall.setOnClickListener(view -> Toast.makeText(this, receiver.getName(), Toast.LENGTH_SHORT).show());
         customChatBarBinding.videoCall.setOnClickListener(view -> createVideoCall());
         customChatBarBinding.userImage.setOnClickListener(view -> WhatsappLikeProfilePicPreview.Companion.zoomImageFromThumb(customChatBarBinding.userImage, binding.expandedImage.cardView, binding.expandedImage.image, binding.chatToolBar.getRoot().getRootView(), receiver.getImage()));
         binding.attachMenu.setOnClickListener(view -> showAttachmentMenu());
         customChatBarBinding.userInfo.setOnClickListener(view -> sendUserToProfileActivity());
+
+        binding.camera.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(ChatActivity.this, CameraxActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
     private void sendMessage() {
