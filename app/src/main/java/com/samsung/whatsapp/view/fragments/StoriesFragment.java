@@ -4,7 +4,6 @@ import static com.samsung.whatsapp.utils.Utils.currentUser;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.ContentValues;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
@@ -32,6 +31,7 @@ import com.samsung.whatsapp.databinding.FragmentStoriesBinding;
 import com.samsung.whatsapp.model.UserStatus;
 import com.samsung.whatsapp.repository.StatusRepositoryImpl;
 import com.samsung.whatsapp.utils.Utils;
+import com.samsung.whatsapp.view.activities.CameraxActivity;
 import com.samsung.whatsapp.viewmodel.StatusViewModel;
 import com.squareup.picasso.Picasso;
 
@@ -44,7 +44,6 @@ public class StoriesFragment extends Fragment {
     private FragmentStoriesBinding binding;
     private StatusAdapter statusAdapter;
     private StatusViewModel viewModel;
-    private Uri imageUri;
 
     private final ActivityResultLauncher<Intent> imagePickActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
         @Override
@@ -67,16 +66,22 @@ public class StoriesFragment extends Fragment {
                 @Override
                 public void onActivityResult(ActivityResult result) {
                     if (result.getResultCode() == Activity.RESULT_OK) {
+                        Intent data = result.getData();
+
+                        assert data != null;
+                        Uri fileUri = Uri.parse(data.getStringExtra(getString(R.string.IMAGE_URI)));
+
+                        Bitmap bitmap;
                         try {
-                            Bitmap bitmap = MediaStore.Images.Media.getBitmap(requireContext().getContentResolver(), imageUri);
+                            bitmap = MediaStore.Images.Media.getBitmap(requireContext().getContentResolver(), fileUri);
                             Matrix matrix = new Matrix();
                             matrix.postRotate(-90);
                             Bitmap finalBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
-                            OutputStream os= requireContext().getContentResolver().openOutputStream(imageUri);
+                            OutputStream os=requireContext().getContentResolver().openOutputStream(fileUri);
                             finalBitmap.compress(Bitmap.CompressFormat.PNG,100,os);
 
                             Utils.showLoadingBar(requireActivity(), binding.progressbar.getRoot());
-                            StatusRepositoryImpl.getInstance().uploadStatus(imageUri, currentUser, binding.progressbar.getRoot(), requireActivity());
+                            StatusRepositoryImpl.getInstance().uploadStatus(fileUri, currentUser, binding.progressbar.getRoot(), requireActivity());
                         } catch (IOException e) {
                             throw new RuntimeException(e);
                         }
@@ -153,12 +158,8 @@ public class StoriesFragment extends Fragment {
     }
 
     private void cameraButtonClicked() {
-        ContentValues values = new ContentValues();
-        values.put(MediaStore.Images.Media.TITLE, "New Picture");
-        values.put(MediaStore.Images.Media.DESCRIPTION, "From your Camera");
-        imageUri = requireContext().getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
-        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
+        Intent intent = new Intent(requireContext(), CameraxActivity.class);
+        intent.putExtra(getString(R.string.IS_FROM_STORIES), true);
         imageCaptureActivityResultLauncher.launch(intent);
     }
 

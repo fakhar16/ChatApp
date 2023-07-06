@@ -131,4 +131,5 @@
     <string name="IMAGE_URI">image_uri</string>
     <string name="VIDEO_URI">video_uri</string>
     <string name="FILE_TYPE">file_type</string>
+    <string name="IS_FROM_STORIES">isFromStories</string>
 </resources>
