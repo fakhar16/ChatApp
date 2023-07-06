@@ -148,6 +148,8 @@ public class MessagesAdapter extends RecyclerView.Adapter<MessagesAdapter.Messag
 
         //Setting video if message type is video
         if (message.getType().equals(context.getString(R.string.VIDEO))) {
+            holder.binding.message.setVisibility(View.GONE);
+            holder.binding.image.setVisibility(View.VISIBLE);
             Glide.with(context).load(message.getMessage()).centerCrop().placeholder(R.drawable.baseline_play_circle_outline_24).into(holder.binding.image);
             holder.binding.image.setOnClickListener(view -> ((ChatActivity)(context)).showVideoPreview(holder.binding.image, message.getMessage()));
         } else if (message.getType().equals(context.getString(R.string.IMAGE))) {

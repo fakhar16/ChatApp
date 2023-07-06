@@ -314,5 +314,13 @@ public class FirebaseUtils {
                 .child(message.getFrom())
                 .child(message.getMessageId())
                 .removeValue();
+
+        if (message.getType().equals(context.getString(R.string.IMAGE))) {
+            imageStorageReference.getStorage().getReferenceFromUrl(message.getMessage()).delete();
+        }
+
+        if (message.getType().equals(context.getString(R.string.VIDEO))) {
+            videoStorageReference.getStorage().getReferenceFromUrl(message.getMessage()).delete();
+        }
     }
 }

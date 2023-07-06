@@ -128,4 +128,7 @@
     <string name="SEARCH_MESSAGE">search_message</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="IMAGE_URI">image_uri</string>
+    <string name="VIDEO_URI">video_uri</string>
+    <string name="FILE_TYPE">file_type</string>
 </resources>

@@ -1,27 +1,15 @@
 package com.samsung.whatsapp.view.activities;
 
+import static com.samsung.whatsapp.ApplicationClass.context;
 import static com.samsung.whatsapp.ApplicationClass.presenceDatabaseReference;
 import static com.samsung.whatsapp.ApplicationClass.userDatabaseReference;
 import static com.samsung.whatsapp.utils.Utils.TYPE_VIDEO_CALL;
-import static com.samsung.whatsapp.ApplicationClass.context;
 import static com.samsung.whatsapp.utils.Utils.currentUser;
 import static com.samsung.whatsapp.utils.Utils.getFileType;
 import static com.samsung.whatsapp.utils.Utils.showLoadingBar;
 
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.widget.SearchView;
-import androidx.core.content.ContextCompat;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.LinearLayoutManager;
-
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -41,13 +29,27 @@ import android.widget.LinearLayout;
 import android.widget.MediaController;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.widget.SearchView;
+import androidx.core.content.ContextCompat;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import com.samsung.whatsapp.ApplicationClass;
+import com.samsung.whatsapp.R;
 import com.samsung.whatsapp.adapters.MessagesAdapter;
+import com.samsung.whatsapp.databinding.ActivityChatBinding;
+import com.samsung.whatsapp.databinding.CustomChatBarBinding;
 import com.samsung.whatsapp.fcm.FCMNotificationSender;
 import com.samsung.whatsapp.interfaces.MessageListenerCallback;
 import com.samsung.whatsapp.model.Message;
@@ -57,12 +59,8 @@ import com.samsung.whatsapp.utils.FirebaseUtils;
 import com.samsung.whatsapp.utils.Utils;
 import com.samsung.whatsapp.utils.WhatsappLikeProfilePicPreview;
 import com.samsung.whatsapp.viewmodel.MessageViewModel;
-import com.samsung.whatsapp.R;
-import com.samsung.whatsapp.databinding.ActivityChatBinding;
-import com.samsung.whatsapp.databinding.CustomChatBarBinding;
 import com.samsung.whatsapp.webrtc.CallActivity;
 import com.squareup.picasso.Picasso;
-//import com.tougee.recorderview.AudioRecordView;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -77,7 +75,6 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
     public static User receiver;
     private BottomSheetDialog bottomSheetDialog;
     private MessageViewModel viewModel;
-    private Uri imageUri;
     private static final String TAG = "ConsoleChatActivity";
 
     private final ActivityResultLauncher<Intent> imagePickActivityResultLauncher = registerForActivityResult(
@@ -100,29 +97,47 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
                 }
             });
 
-    private final ActivityResultLauncher<Intent> imageCaptureActivityResultLauncher = registerForActivityResult(
-            new ActivityResultContracts.StartActivityForResult(),
-            new ActivityResultCallback<ActivityResult>() {
-                @SuppressLint("SetTextI18n")
-                @Override
-                public void onActivityResult(ActivityResult result) {
-                    if (result.getResultCode() == Activity.RESULT_OK) {
-                        try {
-                            Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imageUri);
-                            Matrix matrix = new Matrix();
-                            matrix.postRotate(-90);
-                            Bitmap finalBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
-                            OutputStream os=getContentResolver().openOutputStream(imageUri);
-                            finalBitmap.compress(Bitmap.CompressFormat.PNG,100,os);
+    private final ActivityResultLauncher<Intent> imageCaptureResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
+        @Override
+        public void onActivityResult(ActivityResult result) {
+            if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
 
+                Intent data = result.getData();
+                String fileType = data.getStringExtra(getString(R.string.FILE_TYPE));
+
+                if (fileType.equals(getString(R.string.IMAGE))) {
+                    Uri fileUri = Uri.parse(data.getStringExtra(getString(R.string.IMAGE_URI)));
+
+                    Bitmap bitmap;
+                    try {
+                        bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), fileUri);
+                        Matrix matrix = new Matrix();
+                        matrix.postRotate(-90);
+                        Bitmap finalBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+                        OutputStream os=getContentResolver().openOutputStream(fileUri);
+                        finalBitmap.compress(Bitmap.CompressFormat.PNG,100,os);
+
+                        binding.capturedImage.cardView.setVisibility(View.VISIBLE);
+                        Picasso.get().load(fileUri).into(binding.capturedImage.image);
+
+                        binding.capturedImage.sendMessage.setOnClickListener(view -> {
+                            binding.capturedImage.cardView.setVisibility(View.GONE);
                             showLoadingBar(ChatActivity.this, binding.progressbar.getRoot());
-                            FirebaseUtils.sendImage(ChatActivity.this, currentUser.getUid(), messageReceiverId, imageUri);
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
+                            FirebaseUtils.sendImage(ChatActivity.this, currentUser.getUid(), messageReceiverId, fileUri);
+                        });
+
+                        binding.capturedImage.cancel.setOnClickListener(view -> binding.capturedImage.cardView.setVisibility(View.GONE));
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
                     }
+                } else if (fileType.equals(getString(R.string.VIDEO))) {
+                    Uri fileUri = Uri.parse(data.getStringExtra(getString(R.string.VIDEO_URI)));
+                    showLoadingBar(ChatActivity.this, binding.progressbar.getRoot());
+                    FirebaseUtils.sendVideo(currentUser.getUid(), messageReceiverId, fileUri, ChatActivity.this, binding.progressbar.getRoot());
                 }
-            });
+            }
+        }
+    });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -156,7 +171,6 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
 
             @Override
             public void afterTextChanged(Editable editable) {
-
                 presenceDatabaseReference
                         .child(currentUser.getUid())
                         .setValue("typing...");
@@ -345,20 +359,13 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
 
     private void handleButtonClicks() {
         binding.sendMessageBtn.setOnClickListener(view -> sendMessage());
-//        binding.camera.setOnClickListener(view -> cameraButtonClicked());
+        binding.camera.setOnClickListener(view -> cameraButtonClicked());
+        binding.attachMenu.setOnClickListener(view -> showAttachmentMenu());
+
         customChatBarBinding.voiceCall.setOnClickListener(view -> Toast.makeText(this, receiver.getName(), Toast.LENGTH_SHORT).show());
         customChatBarBinding.videoCall.setOnClickListener(view -> createVideoCall());
         customChatBarBinding.userImage.setOnClickListener(view -> WhatsappLikeProfilePicPreview.Companion.zoomImageFromThumb(customChatBarBinding.userImage, binding.expandedImage.cardView, binding.expandedImage.image, binding.chatToolBar.getRoot().getRootView(), receiver.getImage()));
-        binding.attachMenu.setOnClickListener(view -> showAttachmentMenu());
         customChatBarBinding.userInfo.setOnClickListener(view -> sendUserToProfileActivity());
-
-        binding.camera.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(ChatActivity.this, CameraxActivity.class);
-                startActivity(intent);
-            }
-        });
     }
 
     private void sendMessage() {
@@ -406,13 +413,8 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
     }
 
     private void cameraButtonClicked() {
-        ContentValues values = new ContentValues();
-        values.put(MediaStore.Images.Media.TITLE, "New Picture");
-        values.put(MediaStore.Images.Media.DESCRIPTION, "From your Camera");
-        imageUri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
-        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
-        imageCaptureActivityResultLauncher.launch(intent);
+        Intent intent = new Intent(ChatActivity.this, CameraxActivity.class);
+        imageCaptureResultLauncher.launch(intent);
     }
 
     private void attachmentButtonClicked() {

@@ -73,4 +73,11 @@
             tools:ignore="ContentDescription,HardcodedText" />
 
     </RelativeLayout>
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/profile_image"
+        android:id="@+id/preview_image"
+        android:visibility="gone"
+        />
 </RelativeLayout>

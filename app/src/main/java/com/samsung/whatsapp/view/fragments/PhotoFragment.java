@@ -1,6 +1,8 @@
 package com.samsung.whatsapp.view.fragments;
 
+import android.app.Activity;
 import android.content.ContentValues;
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -15,6 +17,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LifecycleOwner;
 
 import android.provider.MediaStore;
+import android.util.Size;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,6 +29,7 @@ import com.samsung.whatsapp.databinding.FragmentPhotoBinding;
 
 import java.text.SimpleDateFormat;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
 public class PhotoFragment extends Fragment {
@@ -109,7 +113,8 @@ public class PhotoFragment extends Fragment {
 
         //Image capture use case
         imageCapture = new ImageCapture.Builder()
-                .setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
+                .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
+                .setTargetResolution(new Size(800, 800))
                 .setFlashMode(flashMode)
                 .build();
 
@@ -130,7 +135,11 @@ public class PhotoFragment extends Fragment {
                 new ImageCapture.OnImageSavedCallback() {
                     @Override
                     public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
-                        Toast.makeText(requireContext(), "Image saved successfully", Toast.LENGTH_SHORT).show();
+                        Intent data = new Intent();
+                        data.putExtra(requireContext().getString(R.string.IMAGE_URI), Objects.requireNonNull(outputFileResults.getSavedUri()).toString());
+                        data.putExtra(requireContext().getString(R.string.FILE_TYPE), requireContext().getString(R.string.IMAGE));
+                        requireActivity().setResult(Activity.RESULT_OK, data);
+                        requireActivity().finish();
                     }
 
                     @Override

@@ -1,7 +1,9 @@
 package com.samsung.whatsapp.view.fragments;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.ContentValues;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 
@@ -22,7 +24,9 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LifecycleOwner;
 
+import android.os.CountDownTimer;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,6 +38,8 @@ import com.samsung.whatsapp.databinding.FragmentVideoBinding;
 
 import java.text.SimpleDateFormat;
 import java.util.Locale;
+import java.util.Objects;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 
 public class VideoFragment extends Fragment {
@@ -44,6 +50,10 @@ public class VideoFragment extends Fragment {
     private VideoCapture<Recorder> videoCapture;
     private int flashMode = ImageCapture.FLASH_MODE_OFF;
     Recording recording = null;
+    private CountDownTimer countDownTimer;
+    long counter = 0;
+
+    private static final String TAG = "ConsoleVideoFragment";
     public VideoFragment() {
         // Required empty public constructor
     }
@@ -95,7 +105,7 @@ public class VideoFragment extends Fragment {
 
         //Video capture use case
         Recorder recorder = new Recorder.Builder()
-                .setQualitySelector(QualitySelector.from(Quality.HIGHEST))
+                .setQualitySelector(QualitySelector.from(Quality.SD))
                 .build();
 
         videoCapture = VideoCapture.withOutput(recorder);
@@ -137,17 +147,59 @@ public class VideoFragment extends Fragment {
                 .prepareRecording(requireContext(), options).withAudioEnabled()
                 .start(ContextCompat.getMainExecutor(requireContext()), videoRecordEvent -> {
                     if (videoRecordEvent instanceof VideoRecordEvent.Start) {
-                        binding.takeVideo.setImageResource(R.drawable.baseline_stop_circle_24);
+                        startVideo();
+
                     } else if (videoRecordEvent instanceof VideoRecordEvent.Finalize) {
                         if (!((VideoRecordEvent.Finalize) videoRecordEvent).hasError()) {
-                            Toast.makeText(requireContext(), "Video saved successfully", Toast.LENGTH_SHORT).show();
+                            Intent data = new Intent();
+                            data.putExtra(requireContext().getString(R.string.VIDEO_URI), ((VideoRecordEvent.Finalize) videoRecordEvent).getOutputResults().getOutputUri().toString());
+                            data.putExtra(requireContext().getString(R.string.FILE_TYPE), requireContext().getString(R.string.VIDEO));
+                            requireActivity().setResult(Activity.RESULT_OK, data);
+                            requireActivity().finish();
                         } else {
                             recording.close();
                             recording = null;
                             Toast.makeText(requireContext(), "Error while saving the video", Toast.LENGTH_SHORT).show();
                         }
-                        binding.takeVideo.setImageResource(R.drawable.baseline_fiber_manual_record_24);
+                        stopVideo();
                     }
                 });
+    }
+
+    private void stopVideo() {
+        binding.takeVideo.setImageResource(R.drawable.baseline_fiber_manual_record_24);
+        binding.flipCamera.setVisibility(View.VISIBLE);
+        binding.gallery.setVisibility(View.VISIBLE);
+        binding.closeCamera.setVisibility(View.VISIBLE);
+        countDownTimer.cancel();
+    }
+
+    private void startVideo() {
+        binding.takeVideo.setImageResource(R.drawable.baseline_stop_circle_24);
+        binding.flipCamera.setVisibility(View.GONE);
+        binding.gallery.setVisibility(View.GONE);
+        binding.closeCamera.setVisibility(View.GONE);
+
+        countDownTimer = new CountDownTimer(Long.MAX_VALUE, 1000) {
+
+            public void onTick(long millisUntilFinished) {
+                counter++;
+                updateRecordTimerText(counter);
+            }
+
+            public void onFinish() {
+                counter = 0;
+                updateRecordTimerText(counter);
+            }
+        }.start();
+    }
+
+    private void updateRecordTimerText(long millis) {
+        int minutes = (int)(millis) / 60;
+        int seconds = (int)(millis) % 60;
+
+        String timeFormatted = String.format(Locale.US, "%02d:%02d", minutes, seconds);
+
+        binding.recordingTimer.setText(timeFormatted);
     }
 }
