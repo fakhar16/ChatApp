@@ -5,6 +5,7 @@ import static com.samsung.whatsapp.ApplicationClass.messageDatabaseReference;
 import static com.samsung.whatsapp.ApplicationClass.starMessagesDatabaseReference;
 import static com.samsung.whatsapp.ApplicationClass.userDatabaseReference;
 import static com.samsung.whatsapp.ApplicationClass.videoStorageReference;
+import static com.samsung.whatsapp.utils.Utils.TAG;
 import static com.samsung.whatsapp.utils.Utils.TYPE_MESSAGE;
 import static com.samsung.whatsapp.ApplicationClass.context;
 
@@ -12,10 +13,12 @@ import android.app.Activity;
 import android.content.Context;
 import android.net.Uri;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.NonNull;
 
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -132,6 +135,12 @@ public class FirebaseUtils {
     }
 
     public static void sendImage(Context context, String messageSenderId, String messageReceiverId, Uri fileUri) {
+        Log.wtf(TAG, "sendImage: ");
+        if (context == null) {
+            Log.wtf(TAG, "null context sendImage: ");
+        }
+
+        Log.wtf(TAG, "sender: " + messageSenderId + " receiver: " + messageReceiverId + " uri: " + fileUri);
         MessageListenerCallback callback = (MessageListenerCallback) context;
         String messageSenderRef = context.getString(R.string.MESSAGES) + "/" + messageSenderId + "/" + messageReceiverId;
         String messageReceiverRef = context.getString(R.string.MESSAGES) + "/" + messageReceiverId + "/" + messageSenderId;
@@ -144,9 +153,19 @@ public class FirebaseUtils {
 
         String messagePushId = userMessageKeyRef.getKey();
 
+        Log.wtf(TAG, "messageId: " + messagePushId);
+
         StorageReference filePath = imageStorageReference.child(messagePushId + ".jpg");
 
-        StorageTask<UploadTask.TaskSnapshot> uploadTask = filePath.putFile(fileUri);
+        Log.wtf(TAG, "filePath: " + messagePushId);
+
+        StorageTask<UploadTask.TaskSnapshot> uploadTask = filePath.putFile(fileUri)
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.wtf(TAG, "onFailure: image not put");
+                    }
+                });
         uploadTask.continueWithTask(task -> {
             if (!task.isSuccessful()) {
                 throw Objects.requireNonNull(task.getException());
@@ -170,7 +189,10 @@ public class FirebaseUtils {
                 updateLastMessage(obj_message);
                 sendNotification("Sent an image", messageReceiverId, messageSenderId, TYPE_MESSAGE);
             }
-        });
+        }).addOnFailureListener(e -> {
+                    callback.onMessageSentFailed();
+                    Log.wtf(TAG, "onFailure: called");
+                });
     }
 
     public static void forwardImage(Context context, Message message, String receiver) {

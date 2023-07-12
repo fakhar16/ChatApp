@@ -56,9 +56,6 @@
             android:name=".view.activities.WelcomeActivity"
             android:exported="false" />
         <activity
-            android:name=".view.activities.ImageViewerActivity"
-            android:exported="false" />
-        <activity
             android:name=".view.activities.ChatActivity"
             android:exported="false" />
         <activity

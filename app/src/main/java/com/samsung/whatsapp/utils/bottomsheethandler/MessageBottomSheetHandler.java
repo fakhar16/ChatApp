@@ -2,6 +2,7 @@ package com.samsung.whatsapp.utils.bottomsheethandler;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.net.Uri;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -40,7 +41,11 @@ public class MessageBottomSheetHandler {
 
         //Copy click handler
         copy.setOnClickListener(view -> {
-            Utils.copyMessage(message.getMessage());
+            if (message.getType().equals(context.getString(R.string.IMAGE))) {
+                Utils.copyImage(Uri.parse(message.getMessage()));
+            } else {
+                Utils.copyMessage(message.getMessage());
+            }
             bottomSheetDialog.dismiss();
         });
 

@@ -132,4 +132,6 @@
     <string name="VIDEO_URI">video_uri</string>
     <string name="FILE_TYPE">file_type</string>
     <string name="IS_FROM_STORIES">isFromStories</string>
+    <string name="USER_MESSAGE_TEXT">user_message_text</string>
+    <string name="USER_MESSAGE_IMAGE">user_message_image</string>
 </resources>

@@ -92,7 +92,7 @@
             app:layout_constraintStart_toEndOf="@id/attach_menu"
             app:layout_constraintTop_toTopOf="parent">
 
-            <EditText
+            <com.samsung.whatsapp.utils.custom_xml_items.GoEditText
                 android:id="@+id/messageInputText"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"

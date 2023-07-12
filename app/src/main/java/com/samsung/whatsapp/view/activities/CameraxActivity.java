@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 
 import com.google.android.material.tabs.TabLayoutMediator;
+import com.samsung.whatsapp.R;
 import com.samsung.whatsapp.adapters.CameraXViewPagerAdapter;
 import com.samsung.whatsapp.databinding.ActivityCameraxBinding;
 
@@ -19,7 +20,7 @@ public class CameraxActivity extends AppCompatActivity {
 
         int tabCount = 2;
 
-        if (getIntent().getBooleanExtra("isFromStories", false))
+        if (getIntent().getBooleanExtra(getString(R.string.IS_FROM_STORIES), false))
             tabCount = 1;
 
 

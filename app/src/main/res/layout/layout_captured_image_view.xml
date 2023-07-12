@@ -44,6 +44,19 @@
                 android:layout_alignParentBottom="true"
                 android:layout_alignParentEnd="true"
                 />
+
+            <TextView
+                android:id="@+id/receiver_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="10dp"
+                android:layout_alignParentBottom="true"
+                android:textColor="@android:color/white"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:background="@drawable/background_edit_text"
+                android:backgroundTint="@color/colorPrimary"
+                />
         </RelativeLayout>
     </androidx.cardview.widget.CardView>
 

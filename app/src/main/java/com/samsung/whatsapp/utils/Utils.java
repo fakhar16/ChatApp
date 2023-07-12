@@ -10,8 +10,10 @@ import android.content.Context;
 import android.net.Uri;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.webkit.MimeTypeMap;
 
+import com.samsung.whatsapp.R;
 import com.samsung.whatsapp.model.User;
 
 import java.sql.Timestamp;
@@ -34,6 +36,8 @@ public class Utils {
     public static final int ITEM_SENT = 1;
     public static final int ITEM_RECEIVE = 2;
 
+    public static final String TAG = "Console";
+
     public static void showLoadingBar(Activity activity, View view) {
         view.setVisibility(View.VISIBLE);
         activity.getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
@@ -42,6 +46,15 @@ public class Utils {
     public static void dismissLoadingBar(Activity activity, View view) {
         view.setVisibility(View.GONE);
         activity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+    }
+
+    public static void hideKeyboard(Activity activity) {
+        InputMethodManager imm = (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
+        View view = activity.getCurrentFocus();
+        if (view == null) {
+            view = new View(activity);
+        }
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
     public static String getFileType(Uri uri) {
@@ -83,7 +96,13 @@ public class Utils {
 
     public static void copyMessage(String message) {
         ClipboardManager clipboardManager = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
-        ClipData clipData = ClipData.newPlainText("user_message_text", message);
+        ClipData clipData = ClipData.newPlainText(context.getString(R.string.USER_MESSAGE_TEXT), message);
+        clipboardManager.setPrimaryClip(clipData);
+    }
+
+    public static void copyImage(Uri uri) {
+        ClipboardManager clipboardManager = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clipData = ClipData.newRawUri(context.getString(R.string.USER_MESSAGE_IMAGE), uri);
         clipboardManager.setPrimaryClip(clipData);
     }
 }

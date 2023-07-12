@@ -3,13 +3,17 @@ package com.samsung.whatsapp.view.activities;
 import static com.samsung.whatsapp.ApplicationClass.context;
 import static com.samsung.whatsapp.ApplicationClass.presenceDatabaseReference;
 import static com.samsung.whatsapp.ApplicationClass.userDatabaseReference;
+import static com.samsung.whatsapp.utils.Utils.TAG;
 import static com.samsung.whatsapp.utils.Utils.TYPE_VIDEO_CALL;
 import static com.samsung.whatsapp.utils.Utils.currentUser;
 import static com.samsung.whatsapp.utils.Utils.getFileType;
+import static com.samsung.whatsapp.utils.Utils.hideKeyboard;
 import static com.samsung.whatsapp.utils.Utils.showLoadingBar;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -22,6 +26,7 @@ import android.os.Looper;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -51,6 +56,7 @@ import com.samsung.whatsapp.adapters.MessagesAdapter;
 import com.samsung.whatsapp.databinding.ActivityChatBinding;
 import com.samsung.whatsapp.databinding.CustomChatBarBinding;
 import com.samsung.whatsapp.fcm.FCMNotificationSender;
+import com.samsung.whatsapp.interfaces.GoEditTextListener;
 import com.samsung.whatsapp.interfaces.MessageListenerCallback;
 import com.samsung.whatsapp.model.Message;
 import com.samsung.whatsapp.model.Notification;
@@ -75,8 +81,6 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
     public static User receiver;
     private BottomSheetDialog bottomSheetDialog;
     private MessageViewModel viewModel;
-    private static final String TAG = "ConsoleChatActivity";
-
     private final ActivityResultLauncher<Intent> imagePickActivityResultLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             new ActivityResultCallback<ActivityResult>() {
@@ -117,14 +121,7 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
                         OutputStream os=getContentResolver().openOutputStream(fileUri);
                         finalBitmap.compress(Bitmap.CompressFormat.PNG,100,os);
 
-                        binding.capturedImage.cardView.setVisibility(View.VISIBLE);
-                        Picasso.get().load(fileUri).into(binding.capturedImage.image);
-
-                        binding.capturedImage.sendMessage.setOnClickListener(view -> {
-                            binding.capturedImage.cardView.setVisibility(View.GONE);
-                            showLoadingBar(ChatActivity.this, binding.progressbar.getRoot());
-                            FirebaseUtils.sendImage(ChatActivity.this, currentUser.getUid(), messageReceiverId, fileUri);
-                        });
+                        prepareImageMessageForSending(fileUri);
 
                         binding.capturedImage.cancel.setOnClickListener(view -> binding.capturedImage.cardView.setVisibility(View.GONE));
                     } catch (IOException e) {
@@ -138,6 +135,19 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
             }
         }
     });
+
+    private void prepareImageMessageForSending(Uri fileUri) {
+        binding.capturedImage.cardView.setVisibility(View.VISIBLE);
+        Picasso.get().load(fileUri).into(binding.capturedImage.image);
+        binding.capturedImage.receiverName.setText(receiver.getName());
+
+        binding.capturedImage.sendMessage.setOnClickListener(view -> {
+            Log.wtf(TAG, "prepareImageMessageForSending: ");
+            binding.capturedImage.cardView.setVisibility(View.GONE);
+            showLoadingBar(ChatActivity.this, binding.progressbar.getRoot());
+            FirebaseUtils.sendImage(ChatActivity.this, currentUser.getUid(), messageReceiverId, fileUri);
+        });
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -366,10 +376,24 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
         customChatBarBinding.videoCall.setOnClickListener(view -> createVideoCall());
         customChatBarBinding.userImage.setOnClickListener(view -> WhatsappLikeProfilePicPreview.Companion.zoomImageFromThumb(customChatBarBinding.userImage, binding.expandedImage.cardView, binding.expandedImage.image, binding.chatToolBar.getRoot().getRootView(), receiver.getImage()));
         customChatBarBinding.userInfo.setOnClickListener(view -> sendUserToProfileActivity());
+
+        binding.messageInputText.addListener(() -> {
+            ClipboardManager clipboardManager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+            ClipData primaryClipData = clipboardManager.getPrimaryClip();
+
+            if (primaryClipData != null) {
+                ClipData.Item item = primaryClipData.getItemAt(0);
+                Uri uri = item.getUri();
+
+                binding.messageInputText.setText("");
+                hideKeyboard(this);
+                prepareImageMessageForSending(uri);
+            }
+        });
     }
 
     private void sendMessage() {
-        FirebaseUtils.sendMessage(binding.messageInputText.getText().toString(), currentUser.getUid(), receiver.getUid());
+        FirebaseUtils.sendMessage(Objects.requireNonNull(binding.messageInputText.getText()).toString(), currentUser.getUid(), receiver.getUid());
         binding.messageInputText.setText("");
     }
 
@@ -476,6 +500,11 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
 
     @Override
     public void onMessageSent() {
+        Utils.dismissLoadingBar(this, binding.progressbar.getRoot());
+    }
+
+    @Override
+    public void onMessageSentFailed() {
         Utils.dismissLoadingBar(this, binding.progressbar.getRoot());
     }
 
