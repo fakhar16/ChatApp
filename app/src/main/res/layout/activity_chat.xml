@@ -197,6 +197,13 @@
         tools:layout_editor_absoluteX="0dp"
         tools:layout_editor_absoluteY="0dp" />
 
+    <!--    Captured video view-->
+    <include
+        android:id="@+id/captured_video"
+        layout="@layout/layout_captured_video_view"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="0dp" />
+
 <!--    progress bar-->
     <include
         android:id="@+id/progressbar"

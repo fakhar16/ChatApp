@@ -94,7 +94,7 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
                         if (getFileType(fileUri).equals("jpg")) {
                             FirebaseUtils.sendImage(ChatActivity.this, currentUser.getUid(), messageReceiverId, fileUri);
                         } else if (getFileType(fileUri).equals("mp4")) {
-                            FirebaseUtils.sendVideo(currentUser.getUid(), messageReceiverId, fileUri, ChatActivity.this, binding.progressbar.getRoot());
+                            FirebaseUtils.sendVideo(ChatActivity.this, currentUser.getUid(), messageReceiverId, fileUri);
                         }
                     }
                 }
@@ -128,8 +128,8 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
                     }
                 } else if (fileType.equals(getString(R.string.VIDEO))) {
                     Uri fileUri = Uri.parse(data.getStringExtra(getString(R.string.VIDEO_URI)));
-                    showLoadingBar(ChatActivity.this, binding.progressbar.getRoot());
-                    FirebaseUtils.sendVideo(currentUser.getUid(), messageReceiverId, fileUri, ChatActivity.this, binding.progressbar.getRoot());
+                    prepareVideoMessageForSending(fileUri, "", false);
+                    binding.capturedVideo.cancel.setOnClickListener(view -> binding.capturedVideo.cardView.setVisibility(View.GONE));
                 }
             }
         }
@@ -148,6 +148,29 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
                 FirebaseUtils.forwardImage(ChatActivity.this, obj_message, receiver.getUid());
             } else {
                 FirebaseUtils.sendImage(ChatActivity.this, currentUser.getUid(), messageReceiverId, fileUri);
+            }
+        });
+    }
+
+    private void prepareVideoMessageForSending(Uri fileUri, String messageId, boolean isVideoFromClipboard) {
+        binding.capturedVideo.cardView.setVisibility(View.VISIBLE);
+        binding.capturedVideo.receiverName.setText(receiver.getName());
+
+        ExoPlayer player = new ExoPlayer.Builder(this).build();
+        binding.capturedVideo.video.setPlayer(player);
+
+        MediaItem mediaItem = MediaItem.fromUri(fileUri);
+        player.setMediaItem(mediaItem);
+        player.prepare();
+
+        binding.capturedVideo.sendMessage.setOnClickListener(view -> {
+            binding.capturedVideo.cardView.setVisibility(View.GONE);
+            showLoadingBar(ChatActivity.this, binding.progressbar.getRoot());
+            if (isVideoFromClipboard) {
+                Message obj_message = new Message(messageId, fileUri.toString(), getString(R.string.IMAGE), currentUser.getUid(), receiver.getUid(),new Date().getTime(), -1, "");
+                FirebaseUtils.forwardImage(ChatActivity.this, obj_message, receiver.getUid());
+            } else {
+                FirebaseUtils.sendVideo(this, currentUser.getUid(), messageReceiverId, fileUri);
             }
         });
     }

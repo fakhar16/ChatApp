@@ -7,14 +7,13 @@ import static com.samsung.whatsapp.ApplicationClass.messageDatabaseReference;
 import static com.samsung.whatsapp.ApplicationClass.starMessagesDatabaseReference;
 import static com.samsung.whatsapp.ApplicationClass.userDatabaseReference;
 import static com.samsung.whatsapp.ApplicationClass.videoStorageReference;
+import static com.samsung.whatsapp.ApplicationClass.videoUrlDatabaseReference;
 import static com.samsung.whatsapp.utils.Utils.TYPE_MESSAGE;
 import static com.samsung.whatsapp.utils.Utils.currentUser;
 
-import android.app.Activity;
 import android.content.Context;
 import android.net.Uri;
 import android.text.TextUtils;
-import android.view.View;
 
 import androidx.annotation.NonNull;
 
@@ -213,7 +212,8 @@ public class FirebaseUtils {
         sendNotification("Sent an image", obj_message.getTo(), obj_message.getFrom(), TYPE_MESSAGE);
     }
 
-    public static void sendVideo(String messageSenderId, String messageReceiverId, Uri fileUri, Activity activity, View dialog) {
+    public static void sendVideo(Context context, String messageSenderId, String messageReceiverId, Uri fileUri) {
+        MessageListenerCallback callback = (MessageListenerCallback) context;
         String messageSenderRef = context.getString(R.string.MESSAGES) + "/" + messageSenderId + "/" + messageReceiverId;
         String messageReceiverRef = context.getString(R.string.MESSAGES) + "/" + messageReceiverId + "/" + messageSenderId;
 
@@ -224,16 +224,13 @@ public class FirebaseUtils {
                         .push();
 
         String messagePushId = userMessageKeyRef.getKey();
-
         StorageReference filePath = videoStorageReference.child(messagePushId + ".mp4");
-
         filePath.putFile(fileUri)
                 .addOnSuccessListener(taskSnapshot -> {
                     Task<Uri> uriTask = taskSnapshot.getStorage().getDownloadUrl();
                     //noinspection StatementWithEmptyBody
                     while (!uriTask.isSuccessful());
-
-                    Utils.dismissLoadingBar(activity, dialog);
+                    callback.onMessageSent();
 
                     String downloadUri = uriTask.getResult().toString();
                     Message obj_message = new Message(messagePushId, downloadUri, context.getString(R.string.VIDEO), messageSenderId, messageReceiverId, new Date().getTime(), -1, "");
@@ -245,9 +242,19 @@ public class FirebaseUtils {
                     FirebaseDatabase.getInstance().getReference()
                             .updateChildren(messageBodyDetails);
 
+                    Map<String, Object> videoUrlUserDetails = new HashMap<>();
+                    videoUrlUserDetails.put(messageSenderId, true);
+                    videoUrlUserDetails.put(messageReceiverId, true);
+
+                    assert messagePushId != null;
+                    videoUrlDatabaseReference
+                            .child(messagePushId)
+                            .updateChildren(videoUrlUserDetails);
+
                     updateLastMessage(obj_message);
                     sendNotification("Sent a video", messageReceiverId, messageSenderId, TYPE_MESSAGE);
-                });
+                })
+                .addOnFailureListener(e -> callback.onMessageSentFailed());
     }
 
     public static void starMessage(Message message) {
@@ -317,6 +324,13 @@ public class FirebaseUtils {
                     .child(currentUser.getUid())
                     .removeValue();
         }
+
+        if (message.getType().equals(context.getString(R.string.VIDEO))) {
+            videoUrlDatabaseReference
+                    .child(message.getMessageId())
+                    .child(currentUser.getUid())
+                    .removeValue();
+        }
     }
 
     public static void deleteMessageForEveryone(Message message) {
@@ -359,8 +373,31 @@ public class FirebaseUtils {
                     });
         }
 
-//        if (message.getType().equals(context.getString(R.string.VIDEO))) {
-////            videoStorageReference.getStorage().getReferenceFromUrl(message.getMessage()).delete();
-//        }
+        if (message.getType().equals(context.getString(R.string.VIDEO))) {
+            videoUrlDatabaseReference
+                    .child(message.getMessageId())
+                    .child(message.getFrom())
+                    .removeValue();
+
+            videoUrlDatabaseReference
+                    .child(message.getMessageId())
+                    .child(message.getTo())
+                    .removeValue();
+
+            videoUrlDatabaseReference.child(message.getMessageId())
+                    .addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            if (!snapshot.exists()) {
+                                videoStorageReference.getStorage().getReferenceFromUrl(message.getMessage()).delete();
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+        }
     }
 }

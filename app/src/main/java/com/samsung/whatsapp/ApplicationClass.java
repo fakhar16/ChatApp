@@ -19,6 +19,7 @@ public class ApplicationClass extends Application {
     public static DatabaseReference profileImagesDatabaseReference;
     public static DatabaseReference starMessagesDatabaseReference;
     public static DatabaseReference imageUrlDatabaseReference;
+    public static DatabaseReference videoUrlDatabaseReference;
     public static StorageReference userProfilesImagesReference;
     public static StorageReference imageStorageReference;
     public static StorageReference videoStorageReference;
@@ -48,6 +49,7 @@ public class ApplicationClass extends Application {
         profileImagesDatabaseReference.keepSynced(true);
         starMessagesDatabaseReference.keepSynced(true);
         imageUrlDatabaseReference.keepSynced(true);
+        videoUrlDatabaseReference.keepSynced(true);
     }
 
     private void initializeStorageReferences() {
@@ -65,5 +67,6 @@ public class ApplicationClass extends Application {
         profileImagesDatabaseReference = firebaseDatabase.getReference(getString(R.string.PROFILE_IMAGES));
         starMessagesDatabaseReference = firebaseDatabase.getReference(getString(R.string.STARRED_MESSAGES));
         imageUrlDatabaseReference = firebaseDatabase.getReference(getString(R.string.IMAGE_URL_USED_BY_USERS));
+        videoUrlDatabaseReference = firebaseDatabase.getReference(getString(R.string.VIDEO_URL_USED_BY_USERS));
     }
 }
