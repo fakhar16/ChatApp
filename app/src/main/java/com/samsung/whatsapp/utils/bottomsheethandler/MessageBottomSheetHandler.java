@@ -42,7 +42,7 @@ public class MessageBottomSheetHandler {
         //Copy click handler
         copy.setOnClickListener(view -> {
             if (message.getType().equals(context.getString(R.string.IMAGE))) {
-                Utils.copyImage(Uri.parse(message.getMessage()));
+                Utils.copyImage(Uri.parse(message.getMessage()), message.getMessageId());
             } else {
                 Utils.copyMessage(message.getMessage());
             }

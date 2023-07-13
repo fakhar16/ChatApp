@@ -1,24 +1,23 @@
 package com.samsung.whatsapp.utils;
 
+import static com.samsung.whatsapp.ApplicationClass.context;
 import static com.samsung.whatsapp.ApplicationClass.imageStorageReference;
+import static com.samsung.whatsapp.ApplicationClass.imageUrlDatabaseReference;
 import static com.samsung.whatsapp.ApplicationClass.messageDatabaseReference;
 import static com.samsung.whatsapp.ApplicationClass.starMessagesDatabaseReference;
 import static com.samsung.whatsapp.ApplicationClass.userDatabaseReference;
 import static com.samsung.whatsapp.ApplicationClass.videoStorageReference;
-import static com.samsung.whatsapp.utils.Utils.TAG;
 import static com.samsung.whatsapp.utils.Utils.TYPE_MESSAGE;
-import static com.samsung.whatsapp.ApplicationClass.context;
+import static com.samsung.whatsapp.utils.Utils.currentUser;
 
 import android.app.Activity;
 import android.content.Context;
 import android.net.Uri;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.NonNull;
 
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -135,12 +134,6 @@ public class FirebaseUtils {
     }
 
     public static void sendImage(Context context, String messageSenderId, String messageReceiverId, Uri fileUri) {
-        Log.wtf(TAG, "sendImage: ");
-        if (context == null) {
-            Log.wtf(TAG, "null context sendImage: ");
-        }
-
-        Log.wtf(TAG, "sender: " + messageSenderId + " receiver: " + messageReceiverId + " uri: " + fileUri);
         MessageListenerCallback callback = (MessageListenerCallback) context;
         String messageSenderRef = context.getString(R.string.MESSAGES) + "/" + messageSenderId + "/" + messageReceiverId;
         String messageReceiverRef = context.getString(R.string.MESSAGES) + "/" + messageReceiverId + "/" + messageSenderId;
@@ -152,20 +145,8 @@ public class FirebaseUtils {
                         .push();
 
         String messagePushId = userMessageKeyRef.getKey();
-
-        Log.wtf(TAG, "messageId: " + messagePushId);
-
         StorageReference filePath = imageStorageReference.child(messagePushId + ".jpg");
-
-        Log.wtf(TAG, "filePath: " + messagePushId);
-
-        StorageTask<UploadTask.TaskSnapshot> uploadTask = filePath.putFile(fileUri)
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.wtf(TAG, "onFailure: image not put");
-                    }
-                });
+        StorageTask<UploadTask.TaskSnapshot> uploadTask = filePath.putFile(fileUri);
         uploadTask.continueWithTask(task -> {
             if (!task.isSuccessful()) {
                 throw Objects.requireNonNull(task.getException());
@@ -186,32 +167,31 @@ public class FirebaseUtils {
                 FirebaseDatabase.getInstance().getReference()
                         .updateChildren(messageBodyDetails);
 
+                Map<String, Object> imageUrlUserDetails = new HashMap<>();
+                imageUrlUserDetails.put(messageSenderId, true);
+                imageUrlUserDetails.put(messageReceiverId, true);
+
+                assert messagePushId != null;
+                imageUrlDatabaseReference
+                        .child(messagePushId)
+                        .updateChildren(imageUrlUserDetails);
+
                 updateLastMessage(obj_message);
                 sendNotification("Sent an image", messageReceiverId, messageSenderId, TYPE_MESSAGE);
             }
-        }).addOnFailureListener(e -> {
-                    callback.onMessageSentFailed();
-                    Log.wtf(TAG, "onFailure: called");
-                });
+        }).addOnFailureListener(e -> callback.onMessageSentFailed());
     }
 
     public static void forwardImage(Context context, Message message, String receiver) {
         MessageListenerCallback callback = (MessageListenerCallback) context;
-        DatabaseReference userMessageKeyRef =
-                messageDatabaseReference
-                        .child(message.getFrom())
-                        .child(message.getTo())
-                        .push();
-
-        String messagePushId = userMessageKeyRef.getKey();
-        Message obj_message = new Message(messagePushId, message.getMessage(), message.getType(), message.getFrom(), receiver,new Date().getTime(), -1, "");
+        Message obj_message = new Message(message.getMessageId(), message.getMessage(), message.getType(), currentUser.getUid(), receiver,new Date().getTime(), -1, "");
 
         String messageSenderRef = context.getString(R.string.MESSAGES) + "/" + obj_message.getFrom() + "/" + obj_message.getTo();
         String messageReceiverRef = context.getString(R.string.MESSAGES) + "/" + obj_message.getTo() + "/" + obj_message.getFrom();
 
         Map<String, Object> messageBodyDetails = new HashMap<>();
-        messageBodyDetails.put(messageSenderRef + "/" + messagePushId, obj_message);
-        messageBodyDetails.put(messageReceiverRef + "/" + messagePushId, obj_message);
+        messageBodyDetails.put(messageSenderRef + "/" + message.getMessageId(), obj_message);
+        messageBodyDetails.put(messageReceiverRef + "/" + message.getMessageId(), obj_message);
 
         FirebaseDatabase.getInstance().getReference()
                 .updateChildren(messageBodyDetails)
@@ -220,6 +200,14 @@ public class FirebaseUtils {
                         callback.onMessageSent();
                     }
                 });
+
+        Map<String, Object> imageUrlUserDetails = new HashMap<>();
+        imageUrlUserDetails.put(currentUser.getUid(), true);
+        imageUrlUserDetails.put(receiver, true);
+
+        imageUrlDatabaseReference
+                .child(message.getMessageId())
+                .updateChildren(imageUrlUserDetails);
 
         updateLastMessage(obj_message);
         sendNotification("Sent an image", obj_message.getTo(), obj_message.getFrom(), TYPE_MESSAGE);
@@ -322,6 +310,13 @@ public class FirebaseUtils {
                 .child(message.getTo())
                 .child(message.getMessageId())
                 .removeValue();
+
+        if (message.getType().equals(context.getString(R.string.IMAGE))) {
+            imageUrlDatabaseReference
+                    .child(message.getMessageId())
+                    .child(currentUser.getUid())
+                    .removeValue();
+        }
     }
 
     public static void deleteMessageForEveryone(Message message) {
@@ -338,11 +333,34 @@ public class FirebaseUtils {
                 .removeValue();
 
         if (message.getType().equals(context.getString(R.string.IMAGE))) {
-            imageStorageReference.getStorage().getReferenceFromUrl(message.getMessage()).delete();
+            imageUrlDatabaseReference
+                    .child(message.getMessageId())
+                    .child(message.getFrom())
+                    .removeValue();
+
+            imageUrlDatabaseReference
+                    .child(message.getMessageId())
+                    .child(message.getTo())
+                    .removeValue();
+
+            imageUrlDatabaseReference.child(message.getMessageId())
+                    .addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            if (!snapshot.exists()) {
+                                imageStorageReference.getStorage().getReferenceFromUrl(message.getMessage()).delete();
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
         }
 
-        if (message.getType().equals(context.getString(R.string.VIDEO))) {
-            videoStorageReference.getStorage().getReferenceFromUrl(message.getMessage()).delete();
-        }
+//        if (message.getType().equals(context.getString(R.string.VIDEO))) {
+////            videoStorageReference.getStorage().getReferenceFromUrl(message.getMessage()).delete();
+//        }
     }
 }

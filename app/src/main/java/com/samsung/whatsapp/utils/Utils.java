@@ -100,9 +100,10 @@ public class Utils {
         clipboardManager.setPrimaryClip(clipData);
     }
 
-    public static void copyImage(Uri uri) {
+    public static void copyImage(Uri uri, String message_id) {
         ClipboardManager clipboardManager = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
         ClipData clipData = ClipData.newRawUri(context.getString(R.string.USER_MESSAGE_IMAGE), uri);
+        clipData.addItem(new ClipData.Item(message_id));
         clipboardManager.setPrimaryClip(clipData);
     }
 }

@@ -3,7 +3,6 @@ package com.samsung.whatsapp.view.activities;
 import static com.samsung.whatsapp.ApplicationClass.context;
 import static com.samsung.whatsapp.ApplicationClass.presenceDatabaseReference;
 import static com.samsung.whatsapp.ApplicationClass.userDatabaseReference;
-import static com.samsung.whatsapp.utils.Utils.TAG;
 import static com.samsung.whatsapp.utils.Utils.TYPE_VIDEO_CALL;
 import static com.samsung.whatsapp.utils.Utils.currentUser;
 import static com.samsung.whatsapp.utils.Utils.getFileType;
@@ -26,7 +25,6 @@ import android.os.Looper;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -56,7 +54,6 @@ import com.samsung.whatsapp.adapters.MessagesAdapter;
 import com.samsung.whatsapp.databinding.ActivityChatBinding;
 import com.samsung.whatsapp.databinding.CustomChatBarBinding;
 import com.samsung.whatsapp.fcm.FCMNotificationSender;
-import com.samsung.whatsapp.interfaces.GoEditTextListener;
 import com.samsung.whatsapp.interfaces.MessageListenerCallback;
 import com.samsung.whatsapp.model.Message;
 import com.samsung.whatsapp.model.Notification;
@@ -71,6 +68,7 @@ import com.squareup.picasso.Picasso;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Objects;
 
 public class ChatActivity extends BaseActivity implements MessageListenerCallback {
@@ -121,7 +119,7 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
                         OutputStream os=getContentResolver().openOutputStream(fileUri);
                         finalBitmap.compress(Bitmap.CompressFormat.PNG,100,os);
 
-                        prepareImageMessageForSending(fileUri);
+                        prepareImageMessageForSending(fileUri, "",false);
 
                         binding.capturedImage.cancel.setOnClickListener(view -> binding.capturedImage.cardView.setVisibility(View.GONE));
                     } catch (IOException e) {
@@ -136,16 +134,20 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
         }
     });
 
-    private void prepareImageMessageForSending(Uri fileUri) {
+    private void prepareImageMessageForSending(Uri fileUri, String messageId, boolean isImageFromClipboard) {
         binding.capturedImage.cardView.setVisibility(View.VISIBLE);
         Picasso.get().load(fileUri).into(binding.capturedImage.image);
         binding.capturedImage.receiverName.setText(receiver.getName());
 
         binding.capturedImage.sendMessage.setOnClickListener(view -> {
-            Log.wtf(TAG, "prepareImageMessageForSending: ");
             binding.capturedImage.cardView.setVisibility(View.GONE);
             showLoadingBar(ChatActivity.this, binding.progressbar.getRoot());
-            FirebaseUtils.sendImage(ChatActivity.this, currentUser.getUid(), messageReceiverId, fileUri);
+            if (isImageFromClipboard) {
+                Message obj_message = new Message(messageId, fileUri.toString(), getString(R.string.IMAGE), currentUser.getUid(), receiver.getUid(),new Date().getTime(), -1, "");
+                FirebaseUtils.forwardImage(ChatActivity.this, obj_message, receiver.getUid());
+            } else {
+                FirebaseUtils.sendImage(ChatActivity.this, currentUser.getUid(), messageReceiverId, fileUri);
+            }
         });
     }
 
@@ -383,11 +385,12 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
 
             if (primaryClipData != null) {
                 ClipData.Item item = primaryClipData.getItemAt(0);
+                ClipData.Item message_id_item = primaryClipData.getItemAt(1);
                 Uri uri = item.getUri();
 
                 binding.messageInputText.setText("");
                 hideKeyboard(this);
-                prepareImageMessageForSending(uri);
+                prepareImageMessageForSending(uri, message_id_item.getText().toString(), true);
             }
         });
     }
