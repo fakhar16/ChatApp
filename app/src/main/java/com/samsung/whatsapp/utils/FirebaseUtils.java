@@ -256,6 +256,36 @@ public class FirebaseUtils {
                 })
                 .addOnFailureListener(e -> callback.onMessageSentFailed());
     }
+    public static void forwardVideo(Context context, Message message, String receiver) {
+        MessageListenerCallback callback = (MessageListenerCallback) context;
+        Message obj_message = new Message(message.getMessageId(), message.getMessage(), message.getType(), currentUser.getUid(), receiver,new Date().getTime(), -1, "");
+
+        String messageSenderRef = context.getString(R.string.MESSAGES) + "/" + obj_message.getFrom() + "/" + obj_message.getTo();
+        String messageReceiverRef = context.getString(R.string.MESSAGES) + "/" + obj_message.getTo() + "/" + obj_message.getFrom();
+
+        Map<String, Object> messageBodyDetails = new HashMap<>();
+        messageBodyDetails.put(messageSenderRef + "/" + message.getMessageId(), obj_message);
+        messageBodyDetails.put(messageReceiverRef + "/" + message.getMessageId(), obj_message);
+
+        FirebaseDatabase.getInstance().getReference()
+                .updateChildren(messageBodyDetails)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()){
+                        callback.onMessageSent();
+                    }
+                });
+
+        Map<String, Object> videoUrlUserDetails = new HashMap<>();
+        videoUrlUserDetails.put(currentUser.getUid(), true);
+        videoUrlUserDetails.put(receiver, true);
+
+        videoUrlDatabaseReference
+                .child(message.getMessageId())
+                .updateChildren(videoUrlUserDetails);
+
+        updateLastMessage(obj_message);
+        sendNotification("Sent a video", obj_message.getTo(), obj_message.getFrom(), TYPE_MESSAGE);
+    }
 
     public static void starMessage(Message message) {
         String starredUser = message.getStarred() + ":" + Utils.currentUser.getUid();

@@ -168,7 +168,7 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
             showLoadingBar(ChatActivity.this, binding.progressbar.getRoot());
             if (isVideoFromClipboard) {
                 Message obj_message = new Message(messageId, fileUri.toString(), getString(R.string.IMAGE), currentUser.getUid(), receiver.getUid(),new Date().getTime(), -1, "");
-                FirebaseUtils.forwardImage(ChatActivity.this, obj_message, receiver.getUid());
+                FirebaseUtils.forwardVideo(ChatActivity.this, obj_message, receiver.getUid());
             } else {
                 FirebaseUtils.sendVideo(this, currentUser.getUid(), messageReceiverId, fileUri);
             }

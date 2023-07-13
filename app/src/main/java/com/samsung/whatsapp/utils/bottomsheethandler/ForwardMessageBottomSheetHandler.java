@@ -122,6 +122,9 @@ public class ForwardMessageBottomSheetHandler {
             FirebaseUtils.sendMessage(message.getMessage(), Utils.currentUser.getUid(), receiver);
         else if (message.getType().equals(context.getString(R.string.IMAGE))) {
             FirebaseUtils.forwardImage(context, message, receiver);
+        } else if (message.getType().equals(context.getString(R.string.VIDEO))) {
+            FirebaseUtils.forwardVideo(context, message, receiver);
+
         }
         bottomSheetDialog.dismiss();
         sendUserToChatActivity(receiver);
