@@ -29,7 +29,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.MediaController;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResult;
@@ -43,6 +42,8 @@ import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.google.android.exoplayer2.ExoPlayer;
+import com.google.android.exoplayer2.MediaItem;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -172,7 +173,7 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                if (binding.messageInputText.getText().length() != 0) {
+                if (Objects.requireNonNull(binding.messageInputText.getText()).length() != 0) {
                     binding.camera.setVisibility(View.GONE);
                     binding.sendMessageBtn.setVisibility(View.VISIBLE);
                 } else {
@@ -456,14 +457,13 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
 
     public void showVideoPreview(View thumbView, String url) {
         WhatsappLikeProfilePicPreview.Companion.zoomVideoFromThumb(thumbView, binding.expandedVideoCardView, binding.chatToolBar.getRoot().getRootView());
+        ExoPlayer player = new ExoPlayer.Builder(this).build();
+        binding.video.setPlayer(player);
 
-        MediaController mediaController= new MediaController(ChatActivity.this);
-        mediaController.setAnchorView(binding.expandedVideoCardView);
-
-        binding.video.setMediaController(mediaController);
-        binding.video.setVideoURI(Uri.parse(url));
-        binding.video.requestFocus();
-        binding.video.start();
+        MediaItem mediaItem = MediaItem.fromUri(url);
+        player.setMediaItem(mediaItem);
+        player.prepare();
+        player.play();
     }
 
     @Override
@@ -493,7 +493,7 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
         if (binding.expandedImage.cardView.getVisibility() == View.VISIBLE) {
             WhatsappLikeProfilePicPreview.Companion.dismissPhotoPreview();
         } else if (binding.expandedVideoCardView.getVisibility() == View.VISIBLE) {
-            binding.video.stopPlayback();
+            binding.video.getPlayer().release();
             binding.userMessageList.setClickable(true);
             WhatsappLikeProfilePicPreview.Companion.dismissVideoPreview();
         } else {
