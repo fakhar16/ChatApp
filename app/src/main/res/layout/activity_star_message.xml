@@ -47,6 +47,13 @@
         android:id="@+id/expanded_image"
         layout="@layout/layout_expanded_image_view"/>
 
+    <!--    expanded video view-->
+    <include
+        android:id="@+id/expanded_video"
+        layout="@layout/layout_expanded_video_view"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="0dp" />
+
     <LinearLayout
         android:id="@+id/no_star_message_layout"
         android:layout_width="match_parent"
@@ -74,4 +81,13 @@
             android:gravity="center"
             android:textSize="16sp" />
     </LinearLayout>
+    <!--    progress bar-->
+    <include
+        android:id="@+id/progressbar"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerInParent="true"
+        layout="@layout/progressbar"
+        android:visibility="gone"
+        />
 </RelativeLayout>

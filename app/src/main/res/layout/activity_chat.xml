@@ -170,25 +170,11 @@
         tools:layout_editor_absoluteY="0dp" />
 
     <!--    expanded video view-->
-    <FrameLayout
-        android:id="@+id/expanded_video_cardView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="gone"
-        >
-        <com.google.android.exoplayer2.ui.PlayerView
-            android:id="@+id/video"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:resize_mode="fit"
-            app:hide_on_touch="true"
-            app:show_timeout="5000"
-            app:show_buffering="always"
-            app:use_controller="true"
-            android:background="@android:color/background_dark"
-            app:controller_layout_id="@layout/custom_controller"
-            />
-    </FrameLayout>
+    <include
+        android:id="@+id/expanded_video"
+        layout="@layout/layout_expanded_video_view"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="0dp" />
 
     <!--    Captured image view-->
     <include

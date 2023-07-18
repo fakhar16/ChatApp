@@ -490,9 +490,9 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
     }
 
     public void showVideoPreview(View thumbView, String url) {
-        WhatsappLikeProfilePicPreview.Companion.zoomVideoFromThumb(thumbView, binding.expandedVideoCardView, binding.chatToolBar.getRoot().getRootView());
+        WhatsappLikeProfilePicPreview.Companion.zoomVideoFromThumb(thumbView, binding.expandedVideo.cardView, binding.chatToolBar.getRoot().getRootView());
         ExoPlayer player = new ExoPlayer.Builder(this).build();
-        binding.video.setPlayer(player);
+        binding.expandedVideo.video.setPlayer(player);
 
         MediaItem mediaItem = MediaItem.fromUri(url);
         player.setMediaItem(mediaItem);
@@ -526,8 +526,8 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
     public void onBackPressed() {
         if (binding.expandedImage.cardView.getVisibility() == View.VISIBLE) {
             WhatsappLikeProfilePicPreview.Companion.dismissPhotoPreview();
-        } else if (binding.expandedVideoCardView.getVisibility() == View.VISIBLE) {
-            binding.video.getPlayer().release();
+        } else if (binding.expandedVideo.cardView.getVisibility() == View.VISIBLE) {
+            Objects.requireNonNull(binding.expandedVideo.video.getPlayer()).release();
             binding.userMessageList.setClickable(true);
             WhatsappLikeProfilePicPreview.Companion.dismissVideoPreview();
         } else {

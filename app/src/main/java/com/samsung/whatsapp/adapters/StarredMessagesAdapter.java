@@ -15,6 +15,7 @@ import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
@@ -104,15 +105,14 @@ public class StarredMessagesAdapter extends RecyclerView.Adapter<StarredMessages
                 holder.binding.message.setVisibility(View.GONE);
                 holder.binding.image.setVisibility(View.VISIBLE);
                 Picasso.get().load(message.getMessage()).placeholder(R.drawable.profile_image).into(holder.binding.image);
+                holder.binding.image.setOnClickListener(view -> ((StarMessageActivity)(context)).showImagePreview(holder.binding.image, message.getMessage()));
         }  else if (message.getType().equals(context.getString(R.string.VIDEO))) {
-            //todo load video here
+            holder.binding.message.setVisibility(View.GONE);
+            holder.binding.image.setVisibility(View.VISIBLE);
+            holder.binding.videoPlayPreview.setVisibility(View.VISIBLE);
+            Glide.with(context).load(message.getMessage()).centerCrop().placeholder(R.drawable.baseline_play_circle_outline_24).into(holder.binding.image);
+            holder.binding.image.setOnClickListener(view -> ((StarMessageActivity)(context)).showVideoPreview(holder.binding.image, message.getMessage()));
         }
-
-        handleItemsClick(holder, message);
-    }
-
-    private void handleItemsClick(StarredMessagesViewHolder holder, Message message) {
-        holder.binding.image.setOnClickListener(view -> ((StarMessageActivity)(context)).showImagePreview(holder.binding.image, message.getMessage()));
     }
 
     @SuppressLint("NotifyDataSetChanged")

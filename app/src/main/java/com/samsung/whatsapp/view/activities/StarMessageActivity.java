@@ -12,17 +12,21 @@ import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.google.android.exoplayer2.ExoPlayer;
+import com.google.android.exoplayer2.MediaItem;
 import com.samsung.whatsapp.R;
 import com.samsung.whatsapp.adapters.StarredMessagesAdapter;
 import com.samsung.whatsapp.databinding.ActivityStarMessageBinding;
+import com.samsung.whatsapp.interfaces.MessageListenerCallback;
 import com.samsung.whatsapp.model.Message;
+import com.samsung.whatsapp.utils.Utils;
 import com.samsung.whatsapp.utils.WhatsappLikeProfilePicPreview;
 import com.samsung.whatsapp.viewmodel.StarredMessageViewModel;
 
 import java.util.ArrayList;
 import java.util.Objects;
 
-public class StarMessageActivity extends AppCompatActivity {
+public class StarMessageActivity extends AppCompatActivity implements MessageListenerCallback {
     private ActivityStarMessageBinding binding;
     private StarredMessagesAdapter adapter;
     private StarredMessageViewModel viewModel;
@@ -111,6 +115,17 @@ public class StarMessageActivity extends AppCompatActivity {
         binding.appBarLayout.setVisibility(View.GONE);
     }
 
+    public void showVideoPreview(View thumbView, String url) {
+        WhatsappLikeProfilePicPreview.Companion.zoomVideoFromThumb(thumbView, binding.expandedVideo.cardView, binding.mainPageToolbar.getRoot().getRootView());
+        ExoPlayer player = new ExoPlayer.Builder(this).build();
+        binding.expandedVideo.video.setPlayer(player);
+
+        MediaItem mediaItem = MediaItem.fromUri(url);
+        player.setMediaItem(mediaItem);
+        player.prepare();
+        player.play();
+    }
+
     private void filter(String text) {
         ArrayList<Message> filteredList = new ArrayList<>();
 
@@ -139,8 +154,22 @@ public class StarMessageActivity extends AppCompatActivity {
         if (binding.expandedImage.cardView.getVisibility() == View.VISIBLE) {
             WhatsappLikeProfilePicPreview.Companion.dismissPhotoPreview();
             binding.appBarLayout.setVisibility(View.VISIBLE);
+        } else if (binding.expandedVideo.cardView.getVisibility() == View.VISIBLE) {
+            Objects.requireNonNull(binding.expandedVideo.video.getPlayer()).release();
+            binding.starMessagesList.setClickable(true);
+            WhatsappLikeProfilePicPreview.Companion.dismissVideoPreview();
         } else {
             finish();
         }
+    }
+
+    @Override
+    public void onMessageSent() {
+        Utils.dismissLoadingBar(this, binding.progressbar.getRoot());
+    }
+
+    @Override
+    public void onMessageSentFailed() {
+        Utils.dismissLoadingBar(this, binding.progressbar.getRoot());
     }
 }
