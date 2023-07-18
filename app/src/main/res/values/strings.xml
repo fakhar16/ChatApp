@@ -134,6 +134,7 @@
     <string name="IS_FROM_STORIES">isFromStories</string>
     <string name="USER_MESSAGE_TEXT">user_message_text</string>
     <string name="USER_MESSAGE_IMAGE">user_message_image</string>
+    <string name="USER_MESSAGE_VIDEO">user_message_video</string>
     <string name="IMAGE_URL_USED_BY_USERS">ImageUrlUsedByUsers</string>
     <string name="VIDEO_URL_USED_BY_USERS">video_url_used_by_users</string>
 </resources>

@@ -104,6 +104,15 @@ public class Utils {
         ClipboardManager clipboardManager = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
         ClipData clipData = ClipData.newRawUri(context.getString(R.string.USER_MESSAGE_IMAGE), uri);
         clipData.addItem(new ClipData.Item(message_id));
+        clipData.addItem(new ClipData.Item(context.getString(R.string.IMAGE)));
+        clipboardManager.setPrimaryClip(clipData);
+    }
+
+    public static void copyVideo(Uri uri, String message_id) {
+        ClipboardManager clipboardManager = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clipData = ClipData.newRawUri(context.getString(R.string.USER_MESSAGE_VIDEO), uri);
+        clipData.addItem(new ClipData.Item(message_id));
+        clipData.addItem(new ClipData.Item(context.getString(R.string.VIDEO)));
         clipboardManager.setPrimaryClip(clipData);
     }
 }

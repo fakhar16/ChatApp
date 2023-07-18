@@ -167,7 +167,7 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
             binding.capturedVideo.cardView.setVisibility(View.GONE);
             showLoadingBar(ChatActivity.this, binding.progressbar.getRoot());
             if (isVideoFromClipboard) {
-                Message obj_message = new Message(messageId, fileUri.toString(), getString(R.string.IMAGE), currentUser.getUid(), receiver.getUid(),new Date().getTime(), -1, "");
+                Message obj_message = new Message(messageId, fileUri.toString(), getString(R.string.VIDEO), currentUser.getUid(), receiver.getUid(),new Date().getTime(), -1, "");
                 FirebaseUtils.forwardVideo(ChatActivity.this, obj_message, receiver.getUid());
             } else {
                 FirebaseUtils.sendVideo(this, currentUser.getUid(), messageReceiverId, fileUri);
@@ -288,6 +288,7 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
         handleButtonClicks();
         checkIfSearchMessageTriggered();
         initProgressBar();
+        handleMessageEditTextListener();
     }
 
     private void initProgressBar() {
@@ -402,19 +403,29 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
         customChatBarBinding.videoCall.setOnClickListener(view -> createVideoCall());
         customChatBarBinding.userImage.setOnClickListener(view -> WhatsappLikeProfilePicPreview.Companion.zoomImageFromThumb(customChatBarBinding.userImage, binding.expandedImage.cardView, binding.expandedImage.image, binding.chatToolBar.getRoot().getRootView(), receiver.getImage()));
         customChatBarBinding.userInfo.setOnClickListener(view -> sendUserToProfileActivity());
+    }
 
+    private void handleMessageEditTextListener() {
         binding.messageInputText.addListener(() -> {
             ClipboardManager clipboardManager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
             ClipData primaryClipData = clipboardManager.getPrimaryClip();
 
             if (primaryClipData != null) {
                 ClipData.Item item = primaryClipData.getItemAt(0);
-                ClipData.Item message_id_item = primaryClipData.getItemAt(1);
-                Uri uri = item.getUri();
+                if (primaryClipData.getItemCount() > 1) {
+                    ClipData.Item message_id_item = primaryClipData.getItemAt(1);
+                    ClipData.Item message_type_item = primaryClipData.getItemAt(2);
+                    Uri uri = item.getUri();
 
-                binding.messageInputText.setText("");
-                hideKeyboard(this);
-                prepareImageMessageForSending(uri, message_id_item.getText().toString(), true);
+                    binding.messageInputText.setText("");
+                    hideKeyboard(this);
+
+                    if (message_type_item.getText().toString().equals(context.getString(R.string.IMAGE))) {
+                        prepareImageMessageForSending(uri, message_id_item.getText().toString(), true);
+                    } else if (message_type_item.getText().toString().equals(context.getString(R.string.VIDEO))) {
+                        prepareVideoMessageForSending(uri, message_id_item.getText().toString(), true);
+                    }
+                }
             }
         });
     }

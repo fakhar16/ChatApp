@@ -43,6 +43,8 @@ public class MessageBottomSheetHandler {
         copy.setOnClickListener(view -> {
             if (message.getType().equals(context.getString(R.string.IMAGE))) {
                 Utils.copyImage(Uri.parse(message.getMessage()), message.getMessageId());
+            } else if (message.getType().equals(context.getString(R.string.VIDEO))) {
+                Utils.copyVideo(Uri.parse(message.getMessage()), message.getMessageId());
             } else {
                 Utils.copyMessage(message.getMessage());
             }
