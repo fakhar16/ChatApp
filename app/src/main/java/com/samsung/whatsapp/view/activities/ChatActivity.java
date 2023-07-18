@@ -40,10 +40,10 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.widget.SearchView;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.media3.common.MediaItem;
+import androidx.media3.exoplayer.ExoPlayer;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import com.google.android.exoplayer2.ExoPlayer;
-import com.google.android.exoplayer2.MediaItem;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -152,11 +152,14 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
         });
     }
 
+    @SuppressLint("UnsafeOptInUsageError")
     private void prepareVideoMessageForSending(Uri fileUri, String messageId, boolean isVideoFromClipboard) {
         binding.capturedVideo.cardView.setVisibility(View.VISIBLE);
         binding.capturedVideo.receiverName.setText(receiver.getName());
 
         ExoPlayer player = new ExoPlayer.Builder(this).build();
+        binding.capturedVideo.video.setShowNextButton(false);
+        binding.capturedVideo.video.setShowPreviousButton(false);
         binding.capturedVideo.video.setPlayer(player);
 
         MediaItem mediaItem = MediaItem.fromUri(fileUri);
@@ -489,10 +492,13 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
         WhatsappLikeProfilePicPreview.Companion.zoomImageFromThumb(thumbView, binding.expandedImage.cardView, binding.expandedImage.image, binding.chatToolBar.getRoot().getRootView(), url);
     }
 
+    @SuppressLint("UnsafeOptInUsageError")
     public void showVideoPreview(View thumbView, String url) {
         WhatsappLikeProfilePicPreview.Companion.zoomVideoFromThumb(thumbView, binding.expandedVideo.cardView, binding.chatToolBar.getRoot().getRootView());
         ExoPlayer player = new ExoPlayer.Builder(this).build();
         binding.expandedVideo.video.setPlayer(player);
+        binding.expandedVideo.video.setShowNextButton(false);
+        binding.expandedVideo.video.setShowPreviousButton(false);
 
         MediaItem mediaItem = MediaItem.fromUri(url);
         player.setMediaItem(mediaItem);

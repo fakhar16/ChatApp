@@ -4,6 +4,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.media3.common.MediaItem;
+import androidx.media3.exoplayer.ExoPlayer;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
@@ -12,8 +14,6 @@ import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
 
-import com.google.android.exoplayer2.ExoPlayer;
-import com.google.android.exoplayer2.MediaItem;
 import com.samsung.whatsapp.R;
 import com.samsung.whatsapp.adapters.StarredMessagesAdapter;
 import com.samsung.whatsapp.databinding.ActivityStarMessageBinding;
@@ -115,10 +115,13 @@ public class StarMessageActivity extends AppCompatActivity implements MessageLis
         binding.appBarLayout.setVisibility(View.GONE);
     }
 
+    @SuppressLint("UnsafeOptInUsageError")
     public void showVideoPreview(View thumbView, String url) {
         WhatsappLikeProfilePicPreview.Companion.zoomVideoFromThumb(thumbView, binding.expandedVideo.cardView, binding.mainPageToolbar.getRoot().getRootView());
         ExoPlayer player = new ExoPlayer.Builder(this).build();
         binding.expandedVideo.video.setPlayer(player);
+        binding.expandedVideo.video.setShowNextButton(false);
+        binding.expandedVideo.video.setShowPreviousButton(false);
 
         MediaItem mediaItem = MediaItem.fromUri(url);
         player.setMediaItem(mediaItem);
