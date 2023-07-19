@@ -80,13 +80,27 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
     public static User receiver;
     private BottomSheetDialog bottomSheetDialog;
     private MessageViewModel viewModel;
+
+    private final ActivityResultLauncher<Intent> docPickActivityResultLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            new ActivityResultCallback<ActivityResult>() {
+                @Override
+                public void onActivityResult(ActivityResult result) {
+                    if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                        showLoadingBar(ChatActivity.this, binding.progressbar.getRoot());
+
+                        Intent data = result.getData();
+                        Uri fileUri = Objects.requireNonNull(data).getData();
+                        FirebaseUtils.sendDoc(ChatActivity.this, currentUser.getUid(), messageReceiverId, fileUri);
+                    }
+                }
+            });
     private final ActivityResultLauncher<Intent> imagePickActivityResultLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             new ActivityResultCallback<ActivityResult>() {
                 @Override
                 public void onActivityResult(ActivityResult result) {
                     if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
-
                         showLoadingBar(ChatActivity.this, binding.progressbar.getRoot());
 
                         Intent data = result.getData();
@@ -104,13 +118,11 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
         @Override
         public void onActivityResult(ActivityResult result) {
             if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
-
                 Intent data = result.getData();
                 String fileType = data.getStringExtra(getString(R.string.FILE_TYPE));
 
                 if (fileType.equals(getString(R.string.IMAGE))) {
                     Uri fileUri = Uri.parse(data.getStringExtra(getString(R.string.IMAGE_URI)));
-
                     Bitmap bitmap;
                     try {
                         bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), fileUri);
@@ -174,6 +186,23 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
                 FirebaseUtils.forwardVideo(ChatActivity.this, obj_message, receiver.getUid());
             } else {
                 FirebaseUtils.sendVideo(this, currentUser.getUid(), messageReceiverId, fileUri);
+            }
+        });
+    }
+
+    private void prepareDocMessageForSending(Uri fileUri, String messageId, boolean isImageFromClipboard) {
+        binding.capturedImage.cardView.setVisibility(View.VISIBLE);
+        binding.capturedImage.image.setImageResource(R.drawable.baseline_file_present_24);
+        binding.capturedImage.receiverName.setText(receiver.getName());
+
+        binding.capturedImage.sendMessage.setOnClickListener(view -> {
+            binding.capturedImage.cardView.setVisibility(View.GONE);
+            showLoadingBar(ChatActivity.this, binding.progressbar.getRoot());
+            if (isImageFromClipboard) {
+                Message obj_message = new Message(messageId, fileUri.toString(), getString(R.string.PDF_FILES), currentUser.getUid(), receiver.getUid(),new Date().getTime(), -1, "");
+                FirebaseUtils.forwardDoc(ChatActivity.this, obj_message, receiver.getUid());
+            } else {
+                FirebaseUtils.sendDoc(ChatActivity.this, currentUser.getUid(), messageReceiverId, fileUri);
             }
         });
     }
@@ -427,6 +456,8 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
                         prepareImageMessageForSending(uri, message_id_item.getText().toString(), true);
                     } else if (message_type_item.getText().toString().equals(context.getString(R.string.VIDEO))) {
                         prepareVideoMessageForSending(uri, message_id_item.getText().toString(), true);
+                    } else if (message_type_item.getText().toString().equals(context.getString(R.string.PDF_FILES))) {
+                        prepareDocMessageForSending(uri, message_id_item.getText().toString(), true);
                     }
                 }
             }
@@ -460,10 +491,13 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
 
         LinearLayout camera = bottomSheetDialog.findViewById(R.id.camera_btn);
         LinearLayout attachment = bottomSheetDialog.findViewById(R.id.photo_video_attachment_btn);
+        LinearLayout doc = bottomSheetDialog.findViewById(R.id.document_btn);
+
         Button cancel = bottomSheetDialog.findViewById(R.id.cancel);
         
         assert camera != null;
         assert attachment != null;
+        assert doc != null;
         assert cancel != null;
 
         camera.setOnClickListener(view -> {
@@ -474,7 +508,17 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
             attachmentButtonClicked();
             bottomSheetDialog.dismiss();
         });
+        doc.setOnClickListener(view -> {
+            attachDocButtonClicked();
+            bottomSheetDialog.dismiss();
+        });
         cancel.setOnClickListener(view -> bottomSheetDialog.dismiss());
+    }
+
+    private void attachDocButtonClicked() {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("application/pdf");
+        docPickActivityResultLauncher.launch(intent);
     }
 
     private void cameraButtonClicked() {

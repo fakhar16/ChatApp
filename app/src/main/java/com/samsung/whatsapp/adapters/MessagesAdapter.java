@@ -136,14 +136,6 @@ public class MessagesAdapter extends RecyclerView.Adapter<MessagesAdapter.Messag
             holder.binding.star.setVisibility(View.VISIBLE);
         }
 
-        //Setting image if message type is image
-        if (message.getType().equals(context.getString(R.string.IMAGE))) {
-            holder.binding.message.setVisibility(View.GONE);
-            holder.binding.image.setVisibility(View.VISIBLE);
-
-            Picasso.get().load(message.getMessage()).placeholder(R.drawable.profile_image).into(holder.binding.image);
-        }
-
         //Setting video if message type is video
         if (message.getType().equals(context.getString(R.string.VIDEO))) {
             holder.binding.message.setVisibility(View.GONE);
@@ -151,8 +143,16 @@ public class MessagesAdapter extends RecyclerView.Adapter<MessagesAdapter.Messag
             holder.binding.videoPlayPreview.setVisibility(View.VISIBLE);
             Glide.with(context).load(message.getMessage()).centerCrop().placeholder(R.drawable.baseline_play_circle_outline_24).into(holder.binding.image);
             holder.binding.image.setOnClickListener(view -> ((ChatActivity)(context)).showVideoPreview(holder.binding.image, message.getMessage()));
-        } else if (message.getType().equals(context.getString(R.string.IMAGE))) {
+        } else if (message.getType().equals(context.getString(R.string.IMAGE))) { //Setting image if message type is image
+            holder.binding.message.setVisibility(View.GONE);
+            holder.binding.image.setVisibility(View.VISIBLE);
+
+            Picasso.get().load(message.getMessage()).placeholder(R.drawable.profile_image).into(holder.binding.image);
             holder.binding.image.setOnClickListener(view -> ((ChatActivity)(context)).showImagePreview(holder.binding.image, message.getMessage()));
+        } else if (message.getType().equals(context.getString(R.string.PDF_FILES))) { //Setting image if message type is image
+            holder.binding.message.setVisibility(View.GONE);
+            holder.binding.image.setVisibility(View.VISIBLE);
+            holder.binding.image.setImageResource(R.drawable.baseline_file_present_24);
         }
 
         //        if (message.getFeeling() >= 0) {

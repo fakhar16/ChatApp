@@ -115,4 +115,12 @@ public class Utils {
         clipData.addItem(new ClipData.Item(context.getString(R.string.VIDEO)));
         clipboardManager.setPrimaryClip(clipData);
     }
+
+    public static void copyDoc(Uri uri, String message_id) {
+        ClipboardManager clipboardManager = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clipData = ClipData.newRawUri(context.getString(R.string.USER_MESSAGE_FILE), uri);
+        clipData.addItem(new ClipData.Item(message_id));
+        clipData.addItem(new ClipData.Item(context.getString(R.string.PDF_FILES)));
+        clipboardManager.setPrimaryClip(clipData);
+    }
 }

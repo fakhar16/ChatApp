@@ -1,6 +1,8 @@
 package com.samsung.whatsapp.utils;
 
 import static com.samsung.whatsapp.ApplicationClass.context;
+import static com.samsung.whatsapp.ApplicationClass.docsStorageReference;
+import static com.samsung.whatsapp.ApplicationClass.docsUrlDatabaseReference;
 import static com.samsung.whatsapp.ApplicationClass.imageStorageReference;
 import static com.samsung.whatsapp.ApplicationClass.imageUrlDatabaseReference;
 import static com.samsung.whatsapp.ApplicationClass.messageDatabaseReference;
@@ -111,6 +113,8 @@ public class FirebaseUtils {
             lastMsgObj.put(context.getString(R.string.LAST_MESSAGE_DETAILS), "Photo");
         else if (message.getType().equals(context.getString(R.string.VIDEO)))
             lastMsgObj.put(context.getString(R.string.LAST_MESSAGE_DETAILS), "Video");
+        else if (message.getType().equals(context.getString(R.string.PDF_FILES)))
+            lastMsgObj.put(context.getString(R.string.LAST_MESSAGE_DETAILS), "File");
         else
             lastMsgObj.put(context.getString(R.string.LAST_MESSAGE_DETAILS), message.getMessage());
 
@@ -287,6 +291,86 @@ public class FirebaseUtils {
         sendNotification("Sent a video", obj_message.getTo(), obj_message.getFrom(), TYPE_MESSAGE);
     }
 
+    public static void sendDoc(Context context, String messageSenderId, String messageReceiverId, Uri fileUri) {
+        MessageListenerCallback callback = (MessageListenerCallback) context;
+        String messageSenderRef = context.getString(R.string.MESSAGES) + "/" + messageSenderId + "/" + messageReceiverId;
+        String messageReceiverRef = context.getString(R.string.MESSAGES) + "/" + messageReceiverId + "/" + messageSenderId;
+
+        DatabaseReference userMessageKeyRef =
+                messageDatabaseReference
+                        .child(messageSenderId)
+                        .child(messageReceiverId)
+                        .push();
+
+        String messagePushId = userMessageKeyRef.getKey();
+        StorageReference filePath = docsStorageReference.child(messagePushId + ".pdf");
+        StorageTask<UploadTask.TaskSnapshot> uploadTask = filePath.putFile(fileUri);
+        uploadTask.continueWithTask(task -> {
+            if (!task.isSuccessful()) {
+                throw Objects.requireNonNull(task.getException());
+            }
+            return filePath.getDownloadUrl();
+        }).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                callback.onMessageSent();
+                Uri downloadUrl = task.getResult();
+                String myUrl = downloadUrl.toString();
+
+                Message obj_message = new Message(messagePushId, myUrl, context.getString(R.string.PDF_FILES), messageSenderId, messageReceiverId, new Date().getTime(), -1, "");
+
+                Map<String, Object> messageBodyDetails = new HashMap<>();
+                messageBodyDetails.put(messageSenderRef + "/" + messagePushId, obj_message);
+                messageBodyDetails.put(messageReceiverRef + "/" + messagePushId, obj_message);
+
+                FirebaseDatabase.getInstance().getReference()
+                        .updateChildren(messageBodyDetails);
+
+                Map<String, Object> docUrlUserDetails = new HashMap<>();
+                docUrlUserDetails.put(messageSenderId, true);
+                docUrlUserDetails.put(messageReceiverId, true);
+
+                assert messagePushId != null;
+                docsUrlDatabaseReference
+                        .child(messagePushId)
+                        .updateChildren(docUrlUserDetails);
+
+                updateLastMessage(obj_message);
+                sendNotification("Sent a file", messageReceiverId, messageSenderId, TYPE_MESSAGE);
+            }
+        }).addOnFailureListener(e -> callback.onMessageSentFailed());
+    }
+
+    public static void forwardDoc(Context context, Message message, String receiver) {
+        MessageListenerCallback callback = (MessageListenerCallback) context;
+        Message obj_message = new Message(message.getMessageId(), message.getMessage(), message.getType(), currentUser.getUid(), receiver,new Date().getTime(), -1, "");
+
+        String messageSenderRef = context.getString(R.string.MESSAGES) + "/" + obj_message.getFrom() + "/" + obj_message.getTo();
+        String messageReceiverRef = context.getString(R.string.MESSAGES) + "/" + obj_message.getTo() + "/" + obj_message.getFrom();
+
+        Map<String, Object> messageBodyDetails = new HashMap<>();
+        messageBodyDetails.put(messageSenderRef + "/" + message.getMessageId(), obj_message);
+        messageBodyDetails.put(messageReceiverRef + "/" + message.getMessageId(), obj_message);
+
+        FirebaseDatabase.getInstance().getReference()
+                .updateChildren(messageBodyDetails)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()){
+                        callback.onMessageSent();
+                    }
+                });
+
+        Map<String, Object> docUrlUserDetails = new HashMap<>();
+        docUrlUserDetails.put(currentUser.getUid(), true);
+        docUrlUserDetails.put(receiver, true);
+
+        docsUrlDatabaseReference
+                .child(message.getMessageId())
+                .updateChildren(docUrlUserDetails);
+
+        updateLastMessage(obj_message);
+        sendNotification("Sent a file", obj_message.getTo(), obj_message.getFrom(), TYPE_MESSAGE);
+    }
+
     public static void starMessage(Message message) {
         String starredUser = message.getStarred() + ":" + Utils.currentUser.getUid();
         message.setStarred(context.getString(R.string.STARRED));
@@ -353,10 +437,13 @@ public class FirebaseUtils {
                     .child(message.getMessageId())
                     .child(currentUser.getUid())
                     .removeValue();
-        }
-
-        if (message.getType().equals(context.getString(R.string.VIDEO))) {
+        } else if (message.getType().equals(context.getString(R.string.VIDEO))) {
             videoUrlDatabaseReference
+                    .child(message.getMessageId())
+                    .child(currentUser.getUid())
+                    .removeValue();
+        } else if (message.getType().equals(context.getString(R.string.PDF_FILES))) {
+            docsUrlDatabaseReference
                     .child(message.getMessageId())
                     .child(currentUser.getUid())
                     .removeValue();
@@ -401,9 +488,7 @@ public class FirebaseUtils {
 
                         }
                     });
-        }
-
-        if (message.getType().equals(context.getString(R.string.VIDEO))) {
+        } else if (message.getType().equals(context.getString(R.string.VIDEO))) {
             videoUrlDatabaseReference
                     .child(message.getMessageId())
                     .child(message.getFrom())
@@ -420,6 +505,31 @@ public class FirebaseUtils {
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
                             if (!snapshot.exists()) {
                                 videoStorageReference.getStorage().getReferenceFromUrl(message.getMessage()).delete();
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+        } else if (message.getType().equals(context.getString(R.string.PDF_FILES))) {
+            docsUrlDatabaseReference
+                    .child(message.getMessageId())
+                    .child(message.getFrom())
+                    .removeValue();
+
+            docsUrlDatabaseReference
+                    .child(message.getMessageId())
+                    .child(message.getTo())
+                    .removeValue();
+
+            docsUrlDatabaseReference.child(message.getMessageId())
+                    .addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            if (!snapshot.exists()) {
+                                docsStorageReference.getStorage().getReferenceFromUrl(message.getMessage()).delete();
                             }
                         }
 

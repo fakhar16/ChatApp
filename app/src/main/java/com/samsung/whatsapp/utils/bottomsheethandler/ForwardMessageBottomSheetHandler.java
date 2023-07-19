@@ -124,7 +124,8 @@ public class ForwardMessageBottomSheetHandler {
             FirebaseUtils.forwardImage(context, message, receiver);
         } else if (message.getType().equals(context.getString(R.string.VIDEO))) {
             FirebaseUtils.forwardVideo(context, message, receiver);
-
+        } else if (message.getType().equals(context.getString(R.string.PDF_FILES))) {
+            FirebaseUtils.forwardDoc(context, message, receiver);
         }
         bottomSheetDialog.dismiss();
         sendUserToChatActivity(receiver);

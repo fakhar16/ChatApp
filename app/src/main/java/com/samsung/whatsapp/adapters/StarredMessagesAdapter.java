@@ -87,6 +87,8 @@ public class StarredMessagesAdapter extends RecyclerView.Adapter<StarredMessages
         View clicked_message = holder.binding.myLinearLayout;
         if (message.getType().equals(context.getString(R.string.IMAGE))) {
             clicked_message = holder.binding.image;
+        } else if (message.getType().equals(context.getString(R.string.VIDEO))) {
+            clicked_message = holder.binding.videoPlayPreview;
         }
         MessageBottomSheetHandler.start(context, message, holder.binding.star.getVisibility(), 0, messageList, clicked_message);
     }
@@ -112,6 +114,10 @@ public class StarredMessagesAdapter extends RecyclerView.Adapter<StarredMessages
             holder.binding.videoPlayPreview.setVisibility(View.VISIBLE);
             Glide.with(context).load(message.getMessage()).centerCrop().placeholder(R.drawable.baseline_play_circle_outline_24).into(holder.binding.image);
             holder.binding.image.setOnClickListener(view -> ((StarMessageActivity)(context)).showVideoPreview(holder.binding.image, message.getMessage()));
+        } else if (message.getType().equals(context.getString(R.string.PDF_FILES))) {
+            holder.binding.message.setVisibility(View.GONE);
+            holder.binding.image.setVisibility(View.VISIBLE);
+            holder.binding.image.setImageResource(R.drawable.baseline_file_present_24);
         }
     }
 

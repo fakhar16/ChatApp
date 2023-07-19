@@ -20,9 +20,11 @@ public class ApplicationClass extends Application {
     public static DatabaseReference starMessagesDatabaseReference;
     public static DatabaseReference imageUrlDatabaseReference;
     public static DatabaseReference videoUrlDatabaseReference;
+    public static DatabaseReference docsUrlDatabaseReference;
     public static StorageReference userProfilesImagesReference;
     public static StorageReference imageStorageReference;
     public static StorageReference videoStorageReference;
+    public static StorageReference docsStorageReference;
 
     @SuppressLint("StaticFieldLeak")
     public static Context context;
@@ -50,12 +52,14 @@ public class ApplicationClass extends Application {
         starMessagesDatabaseReference.keepSynced(true);
         imageUrlDatabaseReference.keepSynced(true);
         videoUrlDatabaseReference.keepSynced(true);
+        docsUrlDatabaseReference.keepSynced(true);
     }
 
     private void initializeStorageReferences() {
         userProfilesImagesReference = FirebaseStorage.getInstance().getReference().child(getString(R.string.PROFILE_IMAGES));
         imageStorageReference = FirebaseStorage.getInstance().getReference().child(context.getString(R.string.IMAGE_FILES));
         videoStorageReference = FirebaseStorage.getInstance().getReference().child(context.getString(R.string.VIDEO_FILES));
+        docsStorageReference = FirebaseStorage.getInstance().getReference().child(getString(R.string.PDF_FILES));
     }
 
     private void initializeDatabaseReferences(FirebaseDatabase firebaseDatabase) {
@@ -68,5 +72,6 @@ public class ApplicationClass extends Application {
         starMessagesDatabaseReference = firebaseDatabase.getReference(getString(R.string.STARRED_MESSAGES));
         imageUrlDatabaseReference = firebaseDatabase.getReference(getString(R.string.IMAGE_URL_USED_BY_USERS));
         videoUrlDatabaseReference = firebaseDatabase.getReference(getString(R.string.VIDEO_URL_USED_BY_USERS));
+        docsUrlDatabaseReference = firebaseDatabase.getReference(getString(R.string.doc_url_used_by_users));
     }
 }
