@@ -117,6 +117,7 @@ public class StarMessageActivity extends AppCompatActivity implements MessageLis
 
     @SuppressLint("UnsafeOptInUsageError")
     public void showVideoPreview(View thumbView, String url) {
+        binding.appBarLayout.setVisibility(View.GONE);
         WhatsappLikeProfilePicPreview.Companion.zoomVideoFromThumb(thumbView, binding.expandedVideo.cardView, binding.mainPageToolbar.getRoot().getRootView());
         ExoPlayer player = new ExoPlayer.Builder(this).build();
         binding.expandedVideo.video.setPlayer(player);
@@ -161,6 +162,7 @@ public class StarMessageActivity extends AppCompatActivity implements MessageLis
             Objects.requireNonNull(binding.expandedVideo.video.getPlayer()).release();
             binding.starMessagesList.setClickable(true);
             WhatsappLikeProfilePicPreview.Companion.dismissVideoPreview();
+            binding.appBarLayout.setVisibility(View.VISIBLE);
         } else {
             finish();
         }
