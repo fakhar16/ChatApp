@@ -121,11 +121,11 @@ public class ForwardMessageBottomSheetHandler {
         if (message.getType().equals(context.getString(R.string.TEXT)))
             FirebaseUtils.sendMessage(message.getMessage(), Utils.currentUser.getUid(), receiver);
         else if (message.getType().equals(context.getString(R.string.IMAGE))) {
-            FirebaseUtils.forwardImage(context, message, receiver);
+            FirebaseUtils.forwardImage(context, message, receiver, "");
         } else if (message.getType().equals(context.getString(R.string.VIDEO))) {
-            FirebaseUtils.forwardVideo(context, message, receiver);
+            FirebaseUtils.forwardVideo(context, message, receiver, "");
         } else if (message.getType().equals(context.getString(R.string.PDF_FILES))) {
-            FirebaseUtils.forwardDoc(context, message, receiver);
+            FirebaseUtils.forwardDoc(context, message, receiver, "");
         }
         bottomSheetDialog.dismiss();
         sendUserToChatActivity(receiver);

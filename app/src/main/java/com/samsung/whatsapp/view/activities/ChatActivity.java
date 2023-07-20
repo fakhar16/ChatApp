@@ -84,39 +84,28 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
 
     private final ActivityResultLauncher<Intent> docPickActivityResultLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
-            new ActivityResultCallback<ActivityResult>() {
-                @Override
-                public void onActivityResult(ActivityResult result) {
-                    if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
-                        showLoadingBar(ChatActivity.this, binding.progressbar.getRoot());
-
-                        Intent data = result.getData();
-                        Uri fileUri = Objects.requireNonNull(data).getData();
-                        String filename = getFilename(ChatActivity.this, fileUri);
-                        FirebaseUtils.sendDoc(ChatActivity.this, currentUser.getUid(), messageReceiverId, fileUri, filename);
-                    }
+            result -> {
+                if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                    Intent data = result.getData();
+                    Uri fileUri = Objects.requireNonNull(data).getData();
+                    prepareDocMessageForSending(fileUri, "", false);
                 }
             });
     private final ActivityResultLauncher<Intent> imagePickActivityResultLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
-            new ActivityResultCallback<ActivityResult>() {
-                @Override
-                public void onActivityResult(ActivityResult result) {
-                    if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
-                        showLoadingBar(ChatActivity.this, binding.progressbar.getRoot());
-
-                        Intent data = result.getData();
-                        Uri fileUri = Objects.requireNonNull(data).getData();
-                        if (getFileType(fileUri).equals("jpg")) {
-                            FirebaseUtils.sendImage(ChatActivity.this, currentUser.getUid(), messageReceiverId, fileUri);
-                        } else if (getFileType(fileUri).equals("mp4")) {
-                            FirebaseUtils.sendVideo(ChatActivity.this, currentUser.getUid(), messageReceiverId, fileUri);
-                        }
+            result -> {
+                if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                    Intent data = result.getData();
+                    Uri fileUri = Objects.requireNonNull(data).getData();
+                    if (getFileType(fileUri).equals("jpg")) {
+                        prepareImageMessageForSending(fileUri, "",false);
+                    } else if (getFileType(fileUri).equals("mp4")) {
+                        prepareVideoMessageForSending(fileUri, "", false);
                     }
                 }
             });
 
-    private final ActivityResultLauncher<Intent> imageCaptureResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
+    private final ActivityResultLauncher<Intent> mediaCaptureResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
         @Override
         public void onActivityResult(ActivityResult result) {
             if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
@@ -137,14 +126,20 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
                         finalBitmap.compress(Bitmap.CompressFormat.PNG,100,os);
 
                         prepareImageMessageForSending(fileUri, "",false);
-                        binding.capturedImage.cancel.setOnClickListener(view -> binding.capturedImage.cardView.setVisibility(View.GONE));
+                        binding.capturedImage.cancel.setOnClickListener(view -> {
+                            hideKeyboard(ChatActivity.this);
+                            binding.capturedImage.cardView.setVisibility(View.GONE);
+                        });
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
                 } else if (fileType.equals(getString(R.string.VIDEO))) {
                     Uri fileUri = Uri.parse(data.getStringExtra(getString(R.string.VIDEO_URI)));
                     prepareVideoMessageForSending(fileUri, "", false);
-                    binding.capturedVideo.cancel.setOnClickListener(view -> binding.capturedVideo.cardView.setVisibility(View.GONE));
+                    binding.capturedVideo.cancel.setOnClickListener(view -> {
+                        hideKeyboard(ChatActivity.this);
+                        binding.capturedImage.cardView.setVisibility(View.GONE);
+                    });
                 }
             }
         }
@@ -156,13 +151,16 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
         binding.capturedImage.receiverName.setText(receiver.getName());
 
         binding.capturedImage.sendMessage.setOnClickListener(view -> {
+            String caption = binding.capturedImage.caption.getText().toString();
+            binding.capturedImage.caption.setText("");
+            hideKeyboard(this);
             binding.capturedImage.cardView.setVisibility(View.GONE);
             showLoadingBar(ChatActivity.this, binding.progressbar.getRoot());
             if (isImageFromClipboard) {
-                Message obj_message = new Message(messageId, fileUri.toString(), getString(R.string.IMAGE), currentUser.getUid(), receiver.getUid(),new Date().getTime(), -1, "");
-                FirebaseUtils.forwardImage(ChatActivity.this, obj_message, receiver.getUid());
+                Message obj_message = new Message(messageId, fileUri.toString(), getString(R.string.IMAGE), currentUser.getUid(), receiver.getUid(), new Date().getTime(), -1, "");
+                FirebaseUtils.forwardImage(ChatActivity.this, obj_message, receiver.getUid(), caption);
             } else {
-                FirebaseUtils.sendImage(ChatActivity.this, currentUser.getUid(), messageReceiverId, fileUri);
+                FirebaseUtils.sendImage(ChatActivity.this, currentUser.getUid(), messageReceiverId, fileUri, caption);
             }
         });
     }
@@ -182,27 +180,38 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
         player.prepare();
 
         binding.capturedVideo.sendMessage.setOnClickListener(view -> {
+            String caption = binding.capturedVideo.caption.getText().toString();
+            binding.capturedVideo.caption.setText("");
+            hideKeyboard(this);
             binding.capturedVideo.cardView.setVisibility(View.GONE);
             showLoadingBar(ChatActivity.this, binding.progressbar.getRoot());
             if (isVideoFromClipboard) {
                 Message obj_message = new Message(messageId, fileUri.toString(), getString(R.string.VIDEO), currentUser.getUid(), receiver.getUid(),new Date().getTime(), -1, "");
-                FirebaseUtils.forwardVideo(ChatActivity.this, obj_message, receiver.getUid());
+                FirebaseUtils.forwardVideo(ChatActivity.this, obj_message, receiver.getUid(), caption);
             } else {
-                FirebaseUtils.sendVideo(this, currentUser.getUid(), messageReceiverId, fileUri);
+                FirebaseUtils.sendVideo(this, currentUser.getUid(), messageReceiverId, fileUri, caption);
             }
         });
     }
 
-    private void prepareDocMessageForSending(Uri fileUri, String messageId) {
+    private void prepareDocMessageForSending(Uri fileUri, String messageId, boolean isDocFromClipboard) {
         binding.capturedImage.cardView.setVisibility(View.VISIBLE);
         binding.capturedImage.image.setImageResource(R.drawable.baseline_file_present_24);
         binding.capturedImage.receiverName.setText(receiver.getName());
 
         binding.capturedImage.sendMessage.setOnClickListener(view -> {
+            String caption = binding.capturedImage.caption.getText().toString();
+            binding.capturedImage.caption.setText("");
+            hideKeyboard(this);
             binding.capturedImage.cardView.setVisibility(View.GONE);
             showLoadingBar(ChatActivity.this, binding.progressbar.getRoot());
             Message obj_message = new Message(messageId, fileUri.toString(), getString(R.string.PDF_FILES), currentUser.getUid(), receiver.getUid(),new Date().getTime(), -1, "");
-            FirebaseUtils.forwardDoc(ChatActivity.this, obj_message, receiver.getUid());
+            if (isDocFromClipboard)
+                FirebaseUtils.forwardDoc(ChatActivity.this, obj_message, receiver.getUid(), caption);
+            else {
+                String filename = getFilename(ChatActivity.this, fileUri);
+                FirebaseUtils.sendDoc(ChatActivity.this, currentUser.getUid(), messageReceiverId, fileUri, filename, caption);
+            }
         });
     }
 
@@ -456,7 +465,7 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
                     } else if (message_type_item.getText().toString().equals(context.getString(R.string.VIDEO))) {
                         prepareVideoMessageForSending(uri, message_id_item.getText().toString(), true);
                     } else if (message_type_item.getText().toString().equals(context.getString(R.string.PDF_FILES))) {
-                        prepareDocMessageForSending(uri, message_id_item.getText().toString());
+                        prepareDocMessageForSending(uri, message_id_item.getText().toString(), true);
                     }
                 }
             }
@@ -522,7 +531,7 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
 
     private void cameraButtonClicked() {
         Intent intent = new Intent(ChatActivity.this, CameraxActivity.class);
-        imageCaptureResultLauncher.launch(intent);
+        mediaCaptureResultLauncher.launch(intent);
     }
 
     private void attachmentButtonClicked() {

@@ -139,19 +139,30 @@ public class MessagesAdapter extends RecyclerView.Adapter<MessagesAdapter.Messag
 
         //Setting video if message type is video
         if (message.getType().equals(context.getString(R.string.VIDEO))) {
-            holder.binding.message.setVisibility(View.GONE);
+            if (message.getCaption() == null)
+                holder.binding.message.setVisibility(View.GONE);
+            else {
+                holder.binding.message.setText(message.getCaption());
+            }
             holder.binding.image.setVisibility(View.VISIBLE);
             holder.binding.videoPlayPreview.setVisibility(View.VISIBLE);
             Glide.with(context).load(message.getMessage()).centerCrop().placeholder(R.drawable.baseline_play_circle_outline_24).into(holder.binding.image);
             holder.binding.image.setOnClickListener(view -> ((ChatActivity)(context)).showVideoPreview(holder.binding.image, message.getMessage()));
         } else if (message.getType().equals(context.getString(R.string.IMAGE))) { //Setting image if message type is image
-            holder.binding.message.setVisibility(View.GONE);
+            if (message.getCaption() == null)
+                holder.binding.message.setVisibility(View.GONE);
+            else {
+                holder.binding.message.setText(message.getCaption());
+            }
             holder.binding.image.setVisibility(View.VISIBLE);
-
             Picasso.get().load(message.getMessage()).placeholder(R.drawable.profile_image).into(holder.binding.image);
             holder.binding.image.setOnClickListener(view -> ((ChatActivity)(context)).showImagePreview(holder.binding.image, message.getMessage()));
-        } else if (message.getType().equals(context.getString(R.string.PDF_FILES))) { //Setting file if message type is file
-            holder.binding.message.setVisibility(View.GONE);
+        } else if (message.getType().equals(context.getString(R.string.PDF_FILES))) { //Setting file if message type is
+            if (message.getCaption() == null)
+                holder.binding.message.setVisibility(View.GONE);
+            else {
+                holder.binding.message.setText(message.getCaption());
+            }
             holder.binding.image.setVisibility(View.VISIBLE);
             holder.binding.image.setImageResource(R.drawable.baseline_file_present_24);
             holder.binding.image.setOnClickListener(view -> context.startActivity(PdfViewerActivity.Companion.launchPdfFromUrl(context, message.getMessage(), message.getFilename(), "", true)));

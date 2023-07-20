@@ -57,6 +57,22 @@
                 android:background="@drawable/background_edit_text"
                 android:backgroundTint="@color/colorPrimary"
                 />
+            <EditText
+                android:id="@+id/caption"
+                android:layout_width="match_parent"
+                android:layout_height="35dp"
+                android:hint="Add a caption..."
+                android:drawableStart="@drawable/baseline_add_to_photos_24"
+                android:drawablePadding="10dp"
+                android:textSize="14sp"
+                android:textColor="@android:color/white"
+                android:textColorHint="@android:color/white"
+                android:background="@drawable/background_edit_text_caption"
+                android:layout_above="@id/sendMessage"
+                android:layout_marginBottom="10dp"
+                android:padding="8dp"
+                />
+
         </RelativeLayout>
     </androidx.cardview.widget.CardView>
 

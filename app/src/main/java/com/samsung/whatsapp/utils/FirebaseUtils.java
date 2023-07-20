@@ -136,7 +136,7 @@ public class FirebaseUtils {
                 .removeValue();
     }
 
-    public static void sendImage(Context context, String messageSenderId, String messageReceiverId, Uri fileUri) {
+    public static void sendImage(Context context, String messageSenderId, String messageReceiverId, Uri fileUri, String caption) {
         MessageListenerCallback callback = (MessageListenerCallback) context;
         String messageSenderRef = context.getString(R.string.MESSAGES) + "/" + messageSenderId + "/" + messageReceiverId;
         String messageReceiverRef = context.getString(R.string.MESSAGES) + "/" + messageReceiverId + "/" + messageSenderId;
@@ -160,8 +160,12 @@ public class FirebaseUtils {
                 callback.onMessageSent();
                 Uri downloadUrl = task.getResult();
                 String myUrl = downloadUrl.toString();
-
-                Message obj_message = new Message(messagePushId, myUrl, context.getString(R.string.IMAGE), messageSenderId, messageReceiverId, new Date().getTime(), -1, "");
+                Message obj_message;
+                if (caption.isEmpty()) {
+                    obj_message = new Message(messagePushId, myUrl, context.getString(R.string.IMAGE), messageSenderId, messageReceiverId, new Date().getTime(), -1, "");
+                } else {
+                    obj_message = new Message(messagePushId, myUrl, caption, context.getString(R.string.IMAGE), messageSenderId, messageReceiverId, new Date().getTime(), -1, "");
+                }
 
                 Map<String, Object> messageBodyDetails = new HashMap<>();
                 messageBodyDetails.put(messageSenderRef + "/" + messagePushId, obj_message);
@@ -185,10 +189,13 @@ public class FirebaseUtils {
         }).addOnFailureListener(e -> callback.onMessageSentFailed());
     }
 
-    public static void forwardImage(Context context, Message message, String receiver) {
+    public static void forwardImage(Context context, Message message, String receiver, String caption) {
         MessageListenerCallback callback = (MessageListenerCallback) context;
-        Message obj_message = new Message(message.getMessageId(), message.getMessage(), message.getType(), currentUser.getUid(), receiver,new Date().getTime(), -1, "");
-
+        Message obj_message;
+        if (caption.isEmpty())
+            obj_message = new Message(message.getMessageId(), message.getMessage(), message.getType(), currentUser.getUid(), receiver,new Date().getTime(), -1, "");
+        else
+            obj_message = new Message(message.getMessageId(), message.getMessage(), caption, message.getType(), currentUser.getUid(), receiver,new Date().getTime(), -1, "");
         String messageSenderRef = context.getString(R.string.MESSAGES) + "/" + obj_message.getFrom() + "/" + obj_message.getTo();
         String messageReceiverRef = context.getString(R.string.MESSAGES) + "/" + obj_message.getTo() + "/" + obj_message.getFrom();
 
@@ -216,7 +223,7 @@ public class FirebaseUtils {
         sendNotification("Sent an image", obj_message.getTo(), obj_message.getFrom(), TYPE_MESSAGE);
     }
 
-    public static void sendVideo(Context context, String messageSenderId, String messageReceiverId, Uri fileUri) {
+    public static void sendVideo(Context context, String messageSenderId, String messageReceiverId, Uri fileUri, String caption) {
         MessageListenerCallback callback = (MessageListenerCallback) context;
         String messageSenderRef = context.getString(R.string.MESSAGES) + "/" + messageSenderId + "/" + messageReceiverId;
         String messageReceiverRef = context.getString(R.string.MESSAGES) + "/" + messageReceiverId + "/" + messageSenderId;
@@ -237,8 +244,11 @@ public class FirebaseUtils {
                     callback.onMessageSent();
 
                     String downloadUri = uriTask.getResult().toString();
-                    Message obj_message = new Message(messagePushId, downloadUri, context.getString(R.string.VIDEO), messageSenderId, messageReceiverId, new Date().getTime(), -1, "");
-
+                    Message obj_message;
+                    if (caption.isEmpty())
+                        obj_message = new Message(messagePushId, downloadUri, context.getString(R.string.VIDEO), messageSenderId, messageReceiverId, new Date().getTime(), -1, "");
+                    else
+                        obj_message = new Message(messagePushId, downloadUri, caption, context.getString(R.string.VIDEO), messageSenderId, messageReceiverId, new Date().getTime(), -1, "");
                     Map<String, Object> messageBodyDetails = new HashMap<>();
                     messageBodyDetails.put(messageSenderRef + "/" + messagePushId, obj_message);
                     messageBodyDetails.put(messageReceiverRef + "/" + messagePushId, obj_message);
@@ -260,10 +270,13 @@ public class FirebaseUtils {
                 })
                 .addOnFailureListener(e -> callback.onMessageSentFailed());
     }
-    public static void forwardVideo(Context context, Message message, String receiver) {
+    public static void forwardVideo(Context context, Message message, String receiver, String caption) {
         MessageListenerCallback callback = (MessageListenerCallback) context;
-        Message obj_message = new Message(message.getMessageId(), message.getMessage(), message.getType(), currentUser.getUid(), receiver,new Date().getTime(), -1, "");
-
+        Message obj_message;
+        if (caption.isEmpty())
+            obj_message = new Message(message.getMessageId(), message.getMessage(), message.getType(), currentUser.getUid(), receiver,new Date().getTime(), -1, "");
+        else
+            obj_message = new Message(message.getMessageId(), message.getMessage(), caption, message.getType(), currentUser.getUid(), receiver,new Date().getTime(), -1, "");
         String messageSenderRef = context.getString(R.string.MESSAGES) + "/" + obj_message.getFrom() + "/" + obj_message.getTo();
         String messageReceiverRef = context.getString(R.string.MESSAGES) + "/" + obj_message.getTo() + "/" + obj_message.getFrom();
 
@@ -291,7 +304,7 @@ public class FirebaseUtils {
         sendNotification("Sent a video", obj_message.getTo(), obj_message.getFrom(), TYPE_MESSAGE);
     }
 
-    public static void sendDoc(Context context, String messageSenderId, String messageReceiverId, Uri fileUri, String filename) {
+    public static void sendDoc(Context context, String messageSenderId, String messageReceiverId, Uri fileUri, String filename, String caption) {
         MessageListenerCallback callback = (MessageListenerCallback) context;
         String messageSenderRef = context.getString(R.string.MESSAGES) + "/" + messageSenderId + "/" + messageReceiverId;
         String messageReceiverRef = context.getString(R.string.MESSAGES) + "/" + messageReceiverId + "/" + messageSenderId;
@@ -316,7 +329,11 @@ public class FirebaseUtils {
                 Uri downloadUrl = task.getResult();
                 String myUrl = downloadUrl.toString();
 
-                Message obj_message = new Message(messagePushId, myUrl, context.getString(R.string.PDF_FILES), messageSenderId, messageReceiverId, new Date().getTime(), -1, "", filename);
+                Message obj_message;
+                if (caption.isEmpty())
+                    obj_message = new Message(messagePushId, myUrl, context.getString(R.string.PDF_FILES), messageSenderId, messageReceiverId, new Date().getTime(), -1, "", filename);
+                else
+                    obj_message = new Message(messagePushId, myUrl, caption, context.getString(R.string.PDF_FILES), messageSenderId, messageReceiverId, new Date().getTime(), -1, "", filename);
 
                 Map<String, Object> messageBodyDetails = new HashMap<>();
                 messageBodyDetails.put(messageSenderRef + "/" + messagePushId, obj_message);
@@ -340,9 +357,13 @@ public class FirebaseUtils {
         }).addOnFailureListener(e -> callback.onMessageSentFailed());
     }
 
-    public static void forwardDoc(Context context, Message message, String receiver) {
+    public static void forwardDoc(Context context, Message message, String receiver, String caption) {
         MessageListenerCallback callback = (MessageListenerCallback) context;
-        Message obj_message = new Message(message.getMessageId(), message.getMessage(), message.getType(), currentUser.getUid(), receiver,new Date().getTime(), -1, "");
+        Message obj_message;
+        if (caption.isEmpty())
+            obj_message = new Message(message.getMessageId(), message.getMessage(), message.getType(), currentUser.getUid(), receiver,new Date().getTime(), -1, "");
+        else
+            obj_message = new Message(message.getMessageId(), message.getMessage(), caption, message.getType(), currentUser.getUid(), receiver,new Date().getTime(), -1, "");
 
         String messageSenderRef = context.getString(R.string.MESSAGES) + "/" + obj_message.getFrom() + "/" + obj_message.getTo();
         String messageReceiverRef = context.getString(R.string.MESSAGES) + "/" + obj_message.getTo() + "/" + obj_message.getFrom();

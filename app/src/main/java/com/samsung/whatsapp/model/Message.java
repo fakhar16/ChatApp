@@ -1,7 +1,7 @@
 package com.samsung.whatsapp.model;
 
 public class Message {
-    private String message, type, from, to, messageId, starred, filename;
+    private String message, type, from, to, messageId, starred, filename, caption;
     private long time;
     private int feeling;
 
@@ -30,6 +30,39 @@ public class Message {
         this.feeling = feeling;
         this.starred = starred;
         this.filename = filename;
+    }
+
+    public Message(String messageId, String message, String caption, String type, String from, String to, long time, int feeling, String starred) {
+        this.from = from;
+        this.message = message;
+        this.type = type;
+        this.to = to;
+        this.messageId = messageId;
+        this.time = time;
+        this.feeling = feeling;
+        this.starred = starred;
+        this.caption = caption;
+    }
+
+    public Message(String messageId, String message, String caption, String type, String from, String to, long time, int feeling, String starred, String filename) {
+        this.from = from;
+        this.message = message;
+        this.type = type;
+        this.to = to;
+        this.messageId = messageId;
+        this.time = time;
+        this.feeling = feeling;
+        this.starred = starred;
+        this.filename = filename;
+        this.caption = caption;
+    }
+
+    public String getCaption() {
+        return caption;
+    }
+
+    public void setCaption(String caption) {
+        this.caption = caption;
     }
 
     public String getFilename() {
