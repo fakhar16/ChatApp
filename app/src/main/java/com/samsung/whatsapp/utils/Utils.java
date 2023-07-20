@@ -2,12 +2,15 @@ package com.samsung.whatsapp.utils;
 
 import static com.samsung.whatsapp.ApplicationClass.context;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.database.Cursor;
 import android.net.Uri;
+import android.provider.OpenableColumns;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
@@ -35,7 +38,6 @@ public class Utils {
     public static User currentUser = null;
     public static final int ITEM_SENT = 1;
     public static final int ITEM_RECEIVE = 2;
-
     public static final String TAG = "Console";
 
     public static void showLoadingBar(Activity activity, View view) {
@@ -55,6 +57,31 @@ public class Utils {
             view = new View(activity);
         }
         imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+    }
+
+    @SuppressLint("Range")
+    public static String getFilename(Context context, Uri uri) {
+        String res = null;
+        if (uri.getScheme().equals("content")) {
+            Cursor cursor = context.getContentResolver().query(uri, null, null, null, null);
+            try {
+               if (cursor != null && cursor.moveToFirst()) {
+                   res = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+               }
+            } finally {
+                assert cursor != null;
+                cursor.close();
+            }
+
+            if (res == null) {
+                res = uri.getPath();
+                int cutIndex = res.lastIndexOf('/');
+                if (cutIndex != -1) {
+                    res = res.substring(cutIndex + 1);
+                }
+            }
+        }
+        return res;
     }
 
     public static String getFileType(Uri uri) {

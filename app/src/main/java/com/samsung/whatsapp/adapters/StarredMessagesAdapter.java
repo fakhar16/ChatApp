@@ -19,6 +19,7 @@ import com.bumptech.glide.Glide;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
+import com.rajat.pdfviewer.PdfViewerActivity;
 import com.samsung.whatsapp.R;
 import com.samsung.whatsapp.databinding.ItemStarMessageBinding;
 import com.samsung.whatsapp.model.Message;
@@ -113,11 +114,12 @@ public class StarredMessagesAdapter extends RecyclerView.Adapter<StarredMessages
             holder.binding.image.setVisibility(View.VISIBLE);
             holder.binding.videoPlayPreview.setVisibility(View.VISIBLE);
             Glide.with(context).load(message.getMessage()).centerCrop().placeholder(R.drawable.baseline_play_circle_outline_24).into(holder.binding.image);
-            holder.binding.image.setOnClickListener(view -> ((StarMessageActivity)(context)).showVideoPreview(holder.binding.image, message.getMessage()));
+            holder.binding.videoPlayPreview.setOnClickListener(view -> ((StarMessageActivity)(context)).showVideoPreview(holder.binding.image, message.getMessage()));
         } else if (message.getType().equals(context.getString(R.string.PDF_FILES))) {
             holder.binding.message.setVisibility(View.GONE);
             holder.binding.image.setVisibility(View.VISIBLE);
             holder.binding.image.setImageResource(R.drawable.baseline_file_present_24);
+            holder.binding.image.setOnClickListener(view -> context.startActivity(PdfViewerActivity.Companion.launchPdfFromUrl(context, message.getMessage(), message.getFilename(), "", true)));
         }
     }
 

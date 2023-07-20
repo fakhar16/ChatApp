@@ -291,7 +291,7 @@ public class FirebaseUtils {
         sendNotification("Sent a video", obj_message.getTo(), obj_message.getFrom(), TYPE_MESSAGE);
     }
 
-    public static void sendDoc(Context context, String messageSenderId, String messageReceiverId, Uri fileUri) {
+    public static void sendDoc(Context context, String messageSenderId, String messageReceiverId, Uri fileUri, String filename) {
         MessageListenerCallback callback = (MessageListenerCallback) context;
         String messageSenderRef = context.getString(R.string.MESSAGES) + "/" + messageSenderId + "/" + messageReceiverId;
         String messageReceiverRef = context.getString(R.string.MESSAGES) + "/" + messageReceiverId + "/" + messageSenderId;
@@ -316,7 +316,7 @@ public class FirebaseUtils {
                 Uri downloadUrl = task.getResult();
                 String myUrl = downloadUrl.toString();
 
-                Message obj_message = new Message(messagePushId, myUrl, context.getString(R.string.PDF_FILES), messageSenderId, messageReceiverId, new Date().getTime(), -1, "");
+                Message obj_message = new Message(messagePushId, myUrl, context.getString(R.string.PDF_FILES), messageSenderId, messageReceiverId, new Date().getTime(), -1, "", filename);
 
                 Map<String, Object> messageBodyDetails = new HashMap<>();
                 messageBodyDetails.put(messageSenderRef + "/" + messagePushId, obj_message);

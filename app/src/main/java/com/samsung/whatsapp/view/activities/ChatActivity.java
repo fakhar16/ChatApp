@@ -5,6 +5,7 @@ import static com.samsung.whatsapp.ApplicationClass.presenceDatabaseReference;
 import static com.samsung.whatsapp.ApplicationClass.userDatabaseReference;
 import static com.samsung.whatsapp.utils.Utils.TYPE_VIDEO_CALL;
 import static com.samsung.whatsapp.utils.Utils.currentUser;
+import static com.samsung.whatsapp.utils.Utils.getFilename;
 import static com.samsung.whatsapp.utils.Utils.getFileType;
 import static com.samsung.whatsapp.utils.Utils.hideKeyboard;
 import static com.samsung.whatsapp.utils.Utils.showLoadingBar;
@@ -17,12 +18,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.ImageDecoder;
 import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -91,7 +92,8 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
 
                         Intent data = result.getData();
                         Uri fileUri = Objects.requireNonNull(data).getData();
-                        FirebaseUtils.sendDoc(ChatActivity.this, currentUser.getUid(), messageReceiverId, fileUri);
+                        String filename = getFilename(ChatActivity.this, fileUri);
+                        FirebaseUtils.sendDoc(ChatActivity.this, currentUser.getUid(), messageReceiverId, fileUri, filename);
                     }
                 }
             });
@@ -123,17 +125,18 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
 
                 if (fileType.equals(getString(R.string.IMAGE))) {
                     Uri fileUri = Uri.parse(data.getStringExtra(getString(R.string.IMAGE_URI)));
+
                     Bitmap bitmap;
                     try {
-                        bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), fileUri);
+                        ImageDecoder.Source source = ImageDecoder.createSource(getContentResolver(), fileUri);
+                        bitmap = ImageDecoder.decodeBitmap(source);
                         Matrix matrix = new Matrix();
-                        matrix.postRotate(-90);
+                        matrix.preRotate(0);
                         Bitmap finalBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
                         OutputStream os=getContentResolver().openOutputStream(fileUri);
                         finalBitmap.compress(Bitmap.CompressFormat.PNG,100,os);
 
                         prepareImageMessageForSending(fileUri, "",false);
-
                         binding.capturedImage.cancel.setOnClickListener(view -> binding.capturedImage.cardView.setVisibility(View.GONE));
                     } catch (IOException e) {
                         throw new RuntimeException(e);
@@ -190,7 +193,7 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
         });
     }
 
-    private void prepareDocMessageForSending(Uri fileUri, String messageId, boolean isImageFromClipboard) {
+    private void prepareDocMessageForSending(Uri fileUri, String messageId) {
         binding.capturedImage.cardView.setVisibility(View.VISIBLE);
         binding.capturedImage.image.setImageResource(R.drawable.baseline_file_present_24);
         binding.capturedImage.receiverName.setText(receiver.getName());
@@ -198,12 +201,8 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
         binding.capturedImage.sendMessage.setOnClickListener(view -> {
             binding.capturedImage.cardView.setVisibility(View.GONE);
             showLoadingBar(ChatActivity.this, binding.progressbar.getRoot());
-            if (isImageFromClipboard) {
-                Message obj_message = new Message(messageId, fileUri.toString(), getString(R.string.PDF_FILES), currentUser.getUid(), receiver.getUid(),new Date().getTime(), -1, "");
-                FirebaseUtils.forwardDoc(ChatActivity.this, obj_message, receiver.getUid());
-            } else {
-                FirebaseUtils.sendDoc(ChatActivity.this, currentUser.getUid(), messageReceiverId, fileUri);
-            }
+            Message obj_message = new Message(messageId, fileUri.toString(), getString(R.string.PDF_FILES), currentUser.getUid(), receiver.getUid(),new Date().getTime(), -1, "");
+            FirebaseUtils.forwardDoc(ChatActivity.this, obj_message, receiver.getUid());
         });
     }
 
@@ -413,7 +412,7 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
                 getIntent().removeExtra(getString(R.string.MESSAGE_ID));
                 binding.userMessageList.postDelayed(() -> {
                     Objects.requireNonNull(binding.userMessageList.findViewHolderForAdapterPosition(position)).itemView.findViewById(R.id.my_linear_layout).setBackgroundTintList(ContextCompat.getColorStateList(ChatActivity.this, R.color.colorPrimary));
-                    new Handler().postDelayed(() -> Objects.requireNonNull(binding.userMessageList.findViewHolderForAdapterPosition(position)).itemView.findViewById(R.id.my_linear_layout).setBackgroundTintList(null), 500);
+                    new Handler(Looper.getMainLooper()).postDelayed(() -> Objects.requireNonNull(binding.userMessageList.findViewHolderForAdapterPosition(position)).itemView.findViewById(R.id.my_linear_layout).setBackgroundTintList(null), 500);
                 }, 200);
             } else {
                 binding.userMessageList.smoothScrollToPosition(messagesAdapter.getItemCount() - 1);
@@ -457,7 +456,7 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
                     } else if (message_type_item.getText().toString().equals(context.getString(R.string.VIDEO))) {
                         prepareVideoMessageForSending(uri, message_id_item.getText().toString(), true);
                     } else if (message_type_item.getText().toString().equals(context.getString(R.string.PDF_FILES))) {
-                        prepareDocMessageForSending(uri, message_id_item.getText().toString(), true);
+                        prepareDocMessageForSending(uri, message_id_item.getText().toString());
                     }
                 }
             }

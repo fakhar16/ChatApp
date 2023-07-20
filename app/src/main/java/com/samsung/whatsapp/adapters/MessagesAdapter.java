@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
+import com.rajat.pdfviewer.PdfViewerActivity;
 import com.samsung.whatsapp.databinding.ItemMessageBinding;
 import com.samsung.whatsapp.model.Message;
 import com.samsung.whatsapp.R;
@@ -149,10 +150,11 @@ public class MessagesAdapter extends RecyclerView.Adapter<MessagesAdapter.Messag
 
             Picasso.get().load(message.getMessage()).placeholder(R.drawable.profile_image).into(holder.binding.image);
             holder.binding.image.setOnClickListener(view -> ((ChatActivity)(context)).showImagePreview(holder.binding.image, message.getMessage()));
-        } else if (message.getType().equals(context.getString(R.string.PDF_FILES))) { //Setting image if message type is image
+        } else if (message.getType().equals(context.getString(R.string.PDF_FILES))) { //Setting file if message type is file
             holder.binding.message.setVisibility(View.GONE);
             holder.binding.image.setVisibility(View.VISIBLE);
             holder.binding.image.setImageResource(R.drawable.baseline_file_present_24);
+            holder.binding.image.setOnClickListener(view -> context.startActivity(PdfViewerActivity.Companion.launchPdfFromUrl(context, message.getMessage(), message.getFilename(), "", true)));
         }
 
         //        if (message.getFeeling() >= 0) {

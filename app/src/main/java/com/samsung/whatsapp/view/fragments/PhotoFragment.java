@@ -34,7 +34,7 @@ import java.util.concurrent.ExecutionException;
 
 public class PhotoFragment extends Fragment {
     private FragmentPhotoBinding binding;
-    private int cameraFacing = CameraSelector.LENS_FACING_BACK;
+    private int cameraFacing = CameraSelector.LENS_FACING_FRONT;
     private int flashMode = ImageCapture.FLASH_MODE_OFF;
     private ListenableFuture<ProcessCameraProvider> processCameraProvider;
     private ProcessCameraProvider cameraProvider;

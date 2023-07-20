@@ -4,10 +4,10 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
+import android.annotation.SuppressLint
 import android.graphics.Point
 import android.graphics.Rect
 import android.graphics.RectF
-import android.util.Log
 import android.view.View
 import android.view.animation.DecelerateInterpolator
 import android.widget.FrameLayout
@@ -24,9 +24,10 @@ class WhatsappLikeProfilePicPreview{
         private lateinit var startBounds: RectF
         private  var startScale: Float = 0.0f
         private lateinit var mExpandedImageCardView: CardView
+        @SuppressLint("StaticFieldLeak")
         private lateinit var mExpandedVideoCardView: FrameLayout
+        @SuppressLint("StaticFieldLeak")
         private lateinit var mThumbView: View
-        private const val TAG = "ConsoleWhatsappLikeProfilePicP"
 
 
         fun zoomImageFromThumb(thumbView: View, expandedImageCardView: CardView, expandedImageView: ImageView, container: View, imageUrl: String) {
@@ -160,7 +161,6 @@ class WhatsappLikeProfilePicPreview{
             }
 
             expandVideoCardView.visibility = View.VISIBLE
-            Log.wtf(TAG, "zoomVideoFromThumb: visibility $container")
 
             expandVideoCardView.pivotX = 0f
             expandVideoCardView.pivotY = 0f
