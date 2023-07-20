@@ -11,7 +11,6 @@ import java.util.Objects;
 
 public class PhoneLoginActivity extends BaseActivity {
     private ActivityPhoneLoginBinding binding;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

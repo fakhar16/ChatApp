@@ -26,7 +26,6 @@ import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.RingtoneManager;
 import android.net.Uri;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
@@ -51,7 +50,6 @@ import java.util.Objects;
 
 @SuppressLint("MissingFirebaseInstanceTokenRefresh")
 public class FCMNotificationService extends FirebaseMessagingService {
-    private static final String TAG = "ConsolePushNotificationService";
     public static final String KEY_TEXT_REPLY = "text_reply";
 
     @Override

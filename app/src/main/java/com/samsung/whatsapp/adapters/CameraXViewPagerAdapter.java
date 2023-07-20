@@ -23,9 +23,8 @@ public class CameraXViewPagerAdapter extends FragmentStateAdapter {
                 return new PhotoFragment();
             case 1:
                 return new VideoFragment();
-            default:
-                return null;
         }
+        return new PhotoFragment();
     }
 
     @Override

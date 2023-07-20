@@ -2,6 +2,7 @@ package com.samsung.whatsapp.view.activities;
 
 import static com.samsung.whatsapp.ApplicationClass.presenceDatabaseReference;
 import static com.samsung.whatsapp.ApplicationClass.userDatabaseReference;
+import static com.samsung.whatsapp.utils.Utils.TAG;
 import static com.samsung.whatsapp.utils.Utils.currentUser;
 
 import androidx.annotation.NonNull;
@@ -29,7 +30,6 @@ import java.util.Objects;
 
 public class MainActivity extends BaseActivity {
     private FirebaseAuth mAuth;
-    private static final String TAG = "consoleMainActivity";
     ActivityMainBinding binding;
 
     @Override

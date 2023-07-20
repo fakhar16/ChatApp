@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 public class ContactsRepositoryImpl implements IContactsRepository {
-    private static final String TAG = "ConsoleContactsRepositoryImpl";
     static ContactsRepositoryImpl instance;
     private final ArrayList<User> mUsers = new ArrayList<>();
     MutableLiveData<ArrayList<User>> users = new MutableLiveData<>();
@@ -73,7 +72,7 @@ public class ContactsRepositoryImpl implements IContactsRepository {
 
     @SuppressLint("Range")
     private void loadContactListFromPhone() {
-        Cursor phones = context.getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, null, null, null);
+        @SuppressLint("Recycle") Cursor phones = context.getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, null, null, null);
         while (phones.moveToNext()) {
             String phone = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER));
 

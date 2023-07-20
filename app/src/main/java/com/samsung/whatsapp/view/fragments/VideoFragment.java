@@ -9,7 +9,6 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.camera.core.CameraSelector;
-import androidx.camera.core.ImageCapture;
 import androidx.camera.core.Preview;
 import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.video.MediaStoreOutputOptions;
@@ -26,7 +25,6 @@ import androidx.lifecycle.LifecycleOwner;
 
 import android.os.CountDownTimer;
 import android.provider.MediaStore;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,8 +36,6 @@ import com.samsung.whatsapp.databinding.FragmentVideoBinding;
 
 import java.text.SimpleDateFormat;
 import java.util.Locale;
-import java.util.Objects;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 
 public class VideoFragment extends Fragment {
@@ -48,12 +44,10 @@ public class VideoFragment extends Fragment {
     private ListenableFuture<ProcessCameraProvider> processCameraProvider;
     private ProcessCameraProvider cameraProvider;
     private VideoCapture<Recorder> videoCapture;
-    private int flashMode = ImageCapture.FLASH_MODE_OFF;
     Recording recording = null;
     private CountDownTimer countDownTimer;
     long counter = 0;
 
-    private static final String TAG = "ConsoleVideoFragment";
     public VideoFragment() {
         // Required empty public constructor
     }

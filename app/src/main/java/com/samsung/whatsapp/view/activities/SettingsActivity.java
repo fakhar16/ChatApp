@@ -33,7 +33,6 @@ import java.util.Objects;
 
 public class SettingsActivity extends AppCompatActivity {
     ActivitySettingsBinding binding;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
