@@ -31,6 +31,9 @@
         android:theme="@style/Theme.Whatsapp"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".view.activities.MediaLinksDocsActivity"
+            android:exported="false" />
+        <activity
             android:name=".view.activities.CameraxActivity"
             android:exported="false" />
         <activity

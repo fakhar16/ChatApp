@@ -10,4 +10,5 @@ public interface IMessageRepository {
     MutableLiveData<ArrayList<Message>> getMessages(String sender, String receiver);
     MutableLiveData<ArrayList<Message>> getStarredMessages();
     MutableLiveData<ArrayList<Message>> getStarredMessagesMatchingReceiver();
+    MutableLiveData<ArrayList<Message>> getMediaMessagesMatchingReceiver(String receiver);
 }

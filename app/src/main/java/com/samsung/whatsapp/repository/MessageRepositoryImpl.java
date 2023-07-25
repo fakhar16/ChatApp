@@ -1,5 +1,6 @@
 package com.samsung.whatsapp.repository;
 
+import static com.samsung.whatsapp.ApplicationClass.context;
 import static com.samsung.whatsapp.ApplicationClass.messageDatabaseReference;
 import static com.samsung.whatsapp.ApplicationClass.starMessagesDatabaseReference;
 
@@ -9,6 +10,7 @@ import androidx.lifecycle.MutableLiveData;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
+import com.samsung.whatsapp.R;
 import com.samsung.whatsapp.model.Message;
 import com.samsung.whatsapp.repository.interfaces.IMessageRepository;
 import com.samsung.whatsapp.utils.Utils;
@@ -21,9 +23,11 @@ public class MessageRepositoryImpl implements IMessageRepository {
     private ArrayList<Message> mMessages;
     private  ArrayList<Message> mStarredMessages;
     private  ArrayList<Message> mStarredMessagesWithReceiver;
+    private  ArrayList<Message> mMediaMessagesWithReceiver;
     MutableLiveData<ArrayList<Message>> messages = new MutableLiveData<>();
     MutableLiveData<ArrayList<Message>> starMessages = new MutableLiveData<>();
     MutableLiveData<ArrayList<Message>> starMessagesWithReceiver = new MutableLiveData<>();
+    MutableLiveData<ArrayList<Message>> mediaMessagesWithReceiver = new MutableLiveData<>();
 
     public static MessageRepositoryImpl getInstance() {
         if(instance == null) {
@@ -54,6 +58,14 @@ public class MessageRepositoryImpl implements IMessageRepository {
         loadStarMessagesWithReceiver();
         starMessagesWithReceiver.setValue(mStarredMessagesWithReceiver);
         return starMessagesWithReceiver;
+    }
+
+    @Override
+    public MutableLiveData<ArrayList<Message>> getMediaMessagesMatchingReceiver(String receiver) {
+        mMediaMessagesWithReceiver = new ArrayList<>();
+        loadMediaMessagesWithReceiver(receiver);
+        mediaMessagesWithReceiver.setValue(mMediaMessagesWithReceiver);
+        return mediaMessagesWithReceiver;
     }
 
     public void loadMessages(String messageSenderId, String messageReceiverId) {
@@ -126,6 +138,32 @@ public class MessageRepositoryImpl implements IMessageRepository {
                             }
                         }
                         starMessagesWithReceiver.postValue(mStarredMessagesWithReceiver);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+    }
+
+    public void loadMediaMessagesWithReceiver(String receiver) {
+        messageDatabaseReference
+                .child(Utils.currentUser.getUid())
+                .child(receiver)
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        mMediaMessagesWithReceiver.clear();
+                        if (snapshot.exists()) {
+                            for (DataSnapshot child : snapshot.getChildren()) {
+                                Message message = child.getValue(Message.class);
+                                assert message != null;
+                                if (message.getType().equals(context.getString(R.string.IMAGE)) || message.getType().equals(context.getString(R.string.VIDEO)))
+                                    mMediaMessagesWithReceiver.add(message);
+                            }
+                        }
+                        mediaMessagesWithReceiver.postValue(mMediaMessagesWithReceiver);
                     }
 
                     @Override
