@@ -447,9 +447,17 @@ public class FirebaseUtils {
     }
 
     public static void deleteMessage(Message message) {
+        String from = currentUser.getUid();
+        String to;
+
+        if (message.getFrom().equals(from))
+            to = message.getTo();
+        else
+            to = message.getFrom();
+
         messageDatabaseReference
-                .child(message.getFrom())
-                .child(message.getTo())
+                .child(from)
+                .child(to)
                 .child(message.getMessageId())
                 .removeValue();
 
