@@ -36,6 +36,7 @@ public class ProfileActivity extends AppCompatActivity {
     private User receiver;
     String receiverId;
     ArrayList<Message> starMessages;
+    ArrayList<Message> mediaMessages;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,11 +46,11 @@ public class ProfileActivity extends AppCompatActivity {
 
         receiverId = getIntent().getStringExtra(getString(R.string.RECEIVER_ID));
         starMessages = MessageRepositoryImpl.getInstance().getStarredMessagesMatchingReceiver().getValue();
+        mediaMessages = MessageRepositoryImpl.getInstance().getMediaMessagesMatchingReceiver(receiverId).getValue();
 
         loadUserInfo();
         initToolBar();
         handleItemsClick();
-
     }
 
     private void handleItemsClick() {
@@ -57,6 +58,7 @@ public class ProfileActivity extends AppCompatActivity {
         binding.starLayout.setOnClickListener(view -> sendUserToStarActivity());
         binding.search.setOnClickListener(view -> sendUserToChatActivity());
         binding.videoCall.setOnClickListener(view -> createVideoCall());
+        binding.mediaLayout.setOnClickListener(view -> sendUserToMediaLinksDocsActivity());
     }
 
     private void createVideoCall() {
@@ -73,6 +75,12 @@ public class ProfileActivity extends AppCompatActivity {
     private void sendUserToStarActivity() {
         Intent intent = new Intent(this, StarMessageActivity.class);
         intent.putExtra(getString(R.string.STAR_MESSAGE_WITH_RECEIVER), true);
+        startActivity(intent);
+    }
+
+    private void sendUserToMediaLinksDocsActivity() {
+        Intent intent = new Intent(this, MediaLinksDocsActivity.class);
+        intent.putExtra(getString(R.string.RECEIVER_ID), receiverId);
         startActivity(intent);
     }
 
@@ -107,11 +115,17 @@ public class ProfileActivity extends AppCompatActivity {
         binding.userStatus.setText(receiver.getStatus());
         Picasso.get().load(receiver.getImage()).placeholder(R.drawable.profile_image).into(binding.userImage);
         updateStarredMessageCount();
+        updateMediaMessageCount();
     }
 
     private void updateStarredMessageCount() {
         int starredMessageCount = starMessages.size();
         binding.starredMessagesCount.setText(starredMessageCount == 0? "None": String.valueOf(starredMessageCount));
+    }
+
+    private void updateMediaMessageCount() {
+        int mediaMessageCount = mediaMessages.size();
+        binding.mediaCount.setText(mediaMessageCount == 0? "None": String.valueOf(mediaMessageCount));
     }
 
     private void initToolBar() {

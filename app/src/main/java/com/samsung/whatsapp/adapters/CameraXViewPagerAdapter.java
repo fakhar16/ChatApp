@@ -9,7 +9,7 @@ import com.samsung.whatsapp.view.fragments.PhotoFragment;
 import com.samsung.whatsapp.view.fragments.VideoFragment;
 
 public class CameraXViewPagerAdapter extends FragmentStateAdapter {
-    public int count;
+    private final int count;
     public CameraXViewPagerAdapter(@NonNull FragmentActivity fragmentActivity, int count) {
         super(fragmentActivity);
         this.count = count;
