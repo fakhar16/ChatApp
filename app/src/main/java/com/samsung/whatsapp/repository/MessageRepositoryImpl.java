@@ -24,10 +24,14 @@ public class MessageRepositoryImpl implements IMessageRepository {
     private  ArrayList<Message> mStarredMessages;
     private  ArrayList<Message> mStarredMessagesWithReceiver;
     private  ArrayList<Message> mMediaMessagesWithReceiver;
+    private  ArrayList<Message> mDocMessagesWithReceiver;
+    private  ArrayList<Message> mLinksMessagesWithReceiver;
     MutableLiveData<ArrayList<Message>> messages = new MutableLiveData<>();
     MutableLiveData<ArrayList<Message>> starMessages = new MutableLiveData<>();
     MutableLiveData<ArrayList<Message>> starMessagesWithReceiver = new MutableLiveData<>();
     MutableLiveData<ArrayList<Message>> mediaMessagesWithReceiver = new MutableLiveData<>();
+    MutableLiveData<ArrayList<Message>> docMessagesWithReceiver = new MutableLiveData<>();
+    MutableLiveData<ArrayList<Message>> linksMessagesWithReceiver = new MutableLiveData<>();
 
     public static MessageRepositoryImpl getInstance() {
         if(instance == null) {
@@ -66,6 +70,22 @@ public class MessageRepositoryImpl implements IMessageRepository {
         loadMediaMessagesWithReceiver(receiver);
         mediaMessagesWithReceiver.setValue(mMediaMessagesWithReceiver);
         return mediaMessagesWithReceiver;
+    }
+
+    @Override
+    public MutableLiveData<ArrayList<Message>> getLinksMessagesMatchingReceiver(String receiver) {
+        mLinksMessagesWithReceiver = new ArrayList<>();
+        loadLinksMessagesWithReceiver(receiver);
+        linksMessagesWithReceiver.setValue(mLinksMessagesWithReceiver);
+        return linksMessagesWithReceiver;
+    }
+
+    @Override
+    public MutableLiveData<ArrayList<Message>> getDocMessagesMatchingReceiver(String receiver) {
+        mDocMessagesWithReceiver = new ArrayList<>();
+        loadDocMessagesWithReceiver(receiver);
+        docMessagesWithReceiver.setValue(mDocMessagesWithReceiver);
+        return docMessagesWithReceiver;
     }
 
     public void loadMessages(String messageSenderId, String messageReceiverId) {
@@ -164,6 +184,58 @@ public class MessageRepositoryImpl implements IMessageRepository {
                             }
                         }
                         mediaMessagesWithReceiver.postValue(mMediaMessagesWithReceiver);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+    }
+
+    public void loadLinksMessagesWithReceiver(String receiver) {
+        messageDatabaseReference
+                .child(Utils.currentUser.getUid())
+                .child(receiver)
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        mLinksMessagesWithReceiver.clear();
+                        if (snapshot.exists()) {
+                            for (DataSnapshot child : snapshot.getChildren()) {
+                                Message message = child.getValue(Message.class);
+                                assert message != null;
+                                if (message.getType().equals(context.getString(R.string.URL)))
+                                    mLinksMessagesWithReceiver.add(message);
+                            }
+                        }
+                        linksMessagesWithReceiver.postValue(mLinksMessagesWithReceiver);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+    }
+
+    public void loadDocMessagesWithReceiver(String receiver) {
+        messageDatabaseReference
+                .child(Utils.currentUser.getUid())
+                .child(receiver)
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        mDocMessagesWithReceiver.clear();
+                        if (snapshot.exists()) {
+                            for (DataSnapshot child : snapshot.getChildren()) {
+                                Message message = child.getValue(Message.class);
+                                assert message != null;
+                                if (message.getType().equals(context.getString(R.string.PDF_FILES)))
+                                    mDocMessagesWithReceiver.add(message);
+                            }
+                        }
+                        docMessagesWithReceiver.postValue(mDocMessagesWithReceiver);
                     }
 
                     @Override

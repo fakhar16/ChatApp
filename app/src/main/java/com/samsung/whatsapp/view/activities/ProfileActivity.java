@@ -37,6 +37,8 @@ public class ProfileActivity extends AppCompatActivity {
     String receiverId;
     ArrayList<Message> starMessages;
     ArrayList<Message> mediaMessages;
+    ArrayList<Message> docMessages;
+    ArrayList<Message> linksMessages;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +49,8 @@ public class ProfileActivity extends AppCompatActivity {
         receiverId = getIntent().getStringExtra(getString(R.string.RECEIVER_ID));
         starMessages = MessageRepositoryImpl.getInstance().getStarredMessagesMatchingReceiver().getValue();
         mediaMessages = MessageRepositoryImpl.getInstance().getMediaMessagesMatchingReceiver(receiverId).getValue();
+        docMessages = MessageRepositoryImpl.getInstance().getDocMessagesMatchingReceiver(receiverId).getValue();
+        linksMessages = MessageRepositoryImpl.getInstance().getLinksMessagesMatchingReceiver(receiverId).getValue();
 
         loadUserInfo();
         initToolBar();
@@ -124,7 +128,7 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void updateMediaMessageCount() {
-        int mediaMessageCount = mediaMessages.size();
+        int mediaMessageCount = mediaMessages.size() + docMessages.size() + linksMessages.size();
         binding.mediaCount.setText(mediaMessageCount == 0? "None": String.valueOf(mediaMessageCount));
     }
 

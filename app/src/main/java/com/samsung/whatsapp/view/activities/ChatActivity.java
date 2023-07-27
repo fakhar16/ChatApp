@@ -28,6 +28,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.webkit.URLUtil;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -196,7 +197,7 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
 
     private void prepareDocMessageForSending(Uri fileUri, String messageId, boolean isDocFromClipboard) {
         binding.capturedImage.cardView.setVisibility(View.VISIBLE);
-        binding.capturedImage.image.setImageResource(R.drawable.baseline_file_present_24);
+        binding.capturedImage.image.setImageResource(R.drawable.baseline_picture_as_pdf_24);
         binding.capturedImage.receiverName.setText(receiver.getName());
 
         binding.capturedImage.sendMessage.setOnClickListener(view -> {
@@ -473,7 +474,12 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
     }
 
     private void sendMessage() {
-        FirebaseUtils.sendMessage(Objects.requireNonNull(binding.messageInputText.getText()).toString(), currentUser.getUid(), receiver.getUid());
+        String message = Objects.requireNonNull(binding.messageInputText.getText()).toString();
+        if (URLUtil.isValidUrl(message)) {
+            FirebaseUtils.sendURLMessage(message, currentUser.getUid(), receiver.getUid());
+        } else {
+            FirebaseUtils.sendMessage(message, currentUser.getUid(), receiver.getUid());
+        }
         binding.messageInputText.setText("");
     }
 

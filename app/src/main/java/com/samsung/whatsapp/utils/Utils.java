@@ -11,6 +11,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.OpenableColumns;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
@@ -19,6 +20,9 @@ import android.webkit.MimeTypeMap;
 import com.samsung.whatsapp.R;
 import com.samsung.whatsapp.model.User;
 
+import java.io.IOException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -90,6 +94,25 @@ public class Utils {
         return mimeTypeMap.getExtensionFromMimeType(r.getType(uri));
     }
 
+    public static String getFileSize(String url) {
+        final int[] size = {0};
+        new Thread(new Runnable() {
+            @Override
+            public synchronized void run() {
+                try {
+                    URL obj_url = new URL(url);
+                    URLConnection connection = (URLConnection) obj_url.openConnection();
+                    size[0] = connection.getContentLength();
+                    Log.wtf(TAG, "getFileSize: " + size[0]);
+                    connection.getInputStream().close();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }).start();
+
+        return String.valueOf(size[0]);
+    }
 
     public static boolean isSameDay(long date1) {
         Calendar calendar1 = Calendar.getInstance();

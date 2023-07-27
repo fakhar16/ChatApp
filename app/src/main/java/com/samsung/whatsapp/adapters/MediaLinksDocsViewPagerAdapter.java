@@ -23,11 +23,11 @@ public class MediaLinksDocsViewPagerAdapter extends FragmentStateAdapter {
             case 0:
                 return new MediaFragment(receiverId);
             case 1:
-                return new LinksFragment();
+                return new LinksFragment(receiverId);
             case 2:
-                return new DocsFragment();
+                return new DocsFragment(receiverId);
         }
-        return new MediaFragment();
+        return new MediaFragment(receiverId);
     }
 
     @Override

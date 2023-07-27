@@ -7,6 +7,9 @@ import static com.samsung.whatsapp.utils.Utils.getDateTimeString;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Color;
+import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -163,9 +166,17 @@ public class MessagesAdapter extends RecyclerView.Adapter<MessagesAdapter.Messag
             else {
                 holder.binding.message.setText(message.getCaption());
             }
+
+            holder.binding.fileName.setVisibility(View.VISIBLE);
+            holder.binding.fileName.setText(message.getFilename());
             holder.binding.image.setVisibility(View.VISIBLE);
-            holder.binding.image.setImageResource(R.drawable.baseline_file_present_24);
+            holder.binding.image.setImageResource(R.drawable.baseline_picture_as_pdf_24);
             holder.binding.image.setOnClickListener(view -> context.startActivity(PdfViewerActivity.Companion.launchPdfFromUrl(context, message.getMessage(), message.getFilename(), "", true)));
+        } else if (message.getType().equals(context.getString(R.string.URL))) {
+            String linkedText = String.format("<a href=\"%s\">%s</a> ", message.getMessage(), message.getMessage());
+            holder.binding.message.setText(Html.fromHtml(linkedText));
+            holder.binding.message.setMovementMethod(LinkMovementMethod.getInstance());
+            holder.binding.message.setLinkTextColor(Color.BLUE);
         }
 
         //        if (message.getFeeling() >= 0) {

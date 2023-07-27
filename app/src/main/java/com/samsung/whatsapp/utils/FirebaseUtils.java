@@ -54,7 +54,33 @@ public class FirebaseUtils {
                             .push();
 
             String messagePushId = userMessageKeyRef.getKey();
-            Message obj_message = new Message(messagePushId, message, "text", messageSenderId, messageReceiverId, new Date().getTime(), -1, "");
+            Message obj_message = new Message(messagePushId, message, context.getString(R.string.TEXT), messageSenderId, messageReceiverId, new Date().getTime(), -1, "");
+
+            Map<String, Object> messageBodyDetails = new HashMap<>();
+            messageBodyDetails.put(messageSenderRef + "/" + messagePushId, obj_message);
+            messageBodyDetails.put(messageReceiverRef + "/" + messagePushId, obj_message);
+
+            FirebaseDatabase.getInstance().getReference()
+                    .updateChildren(messageBodyDetails);
+
+            updateLastMessage(obj_message);
+            sendNotification(message, messageReceiverId, messageSenderId, TYPE_MESSAGE);
+        }
+    }
+
+    public static void sendURLMessage(String message, String messageSenderId, String messageReceiverId) {
+        if (!TextUtils.isEmpty(message)) {
+            String messageSenderRef = context.getString(R.string.MESSAGES) + "/" + messageSenderId + "/" + messageReceiverId;
+            String messageReceiverRef = context.getString(R.string.MESSAGES) + "/" + messageReceiverId + "/" + messageSenderId;
+
+            DatabaseReference userMessageKeyRef =
+                    messageDatabaseReference
+                            .child(messageSenderId)
+                            .child(messageReceiverId)
+                            .push();
+
+            String messagePushId = userMessageKeyRef.getKey();
+            Message obj_message = new Message(messagePushId, message, context.getString(R.string.URL), messageSenderId, messageReceiverId, new Date().getTime(), -1, "");
 
             Map<String, Object> messageBodyDetails = new HashMap<>();
             messageBodyDetails.put(messageSenderRef + "/" + messagePushId, obj_message);
@@ -115,6 +141,8 @@ public class FirebaseUtils {
             lastMsgObj.put(context.getString(R.string.LAST_MESSAGE_DETAILS), "Video");
         else if (message.getType().equals(context.getString(R.string.PDF_FILES)))
             lastMsgObj.put(context.getString(R.string.LAST_MESSAGE_DETAILS), "File");
+        else if (message.getType().equals(context.getString(R.string.URL)))
+            lastMsgObj.put(context.getString(R.string.LAST_MESSAGE_DETAILS), "Link");
         else
             lastMsgObj.put(context.getString(R.string.LAST_MESSAGE_DETAILS), message.getMessage());
 
