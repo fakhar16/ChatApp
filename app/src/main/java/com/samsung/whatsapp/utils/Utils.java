@@ -11,7 +11,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.OpenableColumns;
-import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
@@ -20,14 +19,19 @@ import android.webkit.MimeTypeMap;
 import com.samsung.whatsapp.R;
 import com.samsung.whatsapp.model.User;
 
-import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.sql.Timestamp;
+import java.text.CharacterIterator;
 import java.text.SimpleDateFormat;
+import java.text.StringCharacterIterator;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public class Utils {
     public static String MESSAGE_CHANNEL_ID = "MESSAGE";
@@ -94,24 +98,28 @@ public class Utils {
         return mimeTypeMap.getExtensionFromMimeType(r.getType(uri));
     }
 
-    public static String getFileSize(String url) {
-        final int[] size = {0};
-        new Thread(new Runnable() {
-            @Override
-            public synchronized void run() {
-                try {
-                    URL obj_url = new URL(url);
-                    URLConnection connection = (URLConnection) obj_url.openConnection();
-                    size[0] = connection.getContentLength();
-                    Log.wtf(TAG, "getFileSize: " + size[0]);
-                    connection.getInputStream().close();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        }).start();
+    public static String getFileSize(String url) throws ExecutionException, InterruptedException {
+        ExecutorService pool = Executors.newFixedThreadPool(1);
+        Future<Integer> size = pool.submit(() -> {
+            URL obj_url = new URL(url);
+            URLConnection connection = (URLConnection) obj_url.openConnection();
+            return connection.getContentLength();
+        });
 
-        return String.valueOf(size[0]);
+        return humanReadableByteCountSI(size.get().longValue());
+    }
+
+    @SuppressLint("DefaultLocale")
+    public static String humanReadableByteCountSI(long bytes) {
+        if (-1000 < bytes && bytes < 1000) {
+            return bytes + " B";
+        }
+        CharacterIterator ci = new StringCharacterIterator("kMGTPE");
+        while (bytes <= -999_950 || bytes >= 999_950) {
+            bytes /= 1000;
+            ci.next();
+        }
+        return String.format("%.1f %cB", bytes / 1000.0, ci.current());
     }
 
     public static boolean isSameDay(long date1) {

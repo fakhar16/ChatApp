@@ -16,6 +16,7 @@ import com.samsung.whatsapp.databinding.ItemMediaDocBinding;
 import com.samsung.whatsapp.model.Message;
 
 import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
 
 public class DocMessagesAdapter extends RecyclerView.Adapter<DocMessagesAdapter.DocMessagesViewHolder> {
     private final ArrayList<Message> messageList;
@@ -39,7 +40,11 @@ public class DocMessagesAdapter extends RecyclerView.Adapter<DocMessagesAdapter.
 
         holder.binding.fileName.setText(message.getFilename());
         holder.binding.fileLayout.setOnClickListener(view -> context.startActivity(PdfViewerActivity.Companion.launchPdfFromUrl(context, message.getMessage(), message.getFilename(), "", true)));
-        holder.binding.fileSize.setText(getFileSize(message.getMessage()));
+        try {
+            holder.binding.fileSize.setText(getFileSize(message.getMessage()));
+        } catch (ExecutionException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
