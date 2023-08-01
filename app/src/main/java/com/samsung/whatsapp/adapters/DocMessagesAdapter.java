@@ -1,7 +1,5 @@
 package com.samsung.whatsapp.adapters;
 
-import static com.samsung.whatsapp.utils.Utils.getFileSize;
-
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
@@ -16,7 +14,6 @@ import com.samsung.whatsapp.databinding.ItemMediaDocBinding;
 import com.samsung.whatsapp.model.Message;
 
 import java.util.ArrayList;
-import java.util.concurrent.ExecutionException;
 
 public class DocMessagesAdapter extends RecyclerView.Adapter<DocMessagesAdapter.DocMessagesViewHolder> {
     private final ArrayList<Message> messageList;
@@ -40,11 +37,7 @@ public class DocMessagesAdapter extends RecyclerView.Adapter<DocMessagesAdapter.
 
         holder.binding.fileName.setText(message.getFilename());
         holder.binding.fileLayout.setOnClickListener(view -> context.startActivity(PdfViewerActivity.Companion.launchPdfFromUrl(context, message.getMessage(), message.getFilename(), "", true)));
-        try {
-            holder.binding.fileSize.setText(getFileSize(message.getMessage()));
-        } catch (ExecutionException | InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        holder.binding.fileSize.setText(message.getFileSize());
     }
 
     @Override

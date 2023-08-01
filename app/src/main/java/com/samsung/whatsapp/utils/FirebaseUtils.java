@@ -332,7 +332,7 @@ public class FirebaseUtils {
         sendNotification("Sent a video", obj_message.getTo(), obj_message.getFrom(), TYPE_MESSAGE);
     }
 
-    public static void sendDoc(Context context, String messageSenderId, String messageReceiverId, Uri fileUri, String filename, String caption) {
+    public static void sendDoc(Context context, String messageSenderId, String messageReceiverId, Uri fileUri, String filename, String fileSize, String caption) {
         MessageListenerCallback callback = (MessageListenerCallback) context;
         String messageSenderRef = context.getString(R.string.MESSAGES) + "/" + messageSenderId + "/" + messageReceiverId;
         String messageReceiverRef = context.getString(R.string.MESSAGES) + "/" + messageReceiverId + "/" + messageSenderId;
@@ -359,9 +359,9 @@ public class FirebaseUtils {
 
                 Message obj_message;
                 if (caption.isEmpty())
-                    obj_message = new Message(messagePushId, myUrl, context.getString(R.string.PDF_FILES), messageSenderId, messageReceiverId, new Date().getTime(), -1, "", filename, true);
+                    obj_message = new Message(messagePushId, myUrl, context.getString(R.string.PDF_FILES), messageSenderId, messageReceiverId, new Date().getTime(), -1, "", filename, fileSize, true);
                 else
-                    obj_message = new Message(messagePushId, myUrl, caption, context.getString(R.string.PDF_FILES), messageSenderId, messageReceiverId, new Date().getTime(), -1, "", filename, true);
+                    obj_message = new Message(messagePushId, myUrl, caption, context.getString(R.string.PDF_FILES), messageSenderId, messageReceiverId, new Date().getTime(), -1, "", filename, fileSize, true);
 
                 Map<String, Object> messageBodyDetails = new HashMap<>();
                 messageBodyDetails.put(messageSenderRef + "/" + messagePushId, obj_message);
@@ -389,9 +389,9 @@ public class FirebaseUtils {
         MessageListenerCallback callback = (MessageListenerCallback) context;
         Message obj_message;
         if (caption.isEmpty())
-            obj_message = new Message(message.getMessageId(), message.getMessage(), message.getType(), currentUser.getUid(), receiver,new Date().getTime(), -1, "", true);
+            obj_message = new Message(message.getMessageId(), message.getMessage(), message.getType(), currentUser.getUid(), receiver,new Date().getTime(), -1, "", message.getFilename(), message.getFileSize(), true);
         else
-            obj_message = new Message(message.getMessageId(), message.getMessage(), caption, message.getType(), currentUser.getUid(), receiver,new Date().getTime(), -1, "", true);
+            obj_message = new Message(message.getMessageId(), message.getMessage(), caption, message.getType(), currentUser.getUid(), receiver,new Date().getTime(), -1, "", message.getFilename(), message.getFileSize(), true);
 
         String messageSenderRef = context.getString(R.string.MESSAGES) + "/" + obj_message.getFrom() + "/" + obj_message.getTo();
         String messageReceiverRef = context.getString(R.string.MESSAGES) + "/" + obj_message.getTo() + "/" + obj_message.getFrom();
