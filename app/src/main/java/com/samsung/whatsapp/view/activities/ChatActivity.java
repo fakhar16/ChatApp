@@ -5,6 +5,7 @@ import static com.samsung.whatsapp.ApplicationClass.presenceDatabaseReference;
 import static com.samsung.whatsapp.ApplicationClass.userDatabaseReference;
 import static com.samsung.whatsapp.utils.Utils.TYPE_VIDEO_CALL;
 import static com.samsung.whatsapp.utils.Utils.currentUser;
+import static com.samsung.whatsapp.utils.Utils.getFileSize;
 import static com.samsung.whatsapp.utils.Utils.getFilename;
 import static com.samsung.whatsapp.utils.Utils.getFileType;
 import static com.samsung.whatsapp.utils.Utils.hideKeyboard;
@@ -89,7 +90,7 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
                 if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
                     Intent data = result.getData();
                     Uri fileUri = Objects.requireNonNull(data).getData();
-                    prepareDocMessageForSending(fileUri, "", false);
+                    prepareDocMessageForSending(fileUri, "", false, getFilename(this, fileUri), getFileSize(fileUri));
                 }
             });
     private final ActivityResultLauncher<Intent> imagePickActivityResultLauncher = registerForActivityResult(
@@ -195,7 +196,7 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
         });
     }
 
-    private void prepareDocMessageForSending(Uri fileUri, String messageId, boolean isDocFromClipboard) {
+    private void prepareDocMessageForSending(Uri fileUri, String messageId, boolean isDocFromClipboard, String fileName, String fileSize) {
         binding.capturedImage.cardView.setVisibility(View.VISIBLE);
         binding.capturedImage.image.setImageResource(R.drawable.baseline_picture_as_pdf_24);
         binding.capturedImage.receiverName.setText(receiver.getName());
@@ -206,12 +207,11 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
             hideKeyboard(this);
             binding.capturedImage.cardView.setVisibility(View.GONE);
             showLoadingBar(ChatActivity.this, binding.progressbar.getRoot());
-            Message obj_message = new Message(messageId, fileUri.toString(), getString(R.string.PDF_FILES), currentUser.getUid(), receiver.getUid(),new Date().getTime(), -1, "", true);
-            if (isDocFromClipboard)
+            Message obj_message = new Message(messageId, fileUri.toString(), getString(R.string.PDF_FILES), currentUser.getUid(), receiver.getUid(),new Date().getTime(), -1, "", fileName, fileSize, true);
+            if (isDocFromClipboard) {
                 FirebaseUtils.forwardDoc(ChatActivity.this, obj_message, receiver.getUid(), caption);
-            else {
-                String filename = getFilename(ChatActivity.this, fileUri);
-                FirebaseUtils.sendDoc(ChatActivity.this, currentUser.getUid(), messageReceiverId, fileUri, filename, caption);
+            } else {
+                FirebaseUtils.sendDoc(ChatActivity.this, currentUser.getUid(), messageReceiverId, fileUri, fileName, fileSize, caption);
             }
         });
     }
@@ -456,6 +456,8 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
                 if (primaryClipData.getItemCount() > 1) {
                     ClipData.Item message_id_item = primaryClipData.getItemAt(1);
                     ClipData.Item message_type_item = primaryClipData.getItemAt(2);
+                    ClipData.Item file_name_item = primaryClipData.getItemAt(3);
+                    ClipData.Item file_size_item = primaryClipData.getItemAt(4);
                     Uri uri = item.getUri();
 
                     binding.messageInputText.setText("");
@@ -466,7 +468,7 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
                     } else if (message_type_item.getText().toString().equals(context.getString(R.string.VIDEO))) {
                         prepareVideoMessageForSending(uri, message_id_item.getText().toString(), true);
                     } else if (message_type_item.getText().toString().equals(context.getString(R.string.PDF_FILES))) {
-                        prepareDocMessageForSending(uri, message_id_item.getText().toString(), true);
+                        prepareDocMessageForSending(uri, message_id_item.getText().toString(), true, file_name_item.getText().toString(), file_size_item.getText().toString());
                     }
                 }
             }
