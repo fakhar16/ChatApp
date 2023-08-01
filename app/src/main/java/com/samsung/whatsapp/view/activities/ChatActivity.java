@@ -158,7 +158,7 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
             binding.capturedImage.cardView.setVisibility(View.GONE);
             showLoadingBar(ChatActivity.this, binding.progressbar.getRoot());
             if (isImageFromClipboard) {
-                Message obj_message = new Message(messageId, fileUri.toString(), getString(R.string.IMAGE), currentUser.getUid(), receiver.getUid(), new Date().getTime(), -1, "");
+                Message obj_message = new Message(messageId, fileUri.toString(), getString(R.string.IMAGE), currentUser.getUid(), receiver.getUid(), new Date().getTime(), -1, "", true);
                 FirebaseUtils.forwardImage(ChatActivity.this, obj_message, receiver.getUid(), caption);
             } else {
                 FirebaseUtils.sendImage(ChatActivity.this, currentUser.getUid(), messageReceiverId, fileUri, caption);
@@ -187,7 +187,7 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
             binding.capturedVideo.cardView.setVisibility(View.GONE);
             showLoadingBar(ChatActivity.this, binding.progressbar.getRoot());
             if (isVideoFromClipboard) {
-                Message obj_message = new Message(messageId, fileUri.toString(), getString(R.string.VIDEO), currentUser.getUid(), receiver.getUid(),new Date().getTime(), -1, "");
+                Message obj_message = new Message(messageId, fileUri.toString(), getString(R.string.VIDEO), currentUser.getUid(), receiver.getUid(),new Date().getTime(), -1, "", true);
                 FirebaseUtils.forwardVideo(ChatActivity.this, obj_message, receiver.getUid(), caption);
             } else {
                 FirebaseUtils.sendVideo(this, currentUser.getUid(), messageReceiverId, fileUri, caption);
@@ -206,7 +206,7 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
             hideKeyboard(this);
             binding.capturedImage.cardView.setVisibility(View.GONE);
             showLoadingBar(ChatActivity.this, binding.progressbar.getRoot());
-            Message obj_message = new Message(messageId, fileUri.toString(), getString(R.string.PDF_FILES), currentUser.getUid(), receiver.getUid(),new Date().getTime(), -1, "");
+            Message obj_message = new Message(messageId, fileUri.toString(), getString(R.string.PDF_FILES), currentUser.getUid(), receiver.getUid(),new Date().getTime(), -1, "", true);
             if (isDocFromClipboard)
                 FirebaseUtils.forwardDoc(ChatActivity.this, obj_message, receiver.getUid(), caption);
             else {

@@ -54,7 +54,7 @@ public class FirebaseUtils {
                             .push();
 
             String messagePushId = userMessageKeyRef.getKey();
-            Message obj_message = new Message(messagePushId, message, context.getString(R.string.TEXT), messageSenderId, messageReceiverId, new Date().getTime(), -1, "");
+            Message obj_message = new Message(messagePushId, message, context.getString(R.string.TEXT), messageSenderId, messageReceiverId, new Date().getTime(), -1, "", true);
 
             Map<String, Object> messageBodyDetails = new HashMap<>();
             messageBodyDetails.put(messageSenderRef + "/" + messagePushId, obj_message);
@@ -80,7 +80,7 @@ public class FirebaseUtils {
                             .push();
 
             String messagePushId = userMessageKeyRef.getKey();
-            Message obj_message = new Message(messagePushId, message, context.getString(R.string.URL), messageSenderId, messageReceiverId, new Date().getTime(), -1, "");
+            Message obj_message = new Message(messagePushId, message, context.getString(R.string.URL), messageSenderId, messageReceiverId, new Date().getTime(), -1, "", true);
 
             Map<String, Object> messageBodyDetails = new HashMap<>();
             messageBodyDetails.put(messageSenderRef + "/" + messagePushId, obj_message);
@@ -190,9 +190,9 @@ public class FirebaseUtils {
                 String myUrl = downloadUrl.toString();
                 Message obj_message;
                 if (caption.isEmpty()) {
-                    obj_message = new Message(messagePushId, myUrl, context.getString(R.string.IMAGE), messageSenderId, messageReceiverId, new Date().getTime(), -1, "");
+                    obj_message = new Message(messagePushId, myUrl, context.getString(R.string.IMAGE), messageSenderId, messageReceiverId, new Date().getTime(), -1, "", true);
                 } else {
-                    obj_message = new Message(messagePushId, myUrl, caption, context.getString(R.string.IMAGE), messageSenderId, messageReceiverId, new Date().getTime(), -1, "");
+                    obj_message = new Message(messagePushId, myUrl, caption, context.getString(R.string.IMAGE), messageSenderId, messageReceiverId, new Date().getTime(), -1, "", true);
                 }
 
                 Map<String, Object> messageBodyDetails = new HashMap<>();
@@ -221,9 +221,9 @@ public class FirebaseUtils {
         MessageListenerCallback callback = (MessageListenerCallback) context;
         Message obj_message;
         if (caption.isEmpty())
-            obj_message = new Message(message.getMessageId(), message.getMessage(), message.getType(), currentUser.getUid(), receiver,new Date().getTime(), -1, "");
+            obj_message = new Message(message.getMessageId(), message.getMessage(), message.getType(), currentUser.getUid(), receiver,new Date().getTime(), -1, "", true);
         else
-            obj_message = new Message(message.getMessageId(), message.getMessage(), caption, message.getType(), currentUser.getUid(), receiver,new Date().getTime(), -1, "");
+            obj_message = new Message(message.getMessageId(), message.getMessage(), caption, message.getType(), currentUser.getUid(), receiver,new Date().getTime(), -1, "", true);
         String messageSenderRef = context.getString(R.string.MESSAGES) + "/" + obj_message.getFrom() + "/" + obj_message.getTo();
         String messageReceiverRef = context.getString(R.string.MESSAGES) + "/" + obj_message.getTo() + "/" + obj_message.getFrom();
 
@@ -274,9 +274,9 @@ public class FirebaseUtils {
                     String downloadUri = uriTask.getResult().toString();
                     Message obj_message;
                     if (caption.isEmpty())
-                        obj_message = new Message(messagePushId, downloadUri, context.getString(R.string.VIDEO), messageSenderId, messageReceiverId, new Date().getTime(), -1, "");
+                        obj_message = new Message(messagePushId, downloadUri, context.getString(R.string.VIDEO), messageSenderId, messageReceiverId, new Date().getTime(), -1, "", true);
                     else
-                        obj_message = new Message(messagePushId, downloadUri, caption, context.getString(R.string.VIDEO), messageSenderId, messageReceiverId, new Date().getTime(), -1, "");
+                        obj_message = new Message(messagePushId, downloadUri, caption, context.getString(R.string.VIDEO), messageSenderId, messageReceiverId, new Date().getTime(), -1, "", true);
                     Map<String, Object> messageBodyDetails = new HashMap<>();
                     messageBodyDetails.put(messageSenderRef + "/" + messagePushId, obj_message);
                     messageBodyDetails.put(messageReceiverRef + "/" + messagePushId, obj_message);
@@ -302,9 +302,9 @@ public class FirebaseUtils {
         MessageListenerCallback callback = (MessageListenerCallback) context;
         Message obj_message;
         if (caption.isEmpty())
-            obj_message = new Message(message.getMessageId(), message.getMessage(), message.getType(), currentUser.getUid(), receiver,new Date().getTime(), -1, "");
+            obj_message = new Message(message.getMessageId(), message.getMessage(), message.getType(), currentUser.getUid(), receiver,new Date().getTime(), -1, "", true);
         else
-            obj_message = new Message(message.getMessageId(), message.getMessage(), caption, message.getType(), currentUser.getUid(), receiver,new Date().getTime(), -1, "");
+            obj_message = new Message(message.getMessageId(), message.getMessage(), caption, message.getType(), currentUser.getUid(), receiver,new Date().getTime(), -1, "", true);
         String messageSenderRef = context.getString(R.string.MESSAGES) + "/" + obj_message.getFrom() + "/" + obj_message.getTo();
         String messageReceiverRef = context.getString(R.string.MESSAGES) + "/" + obj_message.getTo() + "/" + obj_message.getFrom();
 
@@ -359,9 +359,9 @@ public class FirebaseUtils {
 
                 Message obj_message;
                 if (caption.isEmpty())
-                    obj_message = new Message(messagePushId, myUrl, context.getString(R.string.PDF_FILES), messageSenderId, messageReceiverId, new Date().getTime(), -1, "", filename);
+                    obj_message = new Message(messagePushId, myUrl, context.getString(R.string.PDF_FILES), messageSenderId, messageReceiverId, new Date().getTime(), -1, "", filename, true);
                 else
-                    obj_message = new Message(messagePushId, myUrl, caption, context.getString(R.string.PDF_FILES), messageSenderId, messageReceiverId, new Date().getTime(), -1, "", filename);
+                    obj_message = new Message(messagePushId, myUrl, caption, context.getString(R.string.PDF_FILES), messageSenderId, messageReceiverId, new Date().getTime(), -1, "", filename, true);
 
                 Map<String, Object> messageBodyDetails = new HashMap<>();
                 messageBodyDetails.put(messageSenderRef + "/" + messagePushId, obj_message);
@@ -389,9 +389,9 @@ public class FirebaseUtils {
         MessageListenerCallback callback = (MessageListenerCallback) context;
         Message obj_message;
         if (caption.isEmpty())
-            obj_message = new Message(message.getMessageId(), message.getMessage(), message.getType(), currentUser.getUid(), receiver,new Date().getTime(), -1, "");
+            obj_message = new Message(message.getMessageId(), message.getMessage(), message.getType(), currentUser.getUid(), receiver,new Date().getTime(), -1, "", true);
         else
-            obj_message = new Message(message.getMessageId(), message.getMessage(), caption, message.getType(), currentUser.getUid(), receiver,new Date().getTime(), -1, "");
+            obj_message = new Message(message.getMessageId(), message.getMessage(), caption, message.getType(), currentUser.getUid(), receiver,new Date().getTime(), -1, "", true);
 
         String messageSenderRef = context.getString(R.string.MESSAGES) + "/" + obj_message.getFrom() + "/" + obj_message.getTo();
         String messageReceiverRef = context.getString(R.string.MESSAGES) + "/" + obj_message.getTo() + "/" + obj_message.getFrom();
@@ -596,5 +596,34 @@ public class FirebaseUtils {
                         }
                     });
         }
+    }
+
+    public static void updateMessageUnreadStatus(String receiverId) {
+        messageDatabaseReference
+                .child(currentUser.getUid())
+                .child(receiverId)
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if (snapshot.exists()) {
+                            for (DataSnapshot child : snapshot.getChildren()) {
+                                Message msg = child.getValue(Message.class);
+                                Map<String, Object> map = new HashMap<>();
+                                map.put("unread", false);
+                                assert msg != null;
+                                messageDatabaseReference
+                                        .child(currentUser.getUid())
+                                        .child(receiverId)
+                                        .child(msg.getMessageId())
+                                        .updateChildren(map);
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
     }
 }

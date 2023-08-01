@@ -6,6 +6,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
@@ -17,6 +18,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import com.samsung.whatsapp.ApplicationClass;
+import com.samsung.whatsapp.model.Message;
 import com.samsung.whatsapp.model.User;
 import com.samsung.whatsapp.utils.Utils;
 import com.samsung.whatsapp.view.activities.ChatActivity;
@@ -79,6 +81,38 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
             chatIntent.putExtra(ApplicationClass.context.getString(R.string.VISIT_USER_ID), user.getUid());
             context.startActivity(chatIntent);
         });
+
+        updateUnreadMessageListForUser(user, holder);
+    }
+
+    private void updateUnreadMessageListForUser(User user, UserViewHolder holder) {
+        final int[] unread_message_count = {0};
+        messageDatabaseReference
+                .child(Utils.currentUser.getUid())
+                .child(user.getUid())
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if (snapshot.exists()) {
+                            for (DataSnapshot child: snapshot.getChildren()) {
+                                Message message = child.getValue(Message.class);
+                                assert message != null;
+                                if (message.isUnread()) {
+                                    unread_message_count[0]++;
+                                }
+                            }
+                            if (unread_message_count[0] != 0) {
+                                holder.binding.unreadMessageCount.setVisibility(View.VISIBLE);
+                                holder.binding.unreadMessageCount.setText(String.valueOf(unread_message_count[0]));
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
     }
 
     @SuppressLint("NotifyDataSetChanged")

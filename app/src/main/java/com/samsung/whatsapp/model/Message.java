@@ -4,12 +4,13 @@ public class Message {
     private String message, type, from, to, messageId, starred, filename, caption;
     private long time;
     private int feeling;
+    private boolean isUnread;
 
     public Message() {
 
     }
 
-    public Message(String messageId, String message, String type, String from, String to, long time, int feeling, String starred) {
+    public Message(String messageId, String message, String type, String from, String to, long time, int feeling, String starred, boolean isUnread) {
         this.from = from;
         this.message = message;
         this.type = type;
@@ -18,9 +19,10 @@ public class Message {
         this.time = time;
         this.feeling = feeling;
         this.starred = starred;
+        this.isUnread = isUnread;
     }
 
-    public Message(String messageId, String message, String type, String from, String to, long time, int feeling, String starred, String filename) {
+    public Message(String messageId, String message, String type, String from, String to, long time, int feeling, String starred, String filename, boolean isUnread) {
         this.from = from;
         this.message = message;
         this.type = type;
@@ -30,9 +32,10 @@ public class Message {
         this.feeling = feeling;
         this.starred = starred;
         this.filename = filename;
+        this.isUnread = isUnread;
     }
 
-    public Message(String messageId, String message, String caption, String type, String from, String to, long time, int feeling, String starred) {
+    public Message(String messageId, String message, String caption, String type, String from, String to, long time, int feeling, String starred, boolean isUnread) {
         this.from = from;
         this.message = message;
         this.type = type;
@@ -42,9 +45,10 @@ public class Message {
         this.feeling = feeling;
         this.starred = starred;
         this.caption = caption;
+        this.isUnread = isUnread;
     }
 
-    public Message(String messageId, String message, String caption, String type, String from, String to, long time, int feeling, String starred, String filename) {
+    public Message(String messageId, String message, String caption, String type, String from, String to, long time, int feeling, String starred, String filename, boolean isUnread) {
         this.from = from;
         this.message = message;
         this.type = type;
@@ -55,6 +59,15 @@ public class Message {
         this.starred = starred;
         this.filename = filename;
         this.caption = caption;
+        this.isUnread = isUnread;
+    }
+
+    public boolean isUnread() {
+        return isUnread;
+    }
+
+    public void setUnread(boolean unread) {
+        isUnread = unread;
     }
 
     public String getCaption() {

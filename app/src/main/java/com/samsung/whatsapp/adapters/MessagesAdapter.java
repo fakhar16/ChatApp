@@ -1,5 +1,6 @@
 package com.samsung.whatsapp.adapters;
 
+import static com.samsung.whatsapp.utils.FirebaseUtils.updateMessageUnreadStatus;
 import static com.samsung.whatsapp.utils.Utils.ITEM_RECEIVE;
 import static com.samsung.whatsapp.utils.Utils.ITEM_SENT;
 import static com.samsung.whatsapp.utils.Utils.currentUser;
@@ -44,6 +45,8 @@ public class MessagesAdapter extends RecyclerView.Adapter<MessagesAdapter.Messag
         this.senderId = senderId;
         this.receiverId = receiverId;
         this.userMessageList = userMessageList;
+
+        updateMessageUnreadStatus(receiverId);
     }
 
     @NonNull
