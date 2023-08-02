@@ -50,7 +50,6 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
     @Override
     public void onBindViewHolder(@NonNull UserViewHolder holder, int position) {
         User user = userList.get(position);
-
         holder.bind(userList.get(position));
         Picasso.get().load(user.getImage()).placeholder(R.drawable.profile_image).into(holder.binding.usersProfileImage);
 
@@ -104,6 +103,8 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
                             if (unread_message_count[0] != 0) {
                                 holder.binding.unreadMessageCount.setVisibility(View.VISIBLE);
                                 holder.binding.unreadMessageCount.setText(String.valueOf(unread_message_count[0]));
+                            } else {
+                                holder.binding.unreadMessageCount.setVisibility(View.GONE);
                             }
                         }
                     }

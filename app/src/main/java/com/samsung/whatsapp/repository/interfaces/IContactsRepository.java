@@ -8,4 +8,5 @@ import java.util.ArrayList;
 
 public interface IContactsRepository {
     MutableLiveData<ArrayList<User>> getContacts();
+    MutableLiveData<ArrayList<User>> getContactsWithUnreadChats();
 }

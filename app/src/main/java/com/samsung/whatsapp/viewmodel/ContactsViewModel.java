@@ -16,6 +16,10 @@ public class ContactsViewModel extends ViewModel {
         return users;
     }
 
+    public LiveData<ArrayList<User>> getContactsWithUnreadChats() {
+        return ContactsRepositoryImpl.getInstance().getContactsWithUnreadChats();
+    }
+
     public void init() {
         if (users != null)
             return;
