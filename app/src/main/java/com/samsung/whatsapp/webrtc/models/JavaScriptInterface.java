@@ -8,7 +8,6 @@ import android.webkit.JavascriptInterface;
 public class JavaScriptInterface {
     @JavascriptInterface
     public void onPeerConnected(){
-        Log.wtf(TAG, "onPeerConnected: called");
+        Log.i(TAG, "onPeerConnected: called");
     }
-
 }

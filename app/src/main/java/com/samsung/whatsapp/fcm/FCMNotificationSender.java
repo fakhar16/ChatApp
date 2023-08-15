@@ -43,7 +43,7 @@ public class FCMNotificationSender {
 
             JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, BASE_URL,
                     receiverJsonObject,
-                    response -> Log.wtf(TAG, "onResponse: FCM: " + response ),
+                    response -> Log.i(TAG, "onResponse: FCM: " + response ),
                     error -> {}) {
                 @Override
                 public Map<String, String> getHeaders() {
@@ -57,7 +57,7 @@ public class FCMNotificationSender {
 
             queue.add(jsonObjectRequest);
         } catch (JSONException e) {
-            Log.wtf(TAG, "SendNotification: exception");
+            Log.i(TAG, "SendNotification: exception");
             throw new RuntimeException(e);
         }
     }

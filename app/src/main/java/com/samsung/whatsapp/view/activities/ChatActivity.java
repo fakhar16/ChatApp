@@ -629,7 +629,7 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
 //
 //    @Override
 //    public void onRecordCancel() {
-//        Log.wtf(TAG, "onRecordCancel: called");
+//        Log.i(TAG, "onRecordCancel: called");
 //        binding.camera.setVisibility(View.VISIBLE);
 //        binding.attachMenu.setVisibility(View.VISIBLE);
 //        binding.messageInputText.setVisibility(View.VISIBLE);
@@ -638,7 +638,7 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
 //
 //    @Override
 //    public void onRecordEnd() {
-//        Log.wtf(TAG, "onRecordEnd: called");
+//        Log.i(TAG, "onRecordEnd: called");
 //        binding.camera.setVisibility(View.VISIBLE);
 //        binding.attachMenu.setVisibility(View.VISIBLE);
 //        binding.messageInputText.setVisibility(View.VISIBLE);
@@ -647,7 +647,7 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
 //
 //    @Override
 //    public void onRecordStart() {
-//        Log.wtf(TAG, "onRecordStart: called");
+//        Log.i(TAG, "onRecordStart: called");
 //        binding.camera.setVisibility(View.INVISIBLE);
 //        binding.attachMenu.setVisibility(View.INVISIBLE);
 //        binding.messageInputText.setVisibility(View.INVISIBLE);

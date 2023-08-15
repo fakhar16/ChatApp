@@ -78,7 +78,7 @@ public class MainActivity extends BaseActivity {
                         .child(Objects.requireNonNull(FirebaseAuth.getInstance().getUid()))
                         .updateChildren(map);
             } else {
-                Log.wtf(TAG, "acquireFcmRegistrationToken: task failed");
+                Log.i(TAG, "acquireFcmRegistrationToken: task failed");
             }
         });
     }

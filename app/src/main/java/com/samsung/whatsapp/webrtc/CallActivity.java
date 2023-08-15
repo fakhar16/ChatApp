@@ -214,7 +214,7 @@ public class CallActivity extends BaseActivity {
     }
 
     private void onCallRequest(String caller) {
-        Log.wtf(TAG, "onCallRequest: ");
+        Log.i(TAG, "onCallRequest: ");
         if (caller == null)
             return;
 

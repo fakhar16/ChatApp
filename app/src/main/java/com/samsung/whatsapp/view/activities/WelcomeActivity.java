@@ -67,9 +67,9 @@ public class WelcomeActivity extends BaseActivity {
         if (requestCode == 1) {
             for (int i = 0; i < grantResults.length; i++ ) {
                 if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
-                    Log.wtf(TAG, permissions[i] + " : Granted");
+                    Log.i(TAG, permissions[i] + " : Granted");
                 } else {
-                    Log.wtf(TAG, permissions[i] + " : Denied");
+                    Log.i(TAG, permissions[i] + " : Denied");
                 }
             }
         }
