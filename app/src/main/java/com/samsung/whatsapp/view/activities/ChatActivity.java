@@ -65,6 +65,7 @@ import com.samsung.whatsapp.model.User;
 import com.samsung.whatsapp.utils.FirebaseUtils;
 import com.samsung.whatsapp.utils.Utils;
 import com.samsung.whatsapp.utils.WhatsappLikeProfilePicPreview;
+import com.samsung.whatsapp.utils.bottomsheethandler.ShareContactBottomSheetHandler;
 import com.samsung.whatsapp.viewmodel.MessageViewModel;
 import com.samsung.whatsapp.webrtc.CallActivity;
 import com.squareup.picasso.Picasso;
@@ -508,12 +509,14 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
         LinearLayout camera = bottomSheetDialog.findViewById(R.id.camera_btn);
         LinearLayout attachment = bottomSheetDialog.findViewById(R.id.photo_video_attachment_btn);
         LinearLayout doc = bottomSheetDialog.findViewById(R.id.document_btn);
+        LinearLayout contact = bottomSheetDialog.findViewById(R.id.contact_btn);
 
         Button cancel = bottomSheetDialog.findViewById(R.id.cancel);
         
         assert camera != null;
         assert attachment != null;
         assert doc != null;
+        assert contact != null;
         assert cancel != null;
 
         camera.setOnClickListener(view -> {
@@ -528,7 +531,15 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
             attachDocButtonClicked();
             bottomSheetDialog.dismiss();
         });
+        contact.setOnClickListener(view -> {
+            contactButtonClicked();
+            bottomSheetDialog.dismiss();
+        });
         cancel.setOnClickListener(view -> bottomSheetDialog.dismiss());
+    }
+
+    private void contactButtonClicked() {
+        ShareContactBottomSheetHandler.start(this);
     }
 
     private void attachDocButtonClicked() {
