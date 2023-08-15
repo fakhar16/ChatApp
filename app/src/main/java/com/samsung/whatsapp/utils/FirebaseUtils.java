@@ -1,6 +1,5 @@
 package com.samsung.whatsapp.utils;
 
-import static com.samsung.whatsapp.ApplicationClass.context;
 import static com.samsung.whatsapp.ApplicationClass.docsStorageReference;
 import static com.samsung.whatsapp.ApplicationClass.docsUrlDatabaseReference;
 import static com.samsung.whatsapp.ApplicationClass.imageStorageReference;
@@ -44,8 +43,8 @@ import java.util.Objects;
 public class FirebaseUtils {
     public static void sendMessage(String message, String messageSenderId, String messageReceiverId) {
         if (!TextUtils.isEmpty(message)) {
-            String messageSenderRef = context.getString(R.string.MESSAGES) + "/" + messageSenderId + "/" + messageReceiverId;
-            String messageReceiverRef = context.getString(R.string.MESSAGES) + "/" + messageReceiverId + "/" + messageSenderId;
+            String messageSenderRef = ApplicationClass.application.getApplicationContext().getString(R.string.MESSAGES) + "/" + messageSenderId + "/" + messageReceiverId;
+            String messageReceiverRef = ApplicationClass.application.getApplicationContext().getString(R.string.MESSAGES) + "/" + messageReceiverId + "/" + messageSenderId;
 
             DatabaseReference userMessageKeyRef =
                     messageDatabaseReference
@@ -54,7 +53,7 @@ public class FirebaseUtils {
                             .push();
 
             String messagePushId = userMessageKeyRef.getKey();
-            Message obj_message = new Message(messagePushId, message, context.getString(R.string.TEXT), messageSenderId, messageReceiverId, new Date().getTime(), -1, "", true);
+            Message obj_message = new Message(messagePushId, message, ApplicationClass.application.getApplicationContext().getString(R.string.TEXT), messageSenderId, messageReceiverId, new Date().getTime(), -1, "", true);
 
             Map<String, Object> messageBodyDetails = new HashMap<>();
             messageBodyDetails.put(messageSenderRef + "/" + messagePushId, obj_message);
@@ -70,8 +69,8 @@ public class FirebaseUtils {
 
     public static void sendURLMessage(String message, String messageSenderId, String messageReceiverId) {
         if (!TextUtils.isEmpty(message)) {
-            String messageSenderRef = context.getString(R.string.MESSAGES) + "/" + messageSenderId + "/" + messageReceiverId;
-            String messageReceiverRef = context.getString(R.string.MESSAGES) + "/" + messageReceiverId + "/" + messageSenderId;
+            String messageSenderRef = ApplicationClass.application.getApplicationContext().getString(R.string.MESSAGES) + "/" + messageSenderId + "/" + messageReceiverId;
+            String messageReceiverRef = ApplicationClass.application.getApplicationContext().getString(R.string.MESSAGES) + "/" + messageReceiverId + "/" + messageSenderId;
 
             DatabaseReference userMessageKeyRef =
                     messageDatabaseReference
@@ -80,7 +79,7 @@ public class FirebaseUtils {
                             .push();
 
             String messagePushId = userMessageKeyRef.getKey();
-            Message obj_message = new Message(messagePushId, message, context.getString(R.string.URL), messageSenderId, messageReceiverId, new Date().getTime(), -1, "", true);
+            Message obj_message = new Message(messagePushId, message, ApplicationClass.application.getApplicationContext().getString(R.string.URL), messageSenderId, messageReceiverId, new Date().getTime(), -1, "", true);
 
             Map<String, Object> messageBodyDetails = new HashMap<>();
             messageBodyDetails.put(messageSenderRef + "/" + messagePushId, obj_message);
@@ -112,7 +111,7 @@ public class FirebaseUtils {
                                                 assert sender != null;
                                                 assert receiver != null;
                                                 Notification notification = new Notification(sender.getName(), message, type, sender.getImage(), receiver.getToken(), sender.getUid(), receiver.getUid());
-                                                FCMNotificationSender.SendNotification(ApplicationClass.context, notification);
+                                                FCMNotificationSender.SendNotification(ApplicationClass.application.getApplicationContext(), notification);
                                             }
                                         }
 
@@ -134,33 +133,33 @@ public class FirebaseUtils {
 
     public static void updateLastMessage(Message message) {
         Map<String, Object> lastMsgObj = new HashMap<>();
-        lastMsgObj.put(context.getString(R.string.LAST_MESSAGE_TIME), message.getTime());
-        if (message.getType().equals(context.getString(R.string.IMAGE)))
-            lastMsgObj.put(context.getString(R.string.LAST_MESSAGE_DETAILS), "Photo");
-        else if (message.getType().equals(context.getString(R.string.VIDEO)))
-            lastMsgObj.put(context.getString(R.string.LAST_MESSAGE_DETAILS), "Video");
-        else if (message.getType().equals(context.getString(R.string.PDF_FILES)))
-            lastMsgObj.put(context.getString(R.string.LAST_MESSAGE_DETAILS), "File");
-        else if (message.getType().equals(context.getString(R.string.URL)))
-            lastMsgObj.put(context.getString(R.string.LAST_MESSAGE_DETAILS), "Link");
+        lastMsgObj.put(ApplicationClass.application.getApplicationContext().getString(R.string.LAST_MESSAGE_TIME), message.getTime());
+        if (message.getType().equals(ApplicationClass.application.getApplicationContext().getString(R.string.IMAGE)))
+            lastMsgObj.put(ApplicationClass.application.getApplicationContext().getString(R.string.LAST_MESSAGE_DETAILS), "Photo");
+        else if (message.getType().equals(ApplicationClass.application.getApplicationContext().getString(R.string.VIDEO)))
+            lastMsgObj.put(ApplicationClass.application.getApplicationContext().getString(R.string.LAST_MESSAGE_DETAILS), "Video");
+        else if (message.getType().equals(ApplicationClass.application.getApplicationContext().getString(R.string.PDF_FILES)))
+            lastMsgObj.put(ApplicationClass.application.getApplicationContext().getString(R.string.LAST_MESSAGE_DETAILS), "File");
+        else if (message.getType().equals(ApplicationClass.application.getApplicationContext().getString(R.string.URL)))
+            lastMsgObj.put(ApplicationClass.application.getApplicationContext().getString(R.string.LAST_MESSAGE_DETAILS), "Link");
         else
-            lastMsgObj.put(context.getString(R.string.LAST_MESSAGE_DETAILS), message.getMessage());
+            lastMsgObj.put(ApplicationClass.application.getApplicationContext().getString(R.string.LAST_MESSAGE_DETAILS), message.getMessage());
 
         messageDatabaseReference
                 .child(message.getFrom())
-                .child(context.getString(R.string.LAST_MESSAGE_WITH_) + message.getTo())
+                .child(ApplicationClass.application.getApplicationContext().getString(R.string.LAST_MESSAGE_WITH_) + message.getTo())
                 .updateChildren(lastMsgObj);
 
         messageDatabaseReference
                 .child(message.getTo())
-                .child(context.getString(R.string.LAST_MESSAGE_WITH_) + message.getFrom())
+                .child(ApplicationClass.application.getApplicationContext().getString(R.string.LAST_MESSAGE_WITH_) + message.getFrom())
                 .updateChildren(lastMsgObj);
     }
 
     public static void removeLastMessages(String sender, String receiver) {
         messageDatabaseReference
                 .child(sender)
-                .child(context.getString(R.string.LAST_MESSAGE_WITH_) + receiver)
+                .child(ApplicationClass.application.getApplicationContext().getString(R.string.LAST_MESSAGE_WITH_) + receiver)
                 .removeValue();
     }
 
@@ -422,7 +421,7 @@ public class FirebaseUtils {
 
     public static void starMessage(Message message) {
         String starredUser = message.getStarred() + ":" + Utils.currentUser.getUid();
-        message.setStarred(context.getString(R.string.STARRED));
+        message.setStarred(ApplicationClass.application.getApplicationContext().getString(R.string.STARRED));
 
         starMessagesDatabaseReference
                 .child(Utils.currentUser.getUid())
@@ -433,14 +432,14 @@ public class FirebaseUtils {
                 .child(message.getFrom())
                 .child(message.getTo())
                 .child(message.getMessageId())
-                .child(context.getString(R.string.STARRED))
+                .child(ApplicationClass.application.getApplicationContext().getString(R.string.STARRED))
                 .setValue(starredUser);
 
         messageDatabaseReference
                 .child(message.getTo())
                 .child(message.getFrom())
                 .child(message.getMessageId())
-                .child(context.getString(R.string.STARRED))
+                .child(ApplicationClass.application.getApplicationContext().getString(R.string.STARRED))
                 .setValue(starredUser);
     }
 
@@ -456,14 +455,14 @@ public class FirebaseUtils {
                 .child(message.getFrom())
                 .child(message.getTo())
                 .child(message.getMessageId())
-                .child(context.getString(R.string.STARRED))
+                .child(ApplicationClass.application.getApplicationContext().getString(R.string.STARRED))
                 .setValue(starredUser);
 
         messageDatabaseReference
                 .child(message.getTo())
                 .child(message.getFrom())
                 .child(message.getMessageId())
-                .child(context.getString(R.string.STARRED))
+                .child(ApplicationClass.application.getApplicationContext().getString(R.string.STARRED))
                 .setValue(starredUser);
     }
 
@@ -489,17 +488,17 @@ public class FirebaseUtils {
                 .child(message.getMessageId())
                 .removeValue();
 
-        if (message.getType().equals(context.getString(R.string.IMAGE))) {
+        if (message.getType().equals(ApplicationClass.application.getApplicationContext().getString(R.string.IMAGE))) {
             imageUrlDatabaseReference
                     .child(message.getMessageId())
                     .child(currentUser.getUid())
                     .removeValue();
-        } else if (message.getType().equals(context.getString(R.string.VIDEO))) {
+        } else if (message.getType().equals(ApplicationClass.application.getApplicationContext().getString(R.string.VIDEO))) {
             videoUrlDatabaseReference
                     .child(message.getMessageId())
                     .child(currentUser.getUid())
                     .removeValue();
-        } else if (message.getType().equals(context.getString(R.string.PDF_FILES))) {
+        } else if (message.getType().equals(ApplicationClass.application.getApplicationContext().getString(R.string.PDF_FILES))) {
             docsUrlDatabaseReference
                     .child(message.getMessageId())
                     .child(currentUser.getUid())
@@ -520,7 +519,7 @@ public class FirebaseUtils {
                 .child(message.getMessageId())
                 .removeValue();
 
-        if (message.getType().equals(context.getString(R.string.IMAGE))) {
+        if (message.getType().equals(ApplicationClass.application.getApplicationContext().getString(R.string.IMAGE))) {
             imageUrlDatabaseReference
                     .child(message.getMessageId())
                     .child(message.getFrom())
@@ -545,7 +544,7 @@ public class FirebaseUtils {
 
                         }
                     });
-        } else if (message.getType().equals(context.getString(R.string.VIDEO))) {
+        } else if (message.getType().equals(ApplicationClass.application.getApplicationContext().getString(R.string.VIDEO))) {
             videoUrlDatabaseReference
                     .child(message.getMessageId())
                     .child(message.getFrom())
@@ -570,7 +569,7 @@ public class FirebaseUtils {
 
                         }
                     });
-        } else if (message.getType().equals(context.getString(R.string.PDF_FILES))) {
+        } else if (message.getType().equals(ApplicationClass.application.getApplicationContext().getString(R.string.PDF_FILES))) {
             docsUrlDatabaseReference
                     .child(message.getMessageId())
                     .child(message.getFrom())

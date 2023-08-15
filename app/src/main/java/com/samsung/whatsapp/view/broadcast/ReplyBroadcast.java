@@ -23,8 +23,8 @@ public class ReplyBroadcast extends BroadcastReceiver {
 
     private void handleDirectReply(Context context, Intent intent) {
         Bundle remoteReply = RemoteInput.getResultsFromIntent(intent);
-        String messageReceiverId = intent.getExtras().getString(ApplicationClass.context.getString(R.string.VISIT_USER_ID));
-        String messageSenderId = intent.getExtras().getString(ApplicationClass.context.getString(R.string.CURRENT_USER_ID));
+        String messageReceiverId = intent.getExtras().getString(ApplicationClass.application.getApplicationContext().getString(R.string.VISIT_USER_ID));
+        String messageSenderId = intent.getExtras().getString(ApplicationClass.application.getApplicationContext().getString(R.string.CURRENT_USER_ID));
 
         if (remoteReply != null) {
             String message = remoteReply.getCharSequence(FCMNotificationService.KEY_TEXT_REPLY).toString();

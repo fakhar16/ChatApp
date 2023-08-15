@@ -1,7 +1,5 @@
 package com.samsung.whatsapp.utils;
 
-import static com.samsung.whatsapp.ApplicationClass.context;
-
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ClipData;
@@ -90,7 +88,7 @@ public class Utils {
     }
 
     public static String getFileType(Uri uri) {
-        ContentResolver r = context.getContentResolver();
+        ContentResolver r = ApplicationClass.application.getApplicationContext().getContentResolver();
         MimeTypeMap mimeTypeMap = MimeTypeMap.getSingleton();
         return mimeTypeMap.getExtensionFromMimeType(r.getType(uri));
     }
@@ -99,7 +97,7 @@ public class Utils {
     public static String getFileSize(Uri fileUri) {
         AssetFileDescriptor fileDescriptor;
         try {
-            fileDescriptor = ApplicationClass.context.getContentResolver().openAssetFileDescriptor(fileUri , "r");
+            fileDescriptor = ApplicationClass.application.getApplicationContext().getContentResolver().openAssetFileDescriptor(fileUri , "r");
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -152,32 +150,32 @@ public class Utils {
     }
 
     public static void copyMessage(String message) {
-        ClipboardManager clipboardManager = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
-        ClipData clipData = ClipData.newPlainText(context.getString(R.string.USER_MESSAGE_TEXT), message);
+        ClipboardManager clipboardManager = (ClipboardManager) ApplicationClass.application.getApplicationContext().getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clipData = ClipData.newPlainText(ApplicationClass.application.getApplicationContext().getString(R.string.USER_MESSAGE_TEXT), message);
         clipboardManager.setPrimaryClip(clipData);
     }
 
     public static void copyImage(Uri uri, String message_id) {
-        ClipboardManager clipboardManager = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
-        ClipData clipData = ClipData.newRawUri(context.getString(R.string.USER_MESSAGE_IMAGE), uri);
+        ClipboardManager clipboardManager = (ClipboardManager) ApplicationClass.application.getApplicationContext().getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clipData = ClipData.newRawUri(ApplicationClass.application.getApplicationContext().getString(R.string.USER_MESSAGE_IMAGE), uri);
         clipData.addItem(new ClipData.Item(message_id));
-        clipData.addItem(new ClipData.Item(context.getString(R.string.IMAGE)));
+        clipData.addItem(new ClipData.Item(ApplicationClass.application.getApplicationContext().getString(R.string.IMAGE)));
         clipboardManager.setPrimaryClip(clipData);
     }
 
     public static void copyVideo(Uri uri, String message_id) {
-        ClipboardManager clipboardManager = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
-        ClipData clipData = ClipData.newRawUri(context.getString(R.string.USER_MESSAGE_VIDEO), uri);
+        ClipboardManager clipboardManager = (ClipboardManager) ApplicationClass.application.getApplicationContext().getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clipData = ClipData.newRawUri(ApplicationClass.application.getApplicationContext().getString(R.string.USER_MESSAGE_VIDEO), uri);
         clipData.addItem(new ClipData.Item(message_id));
-        clipData.addItem(new ClipData.Item(context.getString(R.string.VIDEO)));
+        clipData.addItem(new ClipData.Item(ApplicationClass.application.getApplicationContext().getString(R.string.VIDEO)));
         clipboardManager.setPrimaryClip(clipData);
     }
 
     public static void copyDoc(Uri uri, String message_id, String fileName, String fileSize) {
-        ClipboardManager clipboardManager = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
-        ClipData clipData = ClipData.newRawUri(context.getString(R.string.USER_MESSAGE_FILE), uri);
+        ClipboardManager clipboardManager = (ClipboardManager) ApplicationClass.application.getApplicationContext().getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clipData = ClipData.newRawUri(ApplicationClass.application.getApplicationContext().getString(R.string.USER_MESSAGE_FILE), uri);
         clipData.addItem(new ClipData.Item(message_id));
-        clipData.addItem(new ClipData.Item(context.getString(R.string.PDF_FILES)));
+        clipData.addItem(new ClipData.Item(ApplicationClass.application.getApplicationContext().getString(R.string.PDF_FILES)));
         clipData.addItem(new ClipData.Item(fileName));
         clipData.addItem(new ClipData.Item(fileSize));
         clipboardManager.setPrimaryClip(clipData);

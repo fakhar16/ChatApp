@@ -1,6 +1,5 @@
 package com.samsung.whatsapp.repository;
 
-import static com.samsung.whatsapp.ApplicationClass.context;
 import static com.samsung.whatsapp.ApplicationClass.storiesDatabaseReference;
 
 import android.app.Activity;
@@ -16,6 +15,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.samsung.whatsapp.ApplicationClass;
 import com.samsung.whatsapp.R;
 import com.samsung.whatsapp.model.Status;
 import com.samsung.whatsapp.model.User;
@@ -53,7 +53,7 @@ public class StatusRepositoryImpl implements IStatusRepository {
     public void uploadStatus(Uri data, User user, View dialog, Activity activity) {
         Date date = new Date();
         FirebaseStorage storage = FirebaseStorage.getInstance();
-        StorageReference reference = storage.getReference().child(context.getString(R.string.STATUS)).child(date.getTime() + "");
+        StorageReference reference = storage.getReference().child(ApplicationClass.application.getApplicationContext().getString(R.string.STATUS)).child(date.getTime() + "");
 
         reference.putFile(data)
                 .addOnCompleteListener(task -> {
@@ -66,9 +66,9 @@ public class StatusRepositoryImpl implements IStatusRepository {
                                     userStatus.setLastUpdated(date.getTime());
 
                                     HashMap<String, Object> obj = new HashMap<>();
-                                    obj.put(context.getString(R.string.NAME), userStatus.getName());
-                                    obj.put(context.getString(R.string.PROFILE_IMAGE), userStatus.getProfileImage());
-                                    obj.put(context.getString(R.string.LAST_UPDATED), userStatus.getLastUpdated());
+                                    obj.put(ApplicationClass.application.getApplicationContext().getString(R.string.NAME), userStatus.getName());
+                                    obj.put(ApplicationClass.application.getApplicationContext().getString(R.string.PROFILE_IMAGE), userStatus.getProfileImage());
+                                    obj.put(ApplicationClass.application.getApplicationContext().getString(R.string.LAST_UPDATED), userStatus.getLastUpdated());
 
                                     String imageUrl = uri.toString();
                                     Status status = new Status(imageUrl, userStatus.getLastUpdated());
@@ -78,7 +78,7 @@ public class StatusRepositoryImpl implements IStatusRepository {
 
                                     storiesDatabaseReference
                                             .child(FirebaseAuth.getInstance().getUid())
-                                            .child(context.getString(R.string.STATUSES))
+                                            .child(ApplicationClass.application.getApplicationContext().getString(R.string.STATUSES))
                                             .push()
                                             .setValue(status);
 
@@ -97,13 +97,13 @@ public class StatusRepositoryImpl implements IStatusRepository {
                             mUserStatuses.clear();
                             for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                                 UserStatus status = new UserStatus();
-                                status.setName(dataSnapshot.child(context.getString(R.string.NAME)).getValue(String.class));
-                                status.setProfileImage(dataSnapshot.child(context.getString(R.string.PROFILE_IMAGE)).getValue(String.class));
-                                status.setLastUpdated(Objects.requireNonNull(dataSnapshot.child(context.getString(R.string.LAST_UPDATED)).getValue(Long.class)));
+                                status.setName(dataSnapshot.child(ApplicationClass.application.getApplicationContext().getString(R.string.NAME)).getValue(String.class));
+                                status.setProfileImage(dataSnapshot.child(ApplicationClass.application.getApplicationContext().getString(R.string.PROFILE_IMAGE)).getValue(String.class));
+                                status.setLastUpdated(Objects.requireNonNull(dataSnapshot.child(ApplicationClass.application.getApplicationContext().getString(R.string.LAST_UPDATED)).getValue(Long.class)));
 
                                 ArrayList<Status> statuses = new ArrayList<>();
 
-                                for (DataSnapshot statusSnapShot : dataSnapshot.child(context.getString(R.string.STATUSES)).getChildren()) {
+                                for (DataSnapshot statusSnapShot : dataSnapshot.child(ApplicationClass.application.getApplicationContext().getString(R.string.STATUSES)).getChildren()) {
                                     Status sampleStatus = statusSnapShot.getValue(Status.class);
                                     statuses.add(sampleStatus);
                                 }

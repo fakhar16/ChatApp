@@ -1,6 +1,5 @@
 package com.samsung.whatsapp.view.activities;
 
-import static com.samsung.whatsapp.ApplicationClass.context;
 import static com.samsung.whatsapp.ApplicationClass.presenceDatabaseReference;
 import static com.samsung.whatsapp.ApplicationClass.userDatabaseReference;
 import static com.samsung.whatsapp.utils.Utils.TYPE_VIDEO_CALL;
@@ -464,11 +463,11 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
                     binding.messageInputText.setText("");
                     hideKeyboard(this);
 
-                    if (message_type_item.getText().toString().equals(context.getString(R.string.IMAGE))) {
+                    if (message_type_item.getText().toString().equals(ApplicationClass.application.getApplicationContext().getString(R.string.IMAGE))) {
                         prepareImageMessageForSending(uri, message_id_item.getText().toString(), true);
-                    } else if (message_type_item.getText().toString().equals(context.getString(R.string.VIDEO))) {
+                    } else if (message_type_item.getText().toString().equals(ApplicationClass.application.getApplicationContext().getString(R.string.VIDEO))) {
                         prepareVideoMessageForSending(uri, message_id_item.getText().toString(), true);
-                    } else if (message_type_item.getText().toString().equals(context.getString(R.string.PDF_FILES))) {
+                    } else if (message_type_item.getText().toString().equals(ApplicationClass.application.getApplicationContext().getString(R.string.PDF_FILES))) {
                         prepareDocMessageForSending(uri, message_id_item.getText().toString(), true, file_name_item.getText().toString(), file_size_item.getText().toString());
                     }
                 }
@@ -488,10 +487,10 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
 
     private void createVideoCall() {
         Notification notification = new Notification(currentUser.getName(), "Incoming Video Call", TYPE_VIDEO_CALL, currentUser.getImage(), receiver.getToken(), currentUser.getUid(), receiver.getUid());
-        FCMNotificationSender.SendNotification(ApplicationClass.context, notification);
+        FCMNotificationSender.SendNotification(ApplicationClass.application.getApplicationContext(), notification);
 
         Intent intent = new Intent(this, CallActivity.class);
-        intent.putExtra(context.getString(R.string.CALLER), currentUser.getUid());
+        intent.putExtra(ApplicationClass.application.getApplicationContext().getString(R.string.CALLER), currentUser.getUid());
         intent.putExtra(getString(R.string.RECEIVER), receiver.getUid());
         intent.putExtra(getString(R.string.IS_CALL_MADE), true);
         startActivity(intent);

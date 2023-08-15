@@ -5,7 +5,6 @@ import static com.samsung.whatsapp.ApplicationClass.videoUserDatabaseReference;
 import static com.samsung.whatsapp.utils.Utils.ACTION_REJECT_CALL;
 import static com.samsung.whatsapp.utils.Utils.INCOMING_CALL_NOTIFICATION_ID;
 import static com.samsung.whatsapp.utils.Utils.TYPE_DISCONNECT_CALL_BY_USER;
-import static com.samsung.whatsapp.ApplicationClass.context;
 
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
@@ -26,6 +25,7 @@ import androidx.core.app.NotificationManagerCompat;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
+import com.samsung.whatsapp.ApplicationClass;
 import com.samsung.whatsapp.R;
 import com.samsung.whatsapp.databinding.ActivityCallBinding;
 import com.samsung.whatsapp.model.User;
@@ -77,7 +77,7 @@ public class CallActivity extends BaseActivity {
 
         registerReceiver(endCallReceiver, rejectFilter);
 
-        sender = getIntent().getStringExtra(context.getString(R.string.CALLER));
+        sender = getIntent().getStringExtra(ApplicationClass.application.getApplicationContext().getString(R.string.CALLER));
 
         binding.endCall.setOnClickListener(view -> disconnectCall());
         binding.endOngoingCall.setOnClickListener(view -> disconnectCall());
@@ -102,10 +102,10 @@ public class CallActivity extends BaseActivity {
 
         setupWebView();
 
-        boolean isCallMade = getIntent().getBooleanExtra(context.getString(R.string.IS_CALL_MADE), false);
+        boolean isCallMade = getIntent().getBooleanExtra(ApplicationClass.application.getApplicationContext().getString(R.string.IS_CALL_MADE), false);
 
         if (isCallMade) {
-            receiver = getIntent().getStringExtra(context.getString(R.string.RECEIVER));
+            receiver = getIntent().getStringExtra(ApplicationClass.application.getApplicationContext().getString(R.string.RECEIVER));
             sendCallRequest();
 
 
@@ -130,7 +130,7 @@ public class CallActivity extends BaseActivity {
     }
 
     private void sendCallRequest() {
-        videoUserDatabaseReference.child(receiver).child(context.getString(R.string.INCOMING)).setValue(sender);
+        videoUserDatabaseReference.child(receiver).child(ApplicationClass.application.getApplicationContext().getString(R.string.INCOMING)).setValue(sender);
         videoUserDatabaseReference.child(receiver).child(getString(R.string.IS_AVAILABLE))
                 .addValueEventListener(new ValueEventListener() {
                     @Override
@@ -198,7 +198,7 @@ public class CallActivity extends BaseActivity {
     private void initializePeer() {
         uniqueId = getUniqueId();
         callJavaScriptFunction("javascript:init('" + uniqueId + "')");
-        videoUserDatabaseReference.child(sender).child(context.getString(R.string.INCOMING))
+        videoUserDatabaseReference.child(sender).child(ApplicationClass.application.getApplicationContext().getString(R.string.INCOMING))
                 .addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -219,12 +219,12 @@ public class CallActivity extends BaseActivity {
             return;
 
 
-        boolean isCallAccepted = getIntent().getBooleanExtra(context.getString(R.string.CALL_ACCEPTED), false);
+        boolean isCallAccepted = getIntent().getBooleanExtra(ApplicationClass.application.getApplicationContext().getString(R.string.CALL_ACCEPTED), false);
 
         if (isCallAccepted) {
             binding.callLayout.setVisibility(View.GONE);
-            videoUserDatabaseReference.child(sender).child(context.getString(R.string.CONN_ID)).setValue(uniqueId);
-            videoUserDatabaseReference.child(sender).child(context.getString(R.string.IS_AVAILABLE)).setValue(true);
+            videoUserDatabaseReference.child(sender).child(ApplicationClass.application.getApplicationContext().getString(R.string.CONN_ID)).setValue(uniqueId);
+            videoUserDatabaseReference.child(sender).child(ApplicationClass.application.getApplicationContext().getString(R.string.IS_AVAILABLE)).setValue(true);
 
             binding.callControlLayout.setVisibility(View.VISIBLE);
         }

@@ -55,13 +55,13 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
 
         messageDatabaseReference
                         .child(Objects.requireNonNull(FirebaseAuth.getInstance().getUid()))
-                        .child(ApplicationClass.context.getString(R.string.LAST_MESSAGE_WITH_) + user.getUid())
+                        .child(ApplicationClass.application.getApplicationContext().getString(R.string.LAST_MESSAGE_WITH_) + user.getUid())
                         .addValueEventListener(new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot snapshot) {
                                 if (snapshot.exists()) {
-                                    String lastMsg = snapshot.child(ApplicationClass.context.getString(R.string.LAST_MESSAGE_DETAILS)).getValue(String.class);
-                                    long lastMsgTime = Objects.requireNonNull(snapshot.child(ApplicationClass.context.getString(R.string.LAST_MESSAGE_TIME)).getValue(Long.class));
+                                    String lastMsg = snapshot.child(ApplicationClass.application.getApplicationContext().getString(R.string.LAST_MESSAGE_DETAILS)).getValue(String.class);
+                                    long lastMsgTime = Objects.requireNonNull(snapshot.child(ApplicationClass.application.getApplicationContext().getString(R.string.LAST_MESSAGE_TIME)).getValue(Long.class));
                                     holder.binding.userProfileStatus.setText(lastMsg);
                                     holder.binding.userLastSeenTime.setText(Utils.getDateTimeString(lastMsgTime));
                                 } else {
@@ -77,7 +77,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
 
         holder.itemView.setOnClickListener(view -> {
             Intent chatIntent = new Intent(context, ChatActivity.class);
-            chatIntent.putExtra(ApplicationClass.context.getString(R.string.VISIT_USER_ID), user.getUid());
+            chatIntent.putExtra(ApplicationClass.application.getApplicationContext().getString(R.string.VISIT_USER_ID), user.getUid());
             context.startActivity(chatIntent);
         });
 

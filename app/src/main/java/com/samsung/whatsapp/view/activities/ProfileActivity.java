@@ -1,6 +1,5 @@
 package com.samsung.whatsapp.view.activities;
 
-import static com.samsung.whatsapp.ApplicationClass.context;
 import static com.samsung.whatsapp.ApplicationClass.userDatabaseReference;
 import static com.samsung.whatsapp.utils.Utils.TYPE_VIDEO_CALL;
 import static com.samsung.whatsapp.utils.Utils.currentUser;
@@ -67,10 +66,10 @@ public class ProfileActivity extends AppCompatActivity {
 
     private void createVideoCall() {
         Notification notification = new Notification(currentUser.getName(), "Incoming Video Call", TYPE_VIDEO_CALL, currentUser.getImage(), receiver.getToken(), currentUser.getUid(), receiver.getUid());
-        FCMNotificationSender.SendNotification(ApplicationClass.context, notification);
+        FCMNotificationSender.SendNotification(ApplicationClass.application.getApplicationContext(), notification);
 
         Intent intent = new Intent(this, CallActivity.class);
-        intent.putExtra(context.getString(R.string.CALLER), currentUser.getUid());
+        intent.putExtra(ApplicationClass.application.getApplicationContext().getString(R.string.CALLER), currentUser.getUid());
         intent.putExtra(getString(R.string.RECEIVER), receiver.getUid());
         intent.putExtra(getString(R.string.IS_CALL_MADE), true);
         startActivity(intent);

@@ -1,6 +1,5 @@
 package com.samsung.whatsapp.utils.bottomsheethandler;
 
-import static com.samsung.whatsapp.ApplicationClass.context;
 import static com.samsung.whatsapp.ApplicationClass.userDatabaseReference;
 
 import android.annotation.SuppressLint;
@@ -17,6 +16,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
+import com.samsung.whatsapp.ApplicationClass;
 import com.samsung.whatsapp.R;
 import com.samsung.whatsapp.adapters.PhoneContactAdapter;
 import com.samsung.whatsapp.model.PhoneContact;
@@ -28,13 +28,10 @@ import java.util.Objects;
 public class ShareContactBottomSheetHandler {
     @SuppressLint("StaticFieldLeak")
     private static BottomSheetDialog bottomSheetDialog;
-    @SuppressLint("StaticFieldLeak")
-    private static Context mContext;
 
     public static void start(Context context) {
         View contentView = View.inflate(context, R.layout.share_contact_bottom_sheet_layout, null);
 
-        mContext = context;
         bottomSheetDialog = new BottomSheetDialog(context);
         bottomSheetDialog.setContentView(contentView);
         bottomSheetDialog.show();
@@ -47,7 +44,7 @@ public class ShareContactBottomSheetHandler {
         ArrayList<User> users = new ArrayList<>();
         ArrayList<PhoneContact> phoneContacts = new ArrayList<>();
 
-        @SuppressLint("Recycle") Cursor phones = context.getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, null, null, null);
+        @SuppressLint("Recycle") Cursor phones = ApplicationClass.application.getApplicationContext().getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, null, null, null);
 
 
         userDatabaseReference.addValueEventListener(new ValueEventListener() {
@@ -55,7 +52,7 @@ public class ShareContactBottomSheetHandler {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists() && snapshot.getValue() != null) {
                     for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                        if (dataSnapshot.hasChild(context.getString(R.string.NAME))) {
+                        if (dataSnapshot.hasChild(ApplicationClass.application.getApplicationContext().getString(R.string.NAME))) {
                             User user = dataSnapshot.getValue(User.class);
                             if (!Objects.requireNonNull(user).getUid().equals(FirebaseAuth.getInstance().getUid())) {
                                 users.add(user);
@@ -99,8 +96,9 @@ public class ShareContactBottomSheetHandler {
     }
 
     private static void setupListView(ArrayList<PhoneContact> phoneContacts) {
-        PhoneContactAdapter adapter = new PhoneContactAdapter(context, phoneContacts);
+        PhoneContactAdapter adapter = new PhoneContactAdapter(ApplicationClass.application.getApplicationContext(), phoneContacts);
         ListView contactList = bottomSheetDialog.findViewById(R.id.contactList);
+        assert contactList != null;
         contactList.setAdapter(adapter);
     }
 }

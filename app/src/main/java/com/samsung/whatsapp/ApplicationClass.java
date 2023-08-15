@@ -1,8 +1,6 @@
 package com.samsung.whatsapp;
 
-import android.annotation.SuppressLint;
 import android.app.Application;
-import android.content.Context;
 
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -26,13 +24,12 @@ public class ApplicationClass extends Application {
     public static StorageReference videoStorageReference;
     public static StorageReference docsStorageReference;
 
-    @SuppressLint("StaticFieldLeak")
-    public static Context context;
+    public static Application application;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        context = this;
+        application = this;
 
 //        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
         FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
@@ -57,8 +54,8 @@ public class ApplicationClass extends Application {
 
     private void initializeStorageReferences() {
         userProfilesImagesReference = FirebaseStorage.getInstance().getReference().child(getString(R.string.PROFILE_IMAGES));
-        imageStorageReference = FirebaseStorage.getInstance().getReference().child(context.getString(R.string.IMAGE_FILES));
-        videoStorageReference = FirebaseStorage.getInstance().getReference().child(context.getString(R.string.VIDEO_FILES));
+        imageStorageReference = FirebaseStorage.getInstance().getReference().child(application.getApplicationContext().getString(R.string.IMAGE_FILES));
+        videoStorageReference = FirebaseStorage.getInstance().getReference().child(application.getApplicationContext().getString(R.string.VIDEO_FILES));
         docsStorageReference = FirebaseStorage.getInstance().getReference().child(getString(R.string.PDF_FILES));
     }
 

@@ -30,15 +30,15 @@ public class FCMNotificationSender {
 
         try {
             JSONObject data = new JSONObject();
-            data.put(ApplicationClass.context.getString(R.string.TITLE), notification.getTitle());
-            data.put(ApplicationClass.context.getString(R.string.MESSAGE), notification.getMessage());
-            data.put(ApplicationClass.context.getString(R.string.TYPE), notification.getType());
-            data.put(ApplicationClass.context.getString(R.string.ICON), notification.getIcon());
-            data.put(ApplicationClass.context.getString(R.string.SENDER_ID), notification.getSender_id());
-            data.put(ApplicationClass.context.getString(R.string.RECEIVER_ID), notification.getReceiver_id());
+            data.put(ApplicationClass.application.getApplicationContext().getString(R.string.TITLE), notification.getTitle());
+            data.put(ApplicationClass.application.getApplicationContext().getString(R.string.MESSAGE), notification.getMessage());
+            data.put(ApplicationClass.application.getApplicationContext().getString(R.string.TYPE), notification.getType());
+            data.put(ApplicationClass.application.getApplicationContext().getString(R.string.ICON), notification.getIcon());
+            data.put(ApplicationClass.application.getApplicationContext().getString(R.string.SENDER_ID), notification.getSender_id());
+            data.put(ApplicationClass.application.getApplicationContext().getString(R.string.RECEIVER_ID), notification.getReceiver_id());
 
             JSONObject receiverJsonObject = new JSONObject();
-            receiverJsonObject.put(ApplicationClass.context.getString(R.string.TO), notification.getTo_token());
+            receiverJsonObject.put(ApplicationClass.application.getApplicationContext().getString(R.string.TO), notification.getTo_token());
             receiverJsonObject.put(context.getString(R.string.DATA), data);
 
             JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, BASE_URL,
@@ -48,8 +48,8 @@ public class FCMNotificationSender {
                 @Override
                 public Map<String, String> getHeaders() {
                     Map<String, String> map = new HashMap<>();
-                    map.put(ApplicationClass.context.getString(R.string.CONTENT_TYPE), ApplicationClass.context.getString(R.string.APPLICATION_JSON));
-                    map.put(ApplicationClass.context.getString(R.string.AUTHORIZATION), ApplicationClass.context.getString(R.string.SERVER_KEY));
+                    map.put(ApplicationClass.application.getApplicationContext().getString(R.string.CONTENT_TYPE), ApplicationClass.application.getApplicationContext().getString(R.string.APPLICATION_JSON));
+                    map.put(ApplicationClass.application.getApplicationContext().getString(R.string.AUTHORIZATION), ApplicationClass.application.getApplicationContext().getString(R.string.SERVER_KEY));
 
                     return map;
                 }

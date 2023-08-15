@@ -18,8 +18,8 @@ import com.samsung.whatsapp.utils.FirebaseUtils;
 public class HungUpBroadcast extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        String receiverId = intent.getStringExtra(ApplicationClass.context.getString(R.string.RECEIVER_ID));
-        String senderId = intent.getStringExtra(ApplicationClass.context.getString(R.string.SENDER_ID));
+        String receiverId = intent.getStringExtra(ApplicationClass.application.getApplicationContext().getString(R.string.RECEIVER_ID));
+        String senderId = intent.getStringExtra(ApplicationClass.application.getApplicationContext().getString(R.string.SENDER_ID));
 
         videoUserDatabaseReference.child(receiverId).setValue(null);
 

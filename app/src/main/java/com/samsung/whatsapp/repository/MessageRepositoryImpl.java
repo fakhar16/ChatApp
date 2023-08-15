@@ -1,6 +1,5 @@
 package com.samsung.whatsapp.repository;
 
-import static com.samsung.whatsapp.ApplicationClass.context;
 import static com.samsung.whatsapp.ApplicationClass.messageDatabaseReference;
 import static com.samsung.whatsapp.ApplicationClass.starMessagesDatabaseReference;
 
@@ -10,6 +9,7 @@ import androidx.lifecycle.MutableLiveData;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
+import com.samsung.whatsapp.ApplicationClass;
 import com.samsung.whatsapp.R;
 import com.samsung.whatsapp.model.Message;
 import com.samsung.whatsapp.repository.interfaces.IMessageRepository;
@@ -179,7 +179,7 @@ public class MessageRepositoryImpl implements IMessageRepository {
                             for (DataSnapshot child : snapshot.getChildren()) {
                                 Message message = child.getValue(Message.class);
                                 assert message != null;
-                                if (message.getType().equals(context.getString(R.string.IMAGE)) || message.getType().equals(context.getString(R.string.VIDEO)))
+                                if (message.getType().equals(ApplicationClass.application.getApplicationContext().getString(R.string.IMAGE)) || message.getType().equals(ApplicationClass.application.getApplicationContext().getString(R.string.VIDEO)))
                                     mMediaMessagesWithReceiver.add(message);
                             }
                         }
@@ -205,7 +205,7 @@ public class MessageRepositoryImpl implements IMessageRepository {
                             for (DataSnapshot child : snapshot.getChildren()) {
                                 Message message = child.getValue(Message.class);
                                 assert message != null;
-                                if (message.getType().equals(context.getString(R.string.URL)))
+                                if (message.getType().equals(ApplicationClass.application.getApplicationContext().getString(R.string.URL)))
                                     mLinksMessagesWithReceiver.add(message);
                             }
                         }
@@ -231,7 +231,7 @@ public class MessageRepositoryImpl implements IMessageRepository {
                             for (DataSnapshot child : snapshot.getChildren()) {
                                 Message message = child.getValue(Message.class);
                                 assert message != null;
-                                if (message.getType().equals(context.getString(R.string.PDF_FILES)))
+                                if (message.getType().equals(ApplicationClass.application.getApplicationContext().getString(R.string.PDF_FILES)))
                                     mDocMessagesWithReceiver.add(message);
                             }
                         }

@@ -1,6 +1,5 @@
 package com.samsung.whatsapp.fcm;
 
-import static com.samsung.whatsapp.ApplicationClass.context;
 import static com.samsung.whatsapp.utils.Utils.ACTION_REJECT_CALL;
 import static com.samsung.whatsapp.utils.Utils.INCOMING_CALL_CHANNEL_ID;
 import static com.samsung.whatsapp.utils.Utils.INCOMING_CALL_NOTIFICATION_ID;
@@ -36,6 +35,7 @@ import androidx.core.app.RemoteInput;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+import com.samsung.whatsapp.ApplicationClass;
 import com.samsung.whatsapp.R;
 import com.samsung.whatsapp.view.activities.CallingActivity;
 import com.samsung.whatsapp.view.activities.ChatActivity;
@@ -56,7 +56,7 @@ public class FCMNotificationService extends FirebaseMessagingService {
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
         Map<String, String> data =  remoteMessage.getData();
 
-        String type = data.get(context.getString(R.string.TYPE));
+        String type = data.get(ApplicationClass.application.getApplicationContext().getString(R.string.TYPE));
 
         if (Objects.equals(type, TYPE_MESSAGE)) {
             try {
@@ -71,7 +71,7 @@ public class FCMNotificationService extends FirebaseMessagingService {
                 throw new RuntimeException(e);
             }
         } else if (Objects.equals(type, TYPE_DISCONNECT_CALL_BY_USER)) {
-            NotificationManagerCompat.from(context).cancel(INCOMING_CALL_NOTIFICATION_ID);
+            NotificationManagerCompat.from(ApplicationClass.application.getApplicationContext()).cancel(INCOMING_CALL_NOTIFICATION_ID);
             // Todo: Show missed call log here
         } else if (Objects.equals(type, TYPE_DISCONNECT_CALL_BY_OTHER_USER)) {
             getApplicationContext().sendBroadcast(new Intent(ACTION_REJECT_CALL));
@@ -92,16 +92,16 @@ public class FCMNotificationService extends FirebaseMessagingService {
             return;
         }
 
-        Bitmap bitmap = Picasso.get().load(data.get(context.getString(R.string.ICON))).get();
-        String senderId = data.get(context.getString(R.string.SENDER_ID));
-        String receiverId = data.get(context.getString(R.string.RECEIVER_ID));
-        String title = data.get(context.getString(R.string.TITLE));
-        String message = data.get(context.getString(R.string.MESSAGE));
+        Bitmap bitmap = Picasso.get().load(data.get(ApplicationClass.application.getApplicationContext().getString(R.string.ICON))).get();
+        String senderId = data.get(ApplicationClass.application.getApplicationContext().getString(R.string.SENDER_ID));
+        String receiverId = data.get(ApplicationClass.application.getApplicationContext().getString(R.string.RECEIVER_ID));
+        String title = data.get(ApplicationClass.application.getApplicationContext().getString(R.string.TITLE));
+        String message = data.get(ApplicationClass.application.getApplicationContext().getString(R.string.MESSAGE));
 
         Intent intent = new Intent(getApplicationContext(), ChatActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        intent.putExtra(context.getString(R.string.VISIT_USER_ID), senderId);
-        intent.putExtra(context.getString(R.string.CURRENT_USER_ID), receiverId);
+        intent.putExtra(ApplicationClass.application.getApplicationContext().getString(R.string.VISIT_USER_ID), senderId);
+        intent.putExtra(ApplicationClass.application.getApplicationContext().getString(R.string.CURRENT_USER_ID), receiverId);
         PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
         NotificationChannel channel = new NotificationChannel(MESSAGE_CHANNEL_ID, "Message Notification", NotificationManager.IMPORTANCE_HIGH);
@@ -109,10 +109,10 @@ public class FCMNotificationService extends FirebaseMessagingService {
 
         //Direct Reply Intent
         RemoteInput remoteInput = new RemoteInput.Builder(KEY_TEXT_REPLY).setLabel("Reply").build();
-        Intent replyIntent = new Intent(context, ReplyBroadcast.class);
-        replyIntent.putExtra(context.getString(R.string.VISIT_USER_ID), senderId);
-        replyIntent.putExtra(context.getString(R.string.CURRENT_USER_ID), receiverId);
-        PendingIntent replyPendingIntent = PendingIntent.getBroadcast(context, 0, replyIntent, PendingIntent.FLAG_ONE_SHOT|PendingIntent.FLAG_MUTABLE);
+        Intent replyIntent = new Intent(ApplicationClass.application.getApplicationContext(), ReplyBroadcast.class);
+        replyIntent.putExtra(ApplicationClass.application.getApplicationContext().getString(R.string.VISIT_USER_ID), senderId);
+        replyIntent.putExtra(ApplicationClass.application.getApplicationContext().getString(R.string.CURRENT_USER_ID), receiverId);
+        PendingIntent replyPendingIntent = PendingIntent.getBroadcast(ApplicationClass.application.getApplicationContext(), 0, replyIntent, PendingIntent.FLAG_ONE_SHOT|PendingIntent.FLAG_MUTABLE);
 
         NotificationCompat.Action action = new NotificationCompat.Action.Builder(R.drawable.app_logo, "Reply", replyPendingIntent).addRemoteInput(remoteInput).build();
 
@@ -154,32 +154,32 @@ public class FCMNotificationService extends FirebaseMessagingService {
                         .setSound(soundUri, audioAttr)
                         .build();
 
-        String title = data.get(context.getString(R.string.TITLE));
-        String icon = data.get(context.getString(R.string.ICON));
-        String receiverId = data.get(context.getString(R.string.RECEIVER_ID));
-        String senderId = data.get(context.getString(R.string.SENDER_ID));
+        String title = data.get(ApplicationClass.application.getApplicationContext().getString(R.string.TITLE));
+        String icon = data.get(ApplicationClass.application.getApplicationContext().getString(R.string.ICON));
+        String receiverId = data.get(ApplicationClass.application.getApplicationContext().getString(R.string.RECEIVER_ID));
+        String senderId = data.get(ApplicationClass.application.getApplicationContext().getString(R.string.SENDER_ID));
 
         Bitmap bitmap = Picasso.get().load(icon).get();
         Icon largeIcon = Icon.createWithBitmap(bitmap);
 
         //Accept call intents
         Intent answerIntent = new Intent(getApplicationContext(), CallActivity.class);
-        answerIntent.putExtra(context.getString(R.string.CALL_ACCEPTED), true);
-        answerIntent.putExtra(context.getString(R.string.CALLER), receiverId);
+        answerIntent.putExtra(ApplicationClass.application.getApplicationContext().getString(R.string.CALL_ACCEPTED), true);
+        answerIntent.putExtra(ApplicationClass.application.getApplicationContext().getString(R.string.CALLER), receiverId);
         PendingIntent answerPendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, answerIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
         //Reject call intents
         Intent rejectIntent = new Intent(getApplicationContext(), HungUpBroadcast.class);
-        rejectIntent.putExtra(context.getString(R.string.RECEIVER_ID), receiverId);
-        rejectIntent.putExtra(context.getString(R.string.SENDER_ID), senderId);
+        rejectIntent.putExtra(ApplicationClass.application.getApplicationContext().getString(R.string.RECEIVER_ID), receiverId);
+        rejectIntent.putExtra(ApplicationClass.application.getApplicationContext().getString(R.string.SENDER_ID), senderId);
         PendingIntent rejectPendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, rejectIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
         //Show incoming call full screen intents
         Intent showIncomingCallIntent = new Intent(getApplicationContext(), CallingActivity.class);
         showIncomingCallIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        showIncomingCallIntent.putExtra(context.getString(R.string.IMAGE), icon);
-        showIncomingCallIntent.putExtra(context.getString(R.string.NAME), title);
-        showIncomingCallIntent.putExtra(context.getString(R.string.FRIEND_USER_NAME), receiverId);
+        showIncomingCallIntent.putExtra(ApplicationClass.application.getApplicationContext().getString(R.string.IMAGE), icon);
+        showIncomingCallIntent.putExtra(ApplicationClass.application.getApplicationContext().getString(R.string.NAME), title);
+        showIncomingCallIntent.putExtra(ApplicationClass.application.getApplicationContext().getString(R.string.FRIEND_USER_NAME), receiverId);
         PendingIntent showIncomingCallPendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, showIncomingCallIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
         // Create a new call with the user as caller.
@@ -190,8 +190,8 @@ public class FCMNotificationService extends FirebaseMessagingService {
                 .build();
 
         // Create a call style notification for an incoming call.
-        Notification.Builder builder = new Notification.Builder(context, INCOMING_CALL_CHANNEL_ID)
-                .setSmallIcon(Icon.createWithResource(context, R.drawable.app_logo))
+        Notification.Builder builder = new Notification.Builder(ApplicationClass.application.getApplicationContext(), INCOMING_CALL_CHANNEL_ID)
+                .setSmallIcon(Icon.createWithResource(ApplicationClass.application.getApplicationContext(), R.drawable.app_logo))
                 .setContentTitle("Incoming call")
                 .setContentText("Whatsapp video call")
                 .setStyle(Notification.CallStyle.forIncomingCall(incoming_caller, rejectPendingIntent, answerPendingIntent))

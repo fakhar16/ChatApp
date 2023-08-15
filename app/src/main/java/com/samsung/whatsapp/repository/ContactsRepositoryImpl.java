@@ -1,6 +1,5 @@
 package com.samsung.whatsapp.repository;
 
-import static com.samsung.whatsapp.ApplicationClass.context;
 import static com.samsung.whatsapp.ApplicationClass.messageDatabaseReference;
 import static com.samsung.whatsapp.ApplicationClass.userDatabaseReference;
 
@@ -16,6 +15,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
+import com.samsung.whatsapp.ApplicationClass;
 import com.samsung.whatsapp.R;
 import com.samsung.whatsapp.model.Message;
 import com.samsung.whatsapp.model.User;
@@ -92,7 +92,7 @@ public class ContactsRepositoryImpl implements IContactsRepository {
                 if (snapshot.exists() && snapshot.getValue() != null) {
                     mUsers.clear();
                     for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                        if (dataSnapshot.hasChild(context.getString(R.string.NAME))) {
+                        if (dataSnapshot.hasChild(ApplicationClass.application.getApplicationContext().getString(R.string.NAME))) {
                             User user = dataSnapshot.getValue(User.class);
                             if (!Objects.requireNonNull(user).getUid().equals(FirebaseAuth.getInstance().getUid()) && contactList.contains(user.getPhone_number()))
                                 mUsers.add(user);
@@ -113,7 +113,7 @@ public class ContactsRepositoryImpl implements IContactsRepository {
 
     @SuppressLint("Range")
     private void loadContactListFromPhone() {
-        @SuppressLint("Recycle") Cursor phones = context.getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, null, null, null);
+        @SuppressLint("Recycle") Cursor phones = ApplicationClass.application.getApplicationContext().getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, null, null, null);
         while (phones.moveToNext()) {
             String phone = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER));
 
