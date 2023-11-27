@@ -6,33 +6,6 @@
     android:layout_height="match_parent"
     android:padding="5dp"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <LinearLayout
-        android:id="@+id/upperBar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:layout_marginHorizontal="10dp">
-        <TextView
-            android:id="@+id/cancel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:text="@string/CANCEL"
-            android:textColor="@color/color_blue"
-            />
-        <androidx.appcompat.widget.SearchView
-            android:id="@+id/search"
-            android:layout_marginStart="10dp"
-            android:layout_width="match_parent"
-            android:layout_height="35dp"
-            android:background="@drawable/background_edit_text"
-            app:queryHint="Search..."
-            app:iconifiedByDefault="false"
-            app:queryBackground="@android:color/transparent"
-            app:searchIcon="@drawable/search"
-            tools:ignore="HardcodedText" />
-    </LinearLayout>
 
     <TextView
         android:id="@+id/contacts_title"
@@ -41,8 +14,6 @@
         android:textSize="18sp"
         android:text="Contacts"
         android:layout_marginHorizontal="10dp"
-        android:layout_marginTop="30dp"
-        android:layout_below="@id/upperBar"
         android:textColor="@android:color/darker_gray"
         tools:ignore="HardcodedText" />
 

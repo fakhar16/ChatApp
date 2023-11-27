@@ -11,6 +11,7 @@ public class ApplicationClass extends Application {
 
     public static DatabaseReference userDatabaseReference;
     public static DatabaseReference messageDatabaseReference;
+    public static DatabaseReference contactsDatabaseReference;
     public static DatabaseReference storiesDatabaseReference;
     public static DatabaseReference presenceDatabaseReference;
     public static DatabaseReference videoUserDatabaseReference;
@@ -42,6 +43,7 @@ public class ApplicationClass extends Application {
     private void keepSyncingReferences() {
         userDatabaseReference.keepSynced(true);
         messageDatabaseReference.keepSynced(true);
+        contactsDatabaseReference.keepSynced(true);
         presenceDatabaseReference.keepSynced(true);
         storiesDatabaseReference.keepSynced(true);
         videoUserDatabaseReference.keepSynced(true);
@@ -62,6 +64,7 @@ public class ApplicationClass extends Application {
     private void initializeDatabaseReferences(FirebaseDatabase firebaseDatabase) {
         userDatabaseReference = firebaseDatabase.getReference(getString(R.string.USERS));
         messageDatabaseReference = firebaseDatabase.getReference(getString(R.string.MESSAGES));
+        contactsDatabaseReference = firebaseDatabase.getReference(getString(R.string.CONTACTS));
         presenceDatabaseReference = firebaseDatabase.getReference(getString(R.string.PRESENCE));
         storiesDatabaseReference = firebaseDatabase.getReference(getString(R.string.STORIES));
         videoUserDatabaseReference = firebaseDatabase.getReference(getString(R.string.VIDEO_USERS));

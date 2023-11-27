@@ -10,6 +10,8 @@ import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.OpenableColumns;
+import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
@@ -179,5 +181,10 @@ public class Utils {
         clipData.addItem(new ClipData.Item(fileName));
         clipData.addItem(new ClipData.Item(fileSize));
         clipboardManager.setPrimaryClip(clipData);
+    }
+
+    public static float dipToPixels(Context context, float dipValue){
+        DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,  dipValue, metrics);
     }
 }

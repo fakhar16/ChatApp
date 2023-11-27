@@ -28,24 +28,23 @@ import java.util.Objects;
 public class ShareContactBottomSheetHandler {
     @SuppressLint("StaticFieldLeak")
     private static BottomSheetDialog bottomSheetDialog;
+    private static ArrayList<PhoneContact> phoneContacts;
+    @SuppressLint("StaticFieldLeak")
+    private static PhoneContactAdapter adapter;
 
-    public static void start(Context context) {
+    private static ArrayList<User> users;
+    private static String receiver;
+
+    public static void start(Context context, String messageReceiverId) {
         View contentView = View.inflate(context, R.layout.share_contact_bottom_sheet_layout, null);
 
         bottomSheetDialog = new BottomSheetDialog(context);
         bottomSheetDialog.setContentView(contentView);
         bottomSheetDialog.show();
 
-        loadContactListFromPhone();
-    }
-
-    @SuppressLint("Range")
-    private static void loadContactListFromPhone() {
-        ArrayList<User> users = new ArrayList<>();
-        ArrayList<PhoneContact> phoneContacts = new ArrayList<>();
-
-        @SuppressLint("Recycle") Cursor phones = ApplicationClass.application.getApplicationContext().getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, null, null, null);
-
+        phoneContacts = new ArrayList<>();
+        users = new ArrayList<>();
+        receiver = messageReceiverId;
 
         userDatabaseReference.addValueEventListener(new ValueEventListener() {
             @Override
@@ -60,24 +59,7 @@ public class ShareContactBottomSheetHandler {
                         }
                     }
                 }
-
-                while (phones.moveToNext()) {
-                    String phone = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER));
-                    String name = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
-                    User user = getUserByPhone(users, phone);
-                    if (user != null) {
-                        PhoneContact phoneContact = new PhoneContact(phone);
-                        if (name != null)
-                            phoneContact.setName(name);
-                        if (user.getImage() != null)
-                            phoneContact.setImage(user.getImage());
-                        if (user.getStatus() != null)
-                            phoneContact.setStatus(user.getStatus());
-
-                        phoneContacts.add(phoneContact);
-                    }
-                }
-                setupListView(phoneContacts);
+                loadContactListFromPhone();
             }
 
             @Override
@@ -85,6 +67,40 @@ public class ShareContactBottomSheetHandler {
 
             }
         });
+    }
+
+    @SuppressLint("Range")
+    private static void loadContactListFromPhone() {
+
+        @SuppressLint("Recycle") Cursor phones = ApplicationClass.application.getApplicationContext().getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, null, null, null);
+
+        while (phones.moveToNext()) {
+            String phone = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER));
+            String name = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
+
+            User user = getUserByPhone(users, phone);
+            PhoneContact phoneContact = new PhoneContact(phone);
+
+            if (name != null)
+                phoneContact.setName(name);
+            if (user != null) {
+                if (user.getImage() != null)
+                    phoneContact.setImage(user.getImage());
+                if (user.getStatus() != null)
+                    phoneContact.setStatus(user.getStatus());
+            }
+            if (!isNumberExist(name))
+                phoneContacts.add(phoneContact);
+        }
+        setupListView();
+    }
+
+    private static boolean isNumberExist(String name) {
+        for (PhoneContact phoneContact : phoneContacts) {
+            if (phoneContact.getName().equals(name))
+                return true;
+        }
+        return false;
     }
 
     private static User getUserByPhone(ArrayList<User> users, String phone) {
@@ -95,10 +111,11 @@ public class ShareContactBottomSheetHandler {
         return null;
     }
 
-    private static void setupListView(ArrayList<PhoneContact> phoneContacts) {
-        PhoneContactAdapter adapter = new PhoneContactAdapter(ApplicationClass.application.getApplicationContext(), phoneContacts);
+    private static void setupListView() {
+        adapter = new PhoneContactAdapter(ApplicationClass.application.getApplicationContext(), ShareContactBottomSheetHandler.phoneContacts, receiver);
         ListView contactList = bottomSheetDialog.findViewById(R.id.contactList);
         assert contactList != null;
         contactList.setAdapter(adapter);
     }
+
 }

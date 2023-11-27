@@ -8,6 +8,7 @@ import static com.samsung.whatsapp.utils.Utils.getDateTimeString;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
@@ -23,15 +24,21 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
 import com.rajat.pdfviewer.PdfViewerActivity;
+import com.samsung.whatsapp.ApplicationClass;
 import com.samsung.whatsapp.databinding.ItemMessageBinding;
 import com.samsung.whatsapp.model.Message;
 import com.samsung.whatsapp.R;
 import com.samsung.whatsapp.utils.bottomsheethandler.MessageBottomSheetHandler;
 import com.samsung.whatsapp.view.activities.ChatActivity;
+import com.samsung.whatsapp.view.activities.SendContactActivity;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class MessagesAdapter extends RecyclerView.Adapter<MessagesAdapter.MessageViewHolder> {
@@ -147,9 +154,8 @@ public class MessagesAdapter extends RecyclerView.Adapter<MessagesAdapter.Messag
         if (message.getType().equals(context.getString(R.string.VIDEO))) {
             if (message.getCaption() == null)
                 holder.binding.message.setVisibility(View.GONE);
-            else {
+            else
                 holder.binding.message.setText(message.getCaption());
-            }
             holder.binding.image.setVisibility(View.VISIBLE);
             holder.binding.videoPlayPreview.setVisibility(View.VISIBLE);
             Glide.with(context).load(message.getMessage()).centerCrop().placeholder(R.drawable.baseline_play_circle_outline_24).into(holder.binding.image);
@@ -157,18 +163,16 @@ public class MessagesAdapter extends RecyclerView.Adapter<MessagesAdapter.Messag
         } else if (message.getType().equals(context.getString(R.string.IMAGE))) { //Setting image if message type is image
             if (message.getCaption() == null)
                 holder.binding.message.setVisibility(View.GONE);
-            else {
+            else
                 holder.binding.message.setText(message.getCaption());
-            }
             holder.binding.image.setVisibility(View.VISIBLE);
             Picasso.get().load(message.getMessage()).placeholder(R.drawable.profile_image).into(holder.binding.image);
             holder.binding.image.setOnClickListener(view -> ((ChatActivity)(context)).showImagePreview(holder.binding.image, message.getMessage()));
         } else if (message.getType().equals(context.getString(R.string.PDF_FILES))) { //Setting file if message type is
             if (message.getCaption() == null)
                 holder.binding.message.setVisibility(View.GONE);
-            else {
+            else
                 holder.binding.message.setText(message.getCaption());
-            }
 
             holder.binding.fileName.setVisibility(View.VISIBLE);
             holder.binding.fileName.setText(message.getFilename());
@@ -180,6 +184,37 @@ public class MessagesAdapter extends RecyclerView.Adapter<MessagesAdapter.Messag
             holder.binding.message.setText(Html.fromHtml(linkedText));
             holder.binding.message.setMovementMethod(LinkMovementMethod.getInstance());
             holder.binding.message.setLinkTextColor(Color.BLUE);
+        } else if (message.getType().equals(context.getString(R.string.CONTACT))) {
+            holder.binding.message.setVisibility(View.GONE);
+            holder.binding.contactLayout.setVisibility(View.VISIBLE);
+            holder.binding.viewContact.setVisibility(View.VISIBLE);
+            ApplicationClass.contactsDatabaseReference.child(message.getMessage())
+                    .addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            List<String> list = new ArrayList<>();
+                            if (snapshot.exists()) {
+                                for (DataSnapshot child : snapshot.getChildren()) {
+                                    list.add(child.getValue(String.class));
+                                }
+
+                                holder.binding.contactName.setText(list.get(1));
+                                Picasso.get().load(list.get(0)).into(holder.binding.contactImage);
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+
+            holder.binding.viewContact.setOnClickListener(view -> {
+                Intent intent = new Intent(context, SendContactActivity.class);
+                intent.putExtra("contactId", message.getMessage());
+                intent.putExtra("IsViewContact", true);
+                context.startActivity(intent);
+            });
         }
 
         //        if (message.getFeeling() >= 0) {

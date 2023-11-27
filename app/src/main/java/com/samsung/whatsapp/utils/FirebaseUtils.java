@@ -5,6 +5,7 @@ import static com.samsung.whatsapp.ApplicationClass.docsUrlDatabaseReference;
 import static com.samsung.whatsapp.ApplicationClass.imageStorageReference;
 import static com.samsung.whatsapp.ApplicationClass.imageUrlDatabaseReference;
 import static com.samsung.whatsapp.ApplicationClass.messageDatabaseReference;
+import static com.samsung.whatsapp.ApplicationClass.contactsDatabaseReference;
 import static com.samsung.whatsapp.ApplicationClass.starMessagesDatabaseReference;
 import static com.samsung.whatsapp.ApplicationClass.userDatabaseReference;
 import static com.samsung.whatsapp.ApplicationClass.videoStorageReference;
@@ -33,6 +34,7 @@ import com.samsung.whatsapp.fcm.FCMNotificationSender;
 import com.samsung.whatsapp.interfaces.MessageListenerCallback;
 import com.samsung.whatsapp.model.Message;
 import com.samsung.whatsapp.model.Notification;
+import com.samsung.whatsapp.model.PhoneContact;
 import com.samsung.whatsapp.model.User;
 
 import java.util.Date;
@@ -65,6 +67,36 @@ public class FirebaseUtils {
             updateLastMessage(obj_message);
             sendNotification(message, messageReceiverId, messageSenderId, TYPE_MESSAGE);
         }
+    }
+
+    public static void sendContact(PhoneContact contact, String messageSenderId, String messageReceiverId) {
+        String messageSenderRef = ApplicationClass.application.getApplicationContext().getString(R.string.MESSAGES) + "/" + messageSenderId + "/" + messageReceiverId;
+        String messageReceiverRef = ApplicationClass.application.getApplicationContext().getString(R.string.MESSAGES) + "/" + messageReceiverId + "/" + messageSenderId;
+
+        DatabaseReference userMessageKeyRef =
+                messageDatabaseReference
+                        .child(messageSenderId)
+                        .child(messageReceiverId)
+                        .push();
+
+        String contactPushId = contactsDatabaseReference.push().getKey();
+        String messagePushId = userMessageKeyRef.getKey();
+        Message obj_message = new Message(messagePushId, contactPushId, ApplicationClass.application.getApplicationContext().getString(R.string.CONTACT), messageSenderId, messageReceiverId, new Date().getTime(), -1, "", true);
+
+        Map<String, Object> messageBodyDetails = new HashMap<>();
+        messageBodyDetails.put(messageSenderRef + "/" + messagePushId, obj_message);
+        messageBodyDetails.put(messageReceiverRef + "/" + messagePushId, obj_message);
+
+        FirebaseDatabase.getInstance().getReference()
+                .child(ApplicationClass.application.getApplicationContext().getString(R.string.CONTACTS))
+                .child(Objects.requireNonNull(contactPushId))
+                        .setValue(contact);
+
+        FirebaseDatabase.getInstance().getReference()
+                .updateChildren(messageBodyDetails);
+
+        updateLastMessage(obj_message);
+        sendNotification("Sent a contact", messageReceiverId, messageSenderId, TYPE_MESSAGE);
     }
 
     public static void sendURLMessage(String message, String messageSenderId, String messageReceiverId) {
@@ -142,6 +174,8 @@ public class FirebaseUtils {
             lastMsgObj.put(ApplicationClass.application.getApplicationContext().getString(R.string.LAST_MESSAGE_DETAILS), "File");
         else if (message.getType().equals(ApplicationClass.application.getApplicationContext().getString(R.string.URL)))
             lastMsgObj.put(ApplicationClass.application.getApplicationContext().getString(R.string.LAST_MESSAGE_DETAILS), "Link");
+        else if (message.getType().equals(ApplicationClass.application.getApplicationContext().getString(R.string.CONTACT)))
+            lastMsgObj.put(ApplicationClass.application.getApplicationContext().getString(R.string.LAST_MESSAGE_DETAILS), "Contact");
         else
             lastMsgObj.put(ApplicationClass.application.getApplicationContext().getString(R.string.LAST_MESSAGE_DETAILS), message.getMessage());
 

@@ -7,6 +7,12 @@ public class PhoneContact {
         this.phone = phone;
     }
 
+    public PhoneContact(String phone, String name, String image) {
+        this.phone = phone;
+        this.name = name;
+        this.image = image;
+    }
+
     public String getStatus() {
         return status;
     }

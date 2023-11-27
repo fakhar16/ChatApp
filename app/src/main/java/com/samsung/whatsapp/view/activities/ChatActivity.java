@@ -538,7 +538,7 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
     }
 
     private void contactButtonClicked() {
-        ShareContactBottomSheetHandler.start(this);
+        ShareContactBottomSheetHandler.start(this, messageReceiverId);
     }
 
     private void attachDocButtonClicked() {
