@@ -142,4 +142,11 @@
     <string name="USER_MESSAGE_FILE">user_message_file</string>
     <string name="shared_images">shared_images</string>
     <string name="play_icon">play_icon\n</string>
+    <string name="custom_slide_cancel_text">Slide to cancel</string>
+    <string name="custom_cancel_text">Cancel</string>
+    <string name="custom_hint_text">Hold to record, release to send</string>
+    <string name="type_message_here">Type message here</string>
+    <string name="AUDIO_RECORDING">audio_recording</string>
+    <string name="AUDIO_RECORDING_FILES">AUDIO RECORDING FILES</string>
+    <string name="AUDIO_RECORDING_URL_BY_USERS">audio_recording_url_used_by_users</string>
 </resources>

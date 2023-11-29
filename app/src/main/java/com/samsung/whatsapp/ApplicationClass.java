@@ -18,10 +18,12 @@ public class ApplicationClass extends Application {
     public static DatabaseReference profileImagesDatabaseReference;
     public static DatabaseReference starMessagesDatabaseReference;
     public static DatabaseReference imageUrlDatabaseReference;
+    public static DatabaseReference audioRecordingUrlDatabaseReference;
     public static DatabaseReference videoUrlDatabaseReference;
     public static DatabaseReference docsUrlDatabaseReference;
     public static StorageReference userProfilesImagesReference;
     public static StorageReference imageStorageReference;
+    public static StorageReference audioRecordingStorageReference;
     public static StorageReference videoStorageReference;
     public static StorageReference docsStorageReference;
 
@@ -57,6 +59,7 @@ public class ApplicationClass extends Application {
     private void initializeStorageReferences() {
         userProfilesImagesReference = FirebaseStorage.getInstance().getReference().child(getString(R.string.PROFILE_IMAGES));
         imageStorageReference = FirebaseStorage.getInstance().getReference().child(application.getApplicationContext().getString(R.string.IMAGE_FILES));
+        audioRecordingStorageReference = FirebaseStorage.getInstance().getReference().child(application.getApplicationContext().getString(R.string.AUDIO_RECORDING_FILES));
         videoStorageReference = FirebaseStorage.getInstance().getReference().child(application.getApplicationContext().getString(R.string.VIDEO_FILES));
         docsStorageReference = FirebaseStorage.getInstance().getReference().child(getString(R.string.PDF_FILES));
     }
@@ -71,6 +74,7 @@ public class ApplicationClass extends Application {
         profileImagesDatabaseReference = firebaseDatabase.getReference(getString(R.string.PROFILE_IMAGES));
         starMessagesDatabaseReference = firebaseDatabase.getReference(getString(R.string.STARRED_MESSAGES));
         imageUrlDatabaseReference = firebaseDatabase.getReference(getString(R.string.IMAGE_URL_USED_BY_USERS));
+        audioRecordingUrlDatabaseReference = firebaseDatabase.getReference(getString(R.string.AUDIO_RECORDING_URL_BY_USERS));
         videoUrlDatabaseReference = firebaseDatabase.getReference(getString(R.string.VIDEO_URL_USED_BY_USERS));
         docsUrlDatabaseReference = firebaseDatabase.getReference(getString(R.string.doc_url_used_by_users));
     }

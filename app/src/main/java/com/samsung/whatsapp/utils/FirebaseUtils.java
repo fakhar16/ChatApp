@@ -1,5 +1,7 @@
 package com.samsung.whatsapp.utils;
 
+import static com.samsung.whatsapp.ApplicationClass.audioRecordingStorageReference;
+import static com.samsung.whatsapp.ApplicationClass.audioRecordingUrlDatabaseReference;
 import static com.samsung.whatsapp.ApplicationClass.docsStorageReference;
 import static com.samsung.whatsapp.ApplicationClass.docsUrlDatabaseReference;
 import static com.samsung.whatsapp.ApplicationClass.imageStorageReference;
@@ -99,6 +101,48 @@ public class FirebaseUtils {
         sendNotification("Sent a contact", messageReceiverId, messageSenderId, TYPE_MESSAGE);
     }
 
+    public static void sendAudioRecording(Context context, String messageSenderId, String messageReceiverId, Uri fileUri, String messagePushId) {
+        MessageListenerCallback callback = (MessageListenerCallback) context;
+        String messageSenderRef = context.getString(R.string.MESSAGES) + "/" + messageSenderId + "/" + messageReceiverId;
+        String messageReceiverRef = context.getString(R.string.MESSAGES) + "/" + messageReceiverId + "/" + messageSenderId;
+
+        StorageReference filePath = audioRecordingStorageReference.child(messagePushId + ".3gp");
+        StorageTask<UploadTask.TaskSnapshot> uploadTask = filePath.putFile(fileUri);
+        uploadTask.continueWithTask(task -> {
+            if (!task.isSuccessful()) {
+                throw Objects.requireNonNull(task.getException());
+            }
+            return filePath.getDownloadUrl();
+        }).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                callback.onMessageSent();
+                Uri downloadUrl = task.getResult();
+                String myUrl = downloadUrl.toString();
+                Message obj_message;
+                obj_message = new Message(messagePushId, myUrl, context.getString(R.string.AUDIO_RECORDING), messageSenderId, messageReceiverId, new Date().getTime(), -1, "", true);
+
+                Map<String, Object> messageBodyDetails = new HashMap<>();
+                messageBodyDetails.put(messageSenderRef + "/" + messagePushId, obj_message);
+                messageBodyDetails.put(messageReceiverRef + "/" + messagePushId, obj_message);
+
+                FirebaseDatabase.getInstance().getReference()
+                        .updateChildren(messageBodyDetails);
+
+                Map<String, Object> audioRecordingUrlUserDetails = new HashMap<>();
+                audioRecordingUrlUserDetails.put(messageSenderId, true);
+                audioRecordingUrlUserDetails.put(messageReceiverId, true);
+
+                assert messagePushId != null;
+                audioRecordingUrlDatabaseReference
+                        .child(messagePushId)
+                        .updateChildren(audioRecordingUrlUserDetails);
+
+                updateLastMessage(obj_message);
+                sendNotification("Sent an audio message", messageReceiverId, messageSenderId, TYPE_MESSAGE);
+            }
+        }).addOnFailureListener(e -> callback.onMessageSentFailed());
+    }
+
     public static void sendURLMessage(String message, String messageSenderId, String messageReceiverId) {
         if (!TextUtils.isEmpty(message)) {
             String messageSenderRef = ApplicationClass.application.getApplicationContext().getString(R.string.MESSAGES) + "/" + messageSenderId + "/" + messageReceiverId;
@@ -176,6 +220,8 @@ public class FirebaseUtils {
             lastMsgObj.put(ApplicationClass.application.getApplicationContext().getString(R.string.LAST_MESSAGE_DETAILS), "Link");
         else if (message.getType().equals(ApplicationClass.application.getApplicationContext().getString(R.string.CONTACT)))
             lastMsgObj.put(ApplicationClass.application.getApplicationContext().getString(R.string.LAST_MESSAGE_DETAILS), "Contact");
+        else if (message.getType().equals(ApplicationClass.application.getApplicationContext().getString(R.string.AUDIO_RECORDING)))
+            lastMsgObj.put(ApplicationClass.application.getApplicationContext().getString(R.string.LAST_MESSAGE_DETAILS), "audio");
         else
             lastMsgObj.put(ApplicationClass.application.getApplicationContext().getString(R.string.LAST_MESSAGE_DETAILS), message.getMessage());
 

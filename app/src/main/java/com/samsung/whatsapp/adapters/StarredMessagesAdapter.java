@@ -2,6 +2,7 @@ package com.samsung.whatsapp.adapters;
 
 import static com.samsung.whatsapp.ApplicationClass.userDatabaseReference;
 import static com.samsung.whatsapp.utils.Utils.currentUser;
+import static com.samsung.whatsapp.utils.Utils.isRecordingPlaying;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -20,6 +21,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import com.rajat.pdfviewer.PdfViewerActivity;
+import com.samsung.whatsapp.ApplicationClass;
 import com.samsung.whatsapp.R;
 import com.samsung.whatsapp.databinding.ItemStarMessageBinding;
 import com.samsung.whatsapp.model.Message;
@@ -27,10 +29,13 @@ import com.samsung.whatsapp.model.User;
 import com.samsung.whatsapp.utils.Utils;
 import com.samsung.whatsapp.utils.bottomsheethandler.MessageBottomSheetHandler;
 import com.samsung.whatsapp.view.activities.ChatActivity;
+import com.samsung.whatsapp.view.activities.SendContactActivity;
 import com.samsung.whatsapp.view.activities.StarMessageActivity;
 import com.squareup.picasso.Picasso;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class StarredMessagesAdapter extends RecyclerView.Adapter<StarredMessagesAdapter.StarredMessagesViewHolder> {
@@ -120,6 +125,57 @@ public class StarredMessagesAdapter extends RecyclerView.Adapter<StarredMessages
             holder.binding.image.setVisibility(View.VISIBLE);
             holder.binding.image.setImageResource(R.drawable.baseline_file_present_24);
             holder.binding.image.setOnClickListener(view -> context.startActivity(PdfViewerActivity.Companion.launchPdfFromUrl(context, message.getMessage(), message.getFilename(), "", true)));
+        } else if (message.getType().equals(context.getString(R.string.AUDIO_RECORDING))) {
+            String file_path= ApplicationClass.application.getApplicationContext().getFilesDir().getPath() + "/" + message.getMessageId() + ".3gp";
+            File file= new File(file_path);
+            holder.binding.audioFileDuration.setText(Utils.getDuration(file));
+            holder.binding.message.setVisibility(View.GONE);
+            holder.binding.audioRecordingLayout.setVisibility(View.VISIBLE);
+            holder.binding.playRecording.setOnClickListener(view -> {
+                isRecordingPlaying = !isRecordingPlaying;
+                if (isRecordingPlaying) {
+                    holder.binding.playRecording.setImageResource(R.drawable.baseline_pause_24);
+                    Utils.playAudioRecording(file.getPath());
+                    Utils.updateAudioDurationUI(Utils.getDurationLong(file), holder.binding.audioFileDuration, holder.binding.playRecording, holder.binding.audioSeekBar);
+                } else {
+                    Utils.countDownTimer.cancel();
+                    holder.binding.playRecording.setImageResource(R.drawable.baseline_play_arrow_24);
+                    Utils.stopPlayingRecording();
+                    holder.binding.audioFileDuration.setText(Utils.getDuration(file));
+                    holder.binding.audioSeekBar.setProgress(0);
+                }
+            });
+        } else if (message.getType().equals(context.getString(R.string.CONTACT))) {
+            holder.binding.message.setVisibility(View.GONE);
+            holder.binding.contactLayout.setVisibility(View.VISIBLE);
+            holder.binding.viewContact.setVisibility(View.VISIBLE);
+            ApplicationClass.contactsDatabaseReference.child(message.getMessage())
+                    .addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            List<String> list = new ArrayList<>();
+                            if (snapshot.exists()) {
+                                for (DataSnapshot child : snapshot.getChildren()) {
+                                    list.add(child.getValue(String.class));
+                                }
+
+                                holder.binding.contactName.setText(list.get(1));
+                                Picasso.get().load(list.get(0)).into(holder.binding.contactImage);
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+
+            holder.binding.viewContact.setOnClickListener(view -> {
+                Intent intent = new Intent(context, SendContactActivity.class);
+                intent.putExtra("contactId", message.getMessage());
+                intent.putExtra("IsViewContact", true);
+                context.startActivity(intent);
+            });
         }
     }
 

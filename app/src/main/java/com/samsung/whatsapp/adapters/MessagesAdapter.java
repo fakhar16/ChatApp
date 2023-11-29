@@ -5,6 +5,7 @@ import static com.samsung.whatsapp.utils.Utils.ITEM_RECEIVE;
 import static com.samsung.whatsapp.utils.Utils.ITEM_SENT;
 import static com.samsung.whatsapp.utils.Utils.currentUser;
 import static com.samsung.whatsapp.utils.Utils.getDateTimeString;
+import static com.samsung.whatsapp.utils.Utils.isRecordingPlaying;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -27,16 +28,19 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
 import com.rajat.pdfviewer.PdfViewerActivity;
 import com.samsung.whatsapp.ApplicationClass;
+import com.samsung.whatsapp.R;
 import com.samsung.whatsapp.databinding.ItemMessageBinding;
 import com.samsung.whatsapp.model.Message;
-import com.samsung.whatsapp.R;
+import com.samsung.whatsapp.utils.Utils;
 import com.samsung.whatsapp.utils.bottomsheethandler.MessageBottomSheetHandler;
 import com.samsung.whatsapp.view.activities.ChatActivity;
 import com.samsung.whatsapp.view.activities.SendContactActivity;
 import com.squareup.picasso.Picasso;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -184,6 +188,30 @@ public class MessagesAdapter extends RecyclerView.Adapter<MessagesAdapter.Messag
             holder.binding.message.setText(Html.fromHtml(linkedText));
             holder.binding.message.setMovementMethod(LinkMovementMethod.getInstance());
             holder.binding.message.setLinkTextColor(Color.BLUE);
+        } else if (message.getType().equals(context.getString(R.string.AUDIO_RECORDING))) {
+            String file_path=ApplicationClass.application.getApplicationContext().getFilesDir().getPath() + "/" + message.getMessageId() + ".3gp";
+            File file= new File(file_path);
+            if (Utils.isRecordingFileExist(file)) {
+                holder.binding.audioFileDuration.setText(Utils.getDuration(file));
+            } else {
+                FirebaseStorage.getInstance().getReferenceFromUrl(message.getMessage()).getFile(file);
+            }
+            holder.binding.message.setVisibility(View.GONE);
+            holder.binding.audioRecordingLayout.setVisibility(View.VISIBLE);
+            holder.binding.playRecording.setOnClickListener(view -> {
+                isRecordingPlaying = !isRecordingPlaying;
+                if (isRecordingPlaying) {
+                    holder.binding.playRecording.setImageResource(R.drawable.baseline_pause_24);
+                    Utils.playAudioRecording(file.getPath());
+                    Utils.updateAudioDurationUI(Utils.getDurationLong(file), holder.binding.audioFileDuration, holder.binding.playRecording, holder.binding.audioSeekBar);
+                } else {
+                    Utils.countDownTimer.cancel();
+                    holder.binding.playRecording.setImageResource(R.drawable.baseline_play_arrow_24);
+                    Utils.stopPlayingRecording();
+                    holder.binding.audioFileDuration.setText(Utils.getDuration(file));
+                    holder.binding.audioSeekBar.setProgress(0);
+                }
+            });
         } else if (message.getType().equals(context.getString(R.string.CONTACT))) {
             holder.binding.message.setVisibility(View.GONE);
             holder.binding.contactLayout.setVisibility(View.VISIBLE);

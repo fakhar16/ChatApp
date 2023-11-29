@@ -1,5 +1,6 @@
 package com.samsung.whatsapp.utils;
 
+import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ClipData;
@@ -8,20 +9,30 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
+import android.media.MediaMetadataRetriever;
+import android.media.MediaPlayer;
+import android.media.MediaRecorder;
 import android.net.Uri;
+import android.os.CountDownTimer;
 import android.provider.OpenableColumns;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.MimeTypeMap;
+import android.widget.ImageView;
+import android.widget.SeekBar;
+import android.widget.TextView;
 
 import com.samsung.whatsapp.ApplicationClass;
 import com.samsung.whatsapp.R;
 import com.samsung.whatsapp.model.User;
 
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.CharacterIterator;
 import java.text.SimpleDateFormat;
@@ -44,6 +55,12 @@ public class Utils {
     public static final int ITEM_SENT = 1;
     public static final int ITEM_RECEIVE = 2;
     public static final String TAG = "Console";
+
+    //For audio recording
+    private static MediaRecorder recorder;
+    private static MediaPlayer mPlayer;
+    public static CountDownTimer countDownTimer = null;
+    public static boolean isRecordingPlaying = false;
 
     public static void showLoadingBar(Activity activity, View view) {
         view.setVisibility(View.VISIBLE);
@@ -186,5 +203,117 @@ public class Utils {
     public static float dipToPixels(Context context, float dipValue){
         DisplayMetrics metrics = context.getResources().getDisplayMetrics();
         return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,  dipValue, metrics);
+    }
+
+    public static void startRecording(String file_name) {
+        String file_path=ApplicationClass.application.getApplicationContext().getFilesDir().getPath();
+        File file= new File(file_path);
+
+        if (!file.exists()){
+            file.mkdirs();
+        }
+
+        String full_file_name=file+"/" + file_name + ".3gp";
+
+        recorder = new MediaRecorder();
+        recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+        recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+        recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+        recorder.setOutputFile(full_file_name);
+
+        try {
+            recorder.prepare();
+        } catch (IOException e) {
+            Log.i(TAG, "startRecording: recording Prepare() failed");
+            Log.i(TAG, "startRecording: " + e.getMessage());
+        }
+        recorder.start();
+    }
+
+    public static void stopRecording() {
+        recorder.stop();
+        recorder.release();
+        recorder = null;
+    }
+
+    public static void playAudioRecording(String filename) {
+        mPlayer = new MediaPlayer();
+        try {
+            mPlayer.setDataSource(filename);
+            mPlayer.prepare();
+            mPlayer.start();
+        } catch (IOException e) {
+            Log.e(TAG, "prepare() failed");
+        }
+    }
+
+    public static void stopPlayingRecording() {
+        mPlayer.release();
+        mPlayer = null;
+    }
+
+    public static boolean isRecordingFileExist(File file) {
+        return file.exists();
+    }
+
+    public static String getDuration(File file) {
+        String durationStr;
+        try (MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever()) {
+            mediaMetadataRetriever.setDataSource(file.getAbsolutePath());
+            durationStr = mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return Utils.formatMilliSecond(Long.parseLong(durationStr));
+    }
+
+    public static Long getDurationLong(File file) {
+        String durationStr;
+        try (MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever()) {
+            mediaMetadataRetriever.setDataSource(file.getAbsolutePath());
+            durationStr = mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return Long.parseLong(durationStr);
+    }
+
+    public static String formatMilliSecond(long milliseconds) {
+        String finalTimerString = "";
+        String secondsString;
+
+        int hours = (int) (milliseconds / (1000 * 60 * 60));
+        int minutes = (int) (milliseconds % (1000 * 60 * 60)) / (1000 * 60);
+        int seconds = (int) ((milliseconds % (1000 * 60 * 60)) % (1000 * 60) / 1000);
+
+        if (hours > 0) finalTimerString = hours + ":";
+
+        if (seconds < 10) secondsString = "0" + seconds;
+        else secondsString = "" + seconds;
+
+        finalTimerString = finalTimerString + minutes + ":" + secondsString;
+
+        return finalTimerString;
+    }
+
+    public static void updateAudioDurationUI(long duration, TextView durationText, ImageView playPause, SeekBar seekBar) {
+        countDownTimer = new CountDownTimer(duration, 1000) {
+            @Override
+            public void onTick(long l) {
+                durationText.setText(formatMilliSecond(l));
+                int seekBarValue = 100- (int) ((l/(duration * 1.0)) * 100.0);
+                seekBar.setProgress(seekBarValue);
+            }
+
+            @SuppressLint("DefaultLocale")
+            @Override
+            public void onFinish() {
+                durationText.setText(formatMilliSecond(duration));
+                playPause.setImageResource(R.drawable.baseline_play_arrow_24);
+                Utils.stopPlayingRecording();
+                isRecordingPlaying = false;
+                seekBar.setProgress(0);
+            }
+        }.start();
     }
 }

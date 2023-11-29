@@ -2,6 +2,8 @@ package com.samsung.whatsapp.view.activities;
 
 import static com.samsung.whatsapp.ApplicationClass.presenceDatabaseReference;
 import static com.samsung.whatsapp.ApplicationClass.userDatabaseReference;
+import static com.samsung.whatsapp.utils.FirebaseUtils.sendAudioRecording;
+import static com.samsung.whatsapp.utils.Utils.TAG;
 import static com.samsung.whatsapp.utils.Utils.TYPE_VIDEO_CALL;
 import static com.samsung.whatsapp.utils.Utils.currentUser;
 import static com.samsung.whatsapp.utils.Utils.getFileSize;
@@ -24,13 +26,18 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
+import android.os.VibratorManager;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.webkit.URLUtil;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResult;
@@ -50,6 +57,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.samsung.whatsapp.ApplicationClass;
 import com.samsung.whatsapp.R;
@@ -68,14 +76,16 @@ import com.samsung.whatsapp.utils.bottomsheethandler.ShareContactBottomSheetHand
 import com.samsung.whatsapp.viewmodel.MessageViewModel;
 import com.samsung.whatsapp.webrtc.CallActivity;
 import com.squareup.picasso.Picasso;
+import com.tougee.recorderview.AudioRecordView;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Objects;
 
-public class ChatActivity extends BaseActivity implements MessageListenerCallback {
+public class ChatActivity extends BaseActivity implements MessageListenerCallback, AudioRecordView.Callback {
     private String messageReceiverId;
     private MessagesAdapter messagesAdapter;
     private ActivityChatBinding binding;
@@ -83,6 +93,8 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
     public static User receiver;
     private BottomSheetDialog bottomSheetDialog;
     private MessageViewModel viewModel;
+
+    private String recordedAudioFileName = null;
 
     private final ActivityResultLauncher<Intent> docPickActivityResultLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
@@ -239,9 +251,13 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 if (Objects.requireNonNull(binding.messageInputText.getText()).length() != 0) {
                     binding.camera.setVisibility(View.GONE);
+                    binding.recordView.setVisibility(View.GONE);
+                    binding.recordBg.setVisibility(View.GONE);
                     binding.sendMessageBtn.setVisibility(View.VISIBLE);
                 } else {
                     binding.camera.setVisibility(View.VISIBLE);
+                    binding.recordView.setVisibility(View.VISIBLE);
+                    binding.recordBg.setVisibility(View.VISIBLE);
                     binding.sendMessageBtn.setVisibility(View.GONE);
                 }
             }
@@ -317,8 +333,8 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
 
     @SuppressLint("NotifyDataSetChanged")
     private void initializeFields() {
-//        binding.recordView.activity = this;
-//        binding.recordView.callback = (AudioRecordView.Callback) this;
+        binding.recordView.activity = this;
+        binding.recordView.callback = this;
 
         messageReceiverId = getIntent().getExtras().getString(getString(R.string.VISIT_USER_ID));
 
@@ -420,6 +436,7 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
             if (getIntent().hasExtra(getString(R.string.MESSAGE_ID))) {
                 int position = messagesAdapter.getItemPosition(getIntent().getStringExtra(getString(R.string.MESSAGE_ID)));
                 getIntent().removeExtra(getString(R.string.MESSAGE_ID));
+                binding.userMessageList.smoothScrollToPosition(position);
                 binding.userMessageList.postDelayed(() -> {
                     Objects.requireNonNull(binding.userMessageList.findViewHolderForAdapterPosition(position)).itemView.findViewById(R.id.my_linear_layout).setBackgroundTintList(ContextCompat.getColorStateList(ChatActivity.this, R.color.colorPrimary));
                     new Handler(Looper.getMainLooper()).postDelayed(() -> Objects.requireNonNull(binding.userMessageList.findViewHolderForAdapterPosition(position)).itemView.findViewById(R.id.my_linear_layout).setBackgroundTintList(null), 500);
@@ -444,6 +461,31 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
         customChatBarBinding.videoCall.setOnClickListener(view -> createVideoCall());
         customChatBarBinding.userImage.setOnClickListener(view -> WhatsappLikeProfilePicPreview.Companion.zoomImageFromThumb(customChatBarBinding.userImage, binding.expandedImage.cardView, binding.expandedImage.image, binding.chatToolBar.getRoot().getRootView(), receiver.getImage()));
         customChatBarBinding.userInfo.setOnClickListener(view -> sendUserToProfileActivity());
+
+        binding.smilies.setOnClickListener(view -> smileyButtonClicked());
+        binding.emojiPickerView.setOnEmojiPickedListener(emojiViewItem -> binding.messageInputText.append(emojiViewItem.getEmoji()));
+    }
+
+    private void smileyButtonClicked() {
+        if (binding.layoutSmily.getVisibility() == View.GONE) showSmileyLayout();
+        else hideSmileyLayout();
+    }
+
+    private void hideSmileyLayout() {
+        binding.layoutSmily.setVisibility(View.GONE);
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, (int) Utils.dipToPixels(ChatActivity.this, 60F));
+        params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
+        params.removeRule(RelativeLayout.ABOVE);
+        binding.bottomBar.setLayoutParams(params);
+    }
+
+    private void showSmileyLayout() {
+        Utils.hideKeyboard(this);
+        binding.layoutSmily.setVisibility(View.VISIBLE);
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, (int) Utils.dipToPixels(ChatActivity.this, 60F));
+        params.removeRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+        params.addRule(RelativeLayout.ABOVE, R.id.layout_smily);
+        binding.bottomBar.setLayoutParams(params);
     }
 
     private void handleMessageEditTextListener() {
@@ -606,6 +648,8 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
             Objects.requireNonNull(binding.expandedVideo.video.getPlayer()).release();
             binding.userMessageList.setClickable(true);
             WhatsappLikeProfilePicPreview.Companion.dismissVideoPreview();
+        } else if (binding.layoutSmily.getVisibility() == View.VISIBLE) {
+            hideSmileyLayout();
         } else {
             finish();
         }
@@ -621,35 +665,35 @@ public class ChatActivity extends BaseActivity implements MessageListenerCallbac
         Utils.dismissLoadingBar(this, binding.progressbar.getRoot());
     }
 
-//    @Override
-//    public boolean isReady() {
-//        return true;
-//    }
-//
-//    @Override
-//    public void onRecordCancel() {
-//        Log.i(TAG, "onRecordCancel: called");
-//        binding.camera.setVisibility(View.VISIBLE);
-//        binding.attachMenu.setVisibility(View.VISIBLE);
-//        binding.messageInputText.setVisibility(View.VISIBLE);
-//        binding.sendMessageBtn.setVisibility(View.VISIBLE);
-//    }
-//
-//    @Override
-//    public void onRecordEnd() {
-//        Log.i(TAG, "onRecordEnd: called");
-//        binding.camera.setVisibility(View.VISIBLE);
-//        binding.attachMenu.setVisibility(View.VISIBLE);
-//        binding.messageInputText.setVisibility(View.VISIBLE);
-//        binding.sendMessageBtn.setVisibility(View.VISIBLE);
-//    }
-//
-//    @Override
-//    public void onRecordStart() {
-//        Log.i(TAG, "onRecordStart: called");
-//        binding.camera.setVisibility(View.INVISIBLE);
-//        binding.attachMenu.setVisibility(View.INVISIBLE);
-//        binding.messageInputText.setVisibility(View.INVISIBLE);
-//        binding.sendMessageBtn.setVisibility(View.INVISIBLE);
-//    }
+    @Override
+    public boolean isReady() {
+        return true;
+    }
+
+    @Override
+    public void onRecordCancel() {
+        Log.i(TAG, "onRecordCancel: ");
+        binding.chatbar.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void onRecordEnd() {
+        Log.i(TAG, "onRecordEnd: ");
+        binding.chatbar.setVisibility(View.VISIBLE);
+        Utils.stopRecording();
+        String file_path=ApplicationClass.application.getApplicationContext().getFilesDir().getPath();
+        File file= new File(file_path);
+        String full_file_name=file+"/" + recordedAudioFileName + ".3gp";
+        sendAudioRecording(this, currentUser.getUid(), messageReceiverId, Uri.fromFile(new File(full_file_name)), recordedAudioFileName);
+    }
+
+    @Override
+    public void onRecordStart() {
+        Log.i(TAG, "onRecordStart: ");
+        recordedAudioFileName = FirebaseDatabase.getInstance().getReference().push().getKey();
+        final Vibrator vibrator = ((VibratorManager) getSystemService(Context.VIBRATOR_MANAGER_SERVICE)).getDefaultVibrator();
+        vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE));
+        binding.chatbar.setVisibility(View.GONE);
+        Utils.startRecording(recordedAudioFileName);
+    }
 }

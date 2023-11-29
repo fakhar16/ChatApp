@@ -6,12 +6,12 @@ plugins {
 
 android {
     namespace 'com.samsung.whatsapp'
-    compileSdk 33
+    compileSdk 34
 
     defaultConfig {
         applicationId "com.samsung.whatsapp"
         minSdk 33
-        targetSdk 33
+        targetSdk 34
         versionCode 1
         versionName "1.0"
 
@@ -109,6 +109,9 @@ dependencies {
     implementation "androidx.media3:media3-exoplayer:1.1.0"
     implementation "androidx.media3:media3-exoplayer-dash:1.1.0"
     implementation "androidx.media3:media3-ui:1.1.0"
+
+    //Emoji picker
+    implementation "androidx.emoji2:emoji2-emojipicker:1.4.0"
 
     implementation files('libs/CircularStatusView-V1.0.3.aar')
     implementation files('libs/StoryView-1.0.6-alpha.aar')
